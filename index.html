@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>From Question to Report — A Pandas Workflow Reference</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="top">
+  <h1>From Question to Report — A Pandas Workflow Reference</h1>
+  <div class="sub">Python Foundations for Data Science · M.Sc. Digital Health</div>
+  <div class="meta">Dr. Jenny Delekta · SuSe 2026 · Saint Mary's Hospital case material</div>
+</header>
+
+<button class="ask-fab" id="ask-fab" aria-label="Ask a question">
+  <span class="ask-icon">?</span> Ask
+</button>
+<button class="floating-glossary-btn" id="open-glossary" aria-label="Open glossary">Glossary ▸</button>
+<button class="back-top" id="back-top" aria-label="Back to top">↑ Top</button>
+
+<div class="ask-overlay" id="ask-overlay">
+  <div class="ask-panel">
+    <button class="ask-close" id="ask-close" aria-label="Close">×</button>
+    <h3>What are you trying to do?</h3>
+    <p class="ask-sub">Type a question. The reference will suggest matching commands.</p>
+    <div class="ask-row">
+      <input id="q" placeholder="How do I remove rows where age is missing?" />
+      <button id="ask">Suggest</button>
+    </div>
+    <div class="hint">
+      Examples:
+      <span data-q="remove rows with missing age">remove rows with missing age</span>
+      <span data-q="average length of stay per ward">average length of stay per ward</span>
+      <span data-q="merge two dataframes to complement values">merge two dataframes</span>
+      <span data-q="combine two 1D arrays">combine 1D arrays</span>
+      <span data-q="bar chart with title and labels">bar chart with labels</span>
+    </div>
+    <div id="suggestions"></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- =================== HERO =================== -->
+  <section class="hero" id="s0">
+    <h2>Every number has a story.</h2>
+    <p class="lede">A reference for the commands that turn data into a report. Click any stage below to expand it; use the <strong>Ask</strong> button (top right) to search by question.</p>
+    <details class="about">
+      <summary>About this reference — how it is structured and why</summary>
+      <p>An analysis does not begin with a file. It begins with a question for which numbers might form part of the answer — and a file is one of many intermediate states between that question and the eventual response. The «messy CSV» is not the starting point; it is the point at which the data first becomes visible and uncomfortable.</p>
+      <p>Before reaching for any command, the analyst should be able to state three things in plain language: (i) what question is being asked, (ii) which population or unit the answer concerns, and (iii) what an answer would look like if one were given the result in finished form. Only then is it productive to ask which tools are required.</p>
+      <p>The remainder of this reference is organised around the typical journey from such a question to a delivered result. Each stage lists the commands one is likely to encounter, with — for each command — a description of <em>what it does</em>, a token-by-token reading of <em>what the code itself means</em>, the <em>conditions</em> under which it applies, and the situations in which one would <em>reach for it</em>.</p>
+    </details>
+  </section>
+
+  <!-- =================== STAGE 1 LOAD =================== -->
+  <section class="card" id="s1">
+    <h2><span class="num">1</span> Locate &amp; Load — bringing the data into Python</h2>
+    <div class="context">Loading is the operation by which a file on disk is read into a Python object that can be queried, transformed and summarised. The choice of loader depends on the file format; the choice of parameters depends on what the file's author did with characters, separators, and missing markers.</div>
+
+    <div class="orient">
+      <strong>How to choose:</strong> The file extension is a useful first signal, but not authoritative. Open the file in a plain-text editor first and read the first ten lines. Establish: which character separates fields, whether the first row contains column names, how the file encodes special characters (German umlauts are a frequent indicator), and how missing values are written. Only then call a loader.
+    </div>
+
+    <div class="commands" data-stage="load"></div>
+  </section>
+
+  <!-- =================== STAGE 2 INSPECT =================== -->
+  <section class="card" id="s2">
+    <h2><span class="num">2</span> Inspect — understanding what was loaded</h2>
+    <div class="context">Before any analytical operation, the analyst should be able to describe the loaded object in four respects: its size, the type of each column, the prevalence of missing values, and the presence of duplicate records. These four checks correspond to questions a careful reader would ask before trusting any subsequent claim.</div>
+
+    <div class="orient">
+      <strong>How to choose:</strong> Begin with <code>shape</code> and <code>head()</code>; these confirm that the loader produced what was expected. Follow with <code>info()</code> and <code>isna().sum()</code>; these reveal the structural integrity of the table. Use <code>value_counts()</code> and <code>describe()</code> when interest shifts to the distribution of a single column.
+    </div>
+
+    <div class="commands" data-stage="inspect"></div>
+  </section>
+
+  <!-- =================== STAGE 3 CLEAN =================== -->
+  <section class="card" id="s3">
+    <h2><span class="num">3</span> Clean — addressing irregularities</h2>
+    <div class="context">Cleaning denotes the corrections applied so that the data can be analysed without introducing systematic error. The most common irregularities are inconsistent types, missing values, duplicate records, and inconsistent string representations of the same underlying category. Each requires a deliberate decision; defaults rarely capture clinical intent.</div>
+
+    <div class="orient">
+      <strong>How to choose:</strong> Cleaning proceeds in a fixed order: types are corrected first (so that subsequent comparisons work), then missing values (so that they do not propagate silently), then duplicates (so that aggregations are not inflated), then string normalisation (so that categories collapse correctly). Decisions about <em>how</em> to treat missingness are addressed in the Decision Boxes at the end of this document.
+    </div>
+
+    <div class="commands" data-stage="clean"></div>
+  </section>
+
+  <!-- =================== STAGE 4 TRANSFORM =================== -->
+  <section class="card" id="s4">
+    <h2><span class="num">4</span> Transform — deriving variables, filtering, sorting</h2>
+    <div class="context">Transformation reshapes the cleaned table toward the question. New variables are computed from existing ones; rows are filtered to the subpopulation of interest; the order of the table is chosen so that a reader can locate the relevant rows quickly.</div>
+
+    <div class="orient">
+      <strong>How to choose:</strong> If a new value is to be computed for every row, use a vectorised expression (column arithmetic, <code>np.where</code>, <code>np.select</code>). If only a subset of rows is of interest, build a boolean mask. If a top-N or bottom-N is required, prefer <code>nlargest</code> / <code>nsmallest</code> over a full sort.
+    </div>
+
+    <div class="commands" data-stage="transform"></div>
+  </section>
+
+  <!-- =================== STAGE 5 AGGREGATE =================== -->
+  <section class="card" id="s5">
+    <h2><span class="num">5</span> Aggregate — summarising by group</h2>
+    <div class="context">Aggregation reduces a long table to a short one by computing a summary statistic within each group. The mental model is <em>split–apply–combine</em>: split the table by one or more key columns, apply a function to each group, combine the results into a single summary.</div>
+
+    <div class="orient">
+      <strong>How to choose:</strong> <code>groupby</code> followed by an aggregation produces a long-format summary suitable for further analysis. <code>pivot_table</code> produces a wide-format summary suitable for display. <code>transform</code> is appropriate when the group-level statistic must be aligned back to every original row (for instance, to compute a deviation from group mean).
+    </div>
+
+    <div class="commands" data-stage="aggregate"></div>
+  </section>
+
+  <!-- =================== STAGE 6 MERGE =================== -->
+  <section class="card" id="s6">
+    <h2><span class="num">6</span> Merge — combining tables and arrays</h2>
+    <div class="context">Most analyses require information from more than one source. Combining sources may take three forms: <em>joining</em> tables by a shared key, <em>stacking</em> tables that share structure, or <em>complementing</em> one source with another to fill in missing values. NumPy arrays are combined in analogous, but simpler, ways.</div>
+
+    <div class="orient">
+      <strong>How to choose:</strong> If the two tables share a key column and each row of the first should pick up additional columns from the second, the operation is a merge. If the two tables have the same columns and represent different periods or sources, the operation is a concatenation. If the two tables describe the same entities but each contains gaps the other can fill, the operation is a complement (<code>combine_first</code>).
+    </div>
+
+    <div class="commands" data-stage="merge"></div>
+  </section>
+
+  <!-- =================== STAGE 7 VISUALIZE =================== -->
+  <section class="card" id="s7">
+    <h2><span class="num">7</span> Visualize — graphical summaries</h2>
+    <div class="context">A graphical summary supports the reader in seeing a pattern that a tabular summary cannot. The choice of plot type follows from the question: comparison across categories (bar), evolution over time (line), distribution of a single variable (histogram), relation between two variables (scatter), distribution by group (boxplot).</div>
+
+    <div class="orient">
+      <strong>How to choose:</strong> Matplotlib's object-oriented interface (<code>fig, ax = plt.subplots()</code> followed by methods on <code>ax</code>) is the recommended foundation. Seaborn provides briefer syntax for common statistical plots and is appropriate once the foundations are familiar. Every plot intended for an external reader requires, at minimum, a descriptive title, axis labels with units, and — if multiple series are present — a legend.
+    </div>
+
+    <div class="commands" data-stage="visualize"></div>
+  </section>
+
+  <!-- =================== STAGE 8 EXPORT =================== -->
+  <section class="card" id="s8">
+    <h2><span class="num">8</span> Export — delivering the result</h2>
+    <div class="context">A result that remains in a notebook is not yet delivered. Delivery takes the form of data files for downstream use, image files for inclusion in reports, and the notebook itself rendered for an external reader.</div>
+
+    <div class="orient">
+      <strong>How to choose:</strong> Tabular data intended for re-use by humans should be exported as CSV or Excel. Tabular data intended for re-use by other Python programs is better stored as Parquet. Figures intended for slides should be exported as PNG at high resolution; figures intended for printed reports as PDF or SVG.
+    </div>
+
+    <div class="commands" data-stage="export"></div>
+  </section>
+
+  <!-- =================== DECISIONS =================== -->
+  <section class="card" id="decisions">
+    <h2><span class="num">★</span> Decision boxes — the considered choices</h2>
+    <div data-decisions></div>
+  </section>
+
+  <!-- =================== WORKED EXAMPLE =================== -->
+  <section class="card example" id="example">
+    <h2><span class="num">▣</span> A complete worked example</h2>
+    <div data-example></div>
+  </section>
+
+</div>
+
+<!-- =================== GLOSSARY DRAWER =================== -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="glossary">
+  <button class="close-x" id="close-glossary" aria-label="Close">×</button>
+  <h2>Glossary</h2>
+  <p style="font-size:13px;color:var(--grey);margin:4px 0 0;">Search by term or concept. Synonyms (English/German) are supported.</p>
+  <input id="g-search" placeholder="e.g. axis, NaN, vectorisation, Spalte" />
+  <div id="g-results"></div>
+</aside>
+
+<footer>
+  Python Foundations for Data Science · M.Sc. Digital Health · Dr. Jenny Delekta · SuSe 2026
+</footer>
+
+<script src="js/search.js"></script>
+<script src="js/glossary.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

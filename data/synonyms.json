@@ -1,0 +1,224 @@
+{
+  "remove": [
+    "drop",
+    "delete",
+    "kill",
+    "eliminate",
+    "loeschen",
+    "löschen",
+    "entfernen",
+    "wegwerfen"
+  ],
+  "drop": [
+    "remove",
+    "delete",
+    "kill",
+    "loeschen",
+    "löschen",
+    "entfernen"
+  ],
+  "missing": [
+    "nan",
+    "null",
+    "na",
+    "fehlend",
+    "lücke",
+    "luecke",
+    "leer",
+    "empty"
+  ],
+  "row": [
+    "rows",
+    "zeile",
+    "zeilen",
+    "observation",
+    "record",
+    "case",
+    "fall"
+  ],
+  "column": [
+    "columns",
+    "col",
+    "cols",
+    "spalte",
+    "spalten",
+    "feature",
+    "variable"
+  ],
+  "average": [
+    "mean",
+    "durchschnitt",
+    "mittel",
+    "mittelwert"
+  ],
+  "mean": [
+    "average",
+    "durchschnitt",
+    "mittelwert"
+  ],
+  "group": [
+    "groupby",
+    "gruppe",
+    "gruppieren",
+    "per",
+    "by",
+    "aggregate",
+    "aggregation"
+  ],
+  "aggregate": [
+    "groupby",
+    "aggregation",
+    "summary",
+    "summarise",
+    "zusammenfassen"
+  ],
+  "merge": [
+    "join",
+    "verknuepfen",
+    "verknüpfen",
+    "verbinden",
+    "combine"
+  ],
+  "combine": [
+    "merge",
+    "join",
+    "verbinden",
+    "kombinieren",
+    "complement",
+    "ergaenzen",
+    "ergänzen"
+  ],
+  "concat": [
+    "concatenate",
+    "stack",
+    "stapeln",
+    "append",
+    "union"
+  ],
+  "array": [
+    "arrays",
+    "ndarray",
+    "numpy"
+  ],
+  "1d": [
+    "one-dimensional",
+    "one dimensional",
+    "eindimensional",
+    "vector"
+  ],
+  "2d": [
+    "two-dimensional",
+    "two dimensional",
+    "zweidimensional",
+    "matrix",
+    "table"
+  ],
+  "plot": [
+    "chart",
+    "graph",
+    "visualize",
+    "visualisieren",
+    "diagramm",
+    "abbildung"
+  ],
+  "bar": [
+    "bar chart",
+    "balken",
+    "balkendiagramm"
+  ],
+  "histogram": [
+    "hist",
+    "verteilung",
+    "distribution"
+  ],
+  "line": [
+    "trend",
+    "linie",
+    "liniendiagramm"
+  ],
+  "title": [
+    "titel",
+    "heading"
+  ],
+  "label": [
+    "beschriftung",
+    "axis label",
+    "achsenbeschriftung"
+  ],
+  "save": [
+    "export",
+    "write",
+    "schreiben",
+    "speichern"
+  ],
+  "load": [
+    "read",
+    "import",
+    "einlesen",
+    "laden"
+  ],
+  "filter": [
+    "subset",
+    "where",
+    "wo",
+    "auswaehlen",
+    "filtern"
+  ],
+  "sort": [
+    "order",
+    "sortieren",
+    "ranking"
+  ],
+  "rename": [
+    "umbenennen",
+    "relabel"
+  ],
+  "type": [
+    "dtype",
+    "datatype",
+    "datentyp",
+    "cast"
+  ],
+  "date": [
+    "datetime",
+    "datum",
+    "time"
+  ],
+  "duplicate": [
+    "duplicates",
+    "duplikat",
+    "doppelt",
+    "duplicated"
+  ],
+  "encoding": [
+    "kodierung",
+    "utf-8",
+    "latin-1",
+    "cp1252",
+    "zeichensatz"
+  ],
+  "compare": [
+    "comparison",
+    "vergleich",
+    "vergleichen"
+  ],
+  "count": [
+    "frequency",
+    "anzahl",
+    "haeufigkeit"
+  ],
+  "outlier": [
+    "ausreisser",
+    "extreme"
+  ],
+  "replace": [
+    "ersetzen",
+    "substitute",
+    "recode"
+  ],
+  "fill": [
+    "impute",
+    "auffuellen",
+    "fillna"
+  ]
+}

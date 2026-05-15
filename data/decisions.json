@@ -1,0 +1,118 @@
+{
+  "lede": "Three decisions recur in any non-trivial analysis. Each admits several defensible answers; the correct answer depends on the question and on the structure of the missingness or the join.",
+  "boxes": [
+    {
+      "id": "missing-values",
+      "title": "Missing values — drop rows, drop columns, fill, or allow to propagate?",
+      "intro": "A column contains <code>NaN</code>. The decision is determined by two considerations: <em>why</em> the value is missing, and <em>how essential</em> the column is to the question.",
+      "options": [
+        {
+          "kind": "kill",
+          "label": "Drop the row — <code>dropna(subset=[col])</code>",
+          "body": "Indicated when the column is essential to the analysis (e.g. <code>patient_id</code>, <code>admission_date</code>) and no substitute is defensible. Acceptable if fewer than approximately five per cent of rows are lost."
+        },
+        {
+          "kind": "kill",
+          "label": "Drop the column — <code>drop(columns=[col])</code>",
+          "body": "Indicated when the column is more than approximately half missing and not load-bearing for the question, or is redundant with another column. The decision should be recorded explicitly in the notebook."
+        },
+        {
+          "kind": "fill",
+          "label": "Impute — <code>fillna(median)</code> / <code>ffill</code>",
+          "body": "Indicated when missingness is plausibly random, the column is numeric, and a substitute is defensible. The median is robust to skew; the mean only for symmetric distributions; forward-fill for time series whose state changes infrequently."
+        },
+        {
+          "kind": "ignore",
+          "label": "Allow to propagate",
+          "body": "Indicated when the downstream aggregation is itself robust to <code>NaN</code> (pandas's <code>mean</code>, <code>sum</code>, and <code>groupby</code> skip <code>NaN</code> by default). Only when a <code>NaN</code>-propagating result is required does one specify <code>skipna=False</code>."
+        }
+      ],
+      "note": "The decision should be made <em>per column</em>, not per DataFrame. <code>dropna()</code> applied to the whole DataFrame, with default arguments, is almost always the wrong choice on real data."
+    },
+    {
+      "id": "merging-dataframes",
+      "title": "Merging two DataFrames — which join, which method?",
+      "options": [
+        {
+          "kind": "fill",
+          "label": "Enrich table A with columns from B",
+          "code": "a.merge(b, on=key, how=\"left\")",
+          "body": ". Retains every row of A; adds matching columns from B, with <code>NaN</code> where no match exists."
+        },
+        {
+          "kind": "fill",
+          "label": "Restrict to rows present in both",
+          "code": "a.merge(b, on=key, how=\"inner\")",
+          "body": ". Smaller result; no missing values introduced by the merge."
+        },
+        {
+          "kind": "fill",
+          "label": "Union of all keys",
+          "code": "a.merge(b, on=key, how=\"outer\", indicator=True)",
+          "body": ". Permits auditing of which keys are present in only one source."
+        },
+        {
+          "kind": "fill",
+          "label": "A is the reference; B fills the gaps",
+          "code": "a.combine_first(b)",
+          "body": ". Applied cell by cell: where A has a value, A is retained; where A is <code>NaN</code>, B is used."
+        },
+        {
+          "kind": "fill",
+          "label": "Stack vertically (same columns)",
+          "code": "pd.concat([a, b], ignore_index=True)",
+          "body": "."
+        },
+        {
+          "kind": "fill",
+          "label": "Glue side by side (same rows)",
+          "code": "pd.concat([a, b], axis=1)",
+          "body": "."
+        }
+      ]
+    },
+    {
+      "id": "numpy-combination",
+      "title": "NumPy — which array-combination function?",
+      "options": [
+        {
+          "kind": "fill",
+          "label": "1D + 1D, end to end",
+          "code": "np.concatenate([a,b])",
+          "body": " or <code>np.hstack([a,b])</code>. Produces <code>[a₀…aₙ, b₀…bₘ]</code>."
+        },
+        {
+          "kind": "fill",
+          "label": "2D + 2D, stack as further rows",
+          "code": "np.concatenate([A,B], axis=0)",
+          "body": " or <code>np.vstack([A,B])</code>."
+        },
+        {
+          "kind": "fill",
+          "label": "2D + 2D, glue as further columns",
+          "code": "np.concatenate([A,B], axis=1)",
+          "body": " or <code>np.hstack([A,B])</code>."
+        },
+        {
+          "kind": "fill",
+          "label": "Two 1D arrays → 2D with each as a column",
+          "code": "np.column_stack([a,b])",
+          "body": ". Shape <code>(n, 2)</code>."
+        },
+        {
+          "kind": "fill",
+          "label": "Two 1D arrays → 2D with each as a row",
+          "code": "np.vstack([a,b])",
+          "body": ". Shape <code>(2, n)</code>."
+        },
+        {
+          "kind": "fill",
+          "label": "Introduce a new axis",
+          "code": "np.stack([a,b])",
+          "body": ". Used for batching."
+        }
+      ],
+      "note": "<strong>Mnemonic:</strong> the argument <code>axis</code> denotes the dimension along which the result <em>grows</em>. <code>axis=0</code> produces additional rows; <code>axis=1</code> produces additional columns."
+    }
+  ]
+}

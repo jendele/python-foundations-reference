@@ -1,0 +1,10 @@
+# Test/dev dependencies (installed transiently for the sanity check)
+node_modules/
+package-lock.json
+
+# Claude Code workspace
+.claude/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db

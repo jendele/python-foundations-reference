@@ -1,0 +1,668 @@
+[
+  {
+    "term": "accessor",
+    "syn": [
+      ".str",
+      ".dt",
+      ".cat",
+      "str accessor"
+    ],
+    "def": "A namespace attached to a Series that exposes operations specific to its content type. <code>.str</code> exposes string methods (<code>strip</code>, <code>lower</code>); <code>.dt</code> exposes datetime methods (<code>year</code>, <code>month</code>); <code>.cat</code> exposes categorical operations. Methods called through an accessor are applied element-wise across the Series."
+  },
+  {
+    "term": "alias",
+    "syn": [
+      "import as",
+      "abbreviation",
+      "abkuerzung"
+    ],
+    "def": "A short name bound to a module by the <code>as</code> clause of an import. The conventions <code>import pandas as pd</code>, <code>import numpy as np</code>, <code>import matplotlib.pyplot as plt</code> are followed almost universally and should be retained."
+  },
+  {
+    "term": "API",
+    "syn": [
+      "application programming interface",
+      "rest api"
+    ],
+    "def": "An application programming interface — a defined contract by which one piece of software requests data or actions from another. In data work, frequently used to describe an HTTP-based service that returns JSON in response to a query."
+  },
+  {
+    "term": "argument",
+    "syn": [
+      "argumente"
+    ],
+    "def": "A value passed into a function call. <em>Positional</em> arguments are matched by position (the file path in <code>pd.read_csv(\"file.csv\")</code>); <em>keyword</em> arguments are matched by name (<code>sep=','</code>). The function's signature determines which positional arguments are required and which keyword arguments accept defaults."
+  },
+  {
+    "term": "assertion",
+    "syn": [
+      "assert",
+      "check",
+      "pruefung",
+      "überprüfung"
+    ],
+    "def": "A statement that raises an exception if a stated condition is false. Used as a self-check at the boundary between steps — for instance <code>assert df.shape[0] == 320</code> both documents and enforces the expected row count."
+  },
+  {
+    "term": "attribute",
+    "syn": [
+      "attribut",
+      "property"
+    ],
+    "def": "A value attached to an object, accessed without parentheses: <code>df.shape</code>. Attributes describe state; methods perform actions."
+  },
+  {
+    "term": "axes",
+    "syn": [
+      "matplotlib axes",
+      "plot axes"
+    ],
+    "def": "In Matplotlib, the coordinate system on which a single plot is drawn. A figure may contain one axes (single plot) or several (subplots). Plotting calls (<code>ax.bar</code>, <code>ax.plot</code>, …) are issued on an axes object rather than on the figure itself."
+  },
+  {
+    "term": "axis",
+    "syn": [
+      "achse",
+      "dimension"
+    ],
+    "def": "The dimension along which an operation is performed. <code>axis=0</code> moves down rows (column-wise reduction); <code>axis=1</code> moves across columns (row-wise reduction). For concatenation, the axis is the dimension that grows."
+  },
+  {
+    "term": "bbox_inches",
+    "syn": [
+      "bounding box",
+      "savefig crop"
+    ],
+    "def": "An argument to <code>plt.savefig</code> controlling the bounding box of the saved figure. <code>bbox_inches='tight'</code> crops surrounding whitespace so that axis labels, titles, and legends are not clipped at the image edge."
+  },
+  {
+    "term": "boolean",
+    "syn": [
+      "bool",
+      "wahrheitswert",
+      "true false"
+    ],
+    "def": "A value that is either <code>True</code> or <code>False</code>. Comparison operators (<code>==</code>, <code>&lt;</code>, <code>&gt;=</code>) produce booleans; pandas operations on whole columns produce boolean Series, which can in turn be used to filter rows."
+  },
+  {
+    "term": "broadcasting",
+    "syn": [
+      "alignment"
+    ],
+    "def": "The rule by which NumPy and pandas perform arithmetic between arrays of different but compatible shapes. A scalar combines with every element; a shorter array is virtually repeated to match a longer one."
+  },
+  {
+    "term": "cardinality",
+    "syn": [
+      "m:1",
+      "1:m",
+      "1:1",
+      "kardinalitaet",
+      "kardinalität"
+    ],
+    "def": "In a join, the number of rows on one side that correspond to a row on the other. Common cardinalities: <em>one-to-one</em> (each key appears at most once on either side), <em>one-to-many</em> (one row on the left corresponds to several on the right), <em>many-to-one</em> (several rows on the left share one row on the right). <code>validate=\"m:1\"</code> asserts the expected cardinality."
+  },
+  {
+    "term": "chaining",
+    "syn": [
+      "method chaining",
+      "verkettung"
+    ],
+    "def": "A sequence of method calls applied to successive results: <code>df.dropna().sort_values('x').head(10)</code>. Chaining keeps an intermediate-free style; each pandas method returns a new DataFrame, which is the next method's input."
+  },
+  {
+    "term": "column",
+    "syn": [
+      "col",
+      "spalte",
+      "feature",
+      "variable"
+    ],
+    "def": "A vertical slice of a DataFrame — one variable, one type. Accessed as <code>df['col']</code>."
+  },
+  {
+    "term": "comprehension",
+    "syn": [
+      "list comprehension",
+      "listenkomprehension"
+    ],
+    "def": "A concise expression that builds a list (or other collection) by iterating over an iterable: <code>[x**2 for x in range(10)]</code>. May include a condition: <code>[x for x in xs if x &gt; 0]</code>. Equivalent to a for-loop that appends, but more readable and slightly faster."
+  },
+  {
+    "term": "copy vs view",
+    "syn": [
+      "copy",
+      "view",
+      "SettingWithCopyWarning"
+    ],
+    "def": "Indexing operations sometimes return a view (a window into the original) and sometimes a copy. Assigning to a view modifies the original; assigning to a copy does not. The safe pattern for writing back is <code>df.loc[rows, col] = value</code>."
+  },
+  {
+    "term": "crosstab",
+    "syn": [
+      "pd.crosstab",
+      "kreuztabelle",
+      "frequency table"
+    ],
+    "def": "A frequency table of two categorical variables. <code>pd.crosstab(df['ward'], df['gender'])</code> returns a table whose rows are wards, columns are genders, and cells are counts."
+  },
+  {
+    "term": "DataFrame",
+    "syn": [
+      "df",
+      "tabelle",
+      "table"
+    ],
+    "def": "A two-dimensional, labelled table — the central pandas object. Conceptually a dictionary of columns, each column a Series sharing a common index."
+  },
+  {
+    "term": "delimiter",
+    "syn": [
+      "separator",
+      "sep",
+      "trennzeichen"
+    ],
+    "def": "The character that separates fields in a delimited text file. Comma in classical CSV, semicolon in many European exports, tab in TSV. Set explicitly via <code>sep=</code> when not the default comma."
+  },
+  {
+    "term": "dictionary",
+    "syn": [
+      "dict",
+      "mapping",
+      "key-value"
+    ],
+    "def": "A Python collection storing values under named keys: <code>{\"M\": \"male\", \"F\": \"female\"}</code>. Used as the mapping argument to <code>replace</code>, <code>rename</code>, <code>agg</code>, and many other pandas methods."
+  },
+  {
+    "term": "DPI",
+    "syn": [
+      "dots per inch",
+      "resolution",
+      "aufloesung",
+      "auflösung"
+    ],
+    "def": "Dots per inch — the resolution of a raster image. <code>dpi=200</code> in <code>plt.savefig</code> produces a sufficiently sharp image for slides; <code>dpi=300</code> is the typical print standard."
+  },
+  {
+    "term": "dtype",
+    "syn": [
+      "data type",
+      "datentyp",
+      "type"
+    ],
+    "def": "The data type of a column or Series — for example <code>int64</code>, <code>float64</code>, <code>object</code> (typically strings), <code>category</code>, <code>datetime64</code>. The dtype determines which operations are permitted."
+  },
+  {
+    "term": "encoding",
+    "syn": [
+      "zeichensatz",
+      "kodierung",
+      "utf-8",
+      "latin-1"
+    ],
+    "def": "The mapping between bytes on disk and characters in memory. UTF-8 covers most modern text; older Windows exports often use <code>cp1252</code> or <code>latin-1</code>."
+  },
+  {
+    "term": "exception",
+    "syn": [
+      "error",
+      "fehler",
+      "raise"
+    ],
+    "def": "A signal that something went wrong during execution. Pandas and NumPy raise specific exceptions (<code>KeyError</code>, <code>ValueError</code>, <code>MergeError</code>) that name the cause. Handled with <code>try / except</code> blocks where appropriate; otherwise read the message and the traceback for the source line."
+  },
+  {
+    "term": "figsize",
+    "syn": [
+      "plot size",
+      "figure size",
+      "abbildungsgroesse"
+    ],
+    "def": "The width and height of a Matplotlib figure in inches, passed as a tuple to <code>plt.subplots(figsize=(10, 6))</code>. Determines aspect ratio and reading comfort; <code>(10, 6)</code> is a sensible default for slide-ready figures."
+  },
+  {
+    "term": "figure",
+    "syn": [
+      "fig",
+      "matplotlib figure",
+      "abbildung",
+      "canvas"
+    ],
+    "def": "In Matplotlib, the outermost container — the canvas on which one or more axes are drawn. The figure is the object that <code>plt.savefig</code> writes; the axes are what individual plot calls draw on."
+  },
+  {
+    "term": "function",
+    "syn": [
+      "funktion"
+    ],
+    "def": "A named, reusable block of code. Functions take inputs (arguments), perform a computation, and may return an output. Defined with <code>def name(args): ...</code>."
+  },
+  {
+    "term": "groupby",
+    "syn": [
+      "aggregation",
+      "gruppieren"
+    ],
+    "def": "The operation of partitioning a DataFrame by the values of one or more key columns and applying a function within each partition. The split–apply–combine model."
+  },
+  {
+    "term": "header",
+    "syn": [
+      "column names",
+      "kopfzeile"
+    ],
+    "def": "The first row of a CSV file when it contains the column names. <code>pd.read_csv</code> treats row 0 as the header by default; <code>header=None</code> indicates that no header row is present, in which case columns may be named via <code>names=[...]</code>."
+  },
+  {
+    "term": "import",
+    "syn": [
+      "importieren"
+    ],
+    "def": "The statement that loads a module into the current namespace. <code>import pandas as pd</code> binds the pandas library to the alias <code>pd</code>."
+  },
+  {
+    "term": "imputation",
+    "syn": [
+      "impute",
+      "imputed",
+      "fillna value",
+      "auffuellen",
+      "auffüllen"
+    ],
+    "def": "The replacement of a missing value (<code>NaN</code>) by an estimated substitute — most often a central value of the column (median, mean) or a domain default. Imputation makes the decision visible; allowing <code>NaN</code> to propagate hides it inside downstream calculations."
+  },
+  {
+    "term": "in-place",
+    "syn": [
+      "inplace",
+      "modify in place"
+    ],
+    "def": "An operation that modifies an object directly rather than returning a new one. Many pandas methods accept an <code>inplace=True</code> argument, though the idiomatic style is to reassign the return value: <code>df = df.dropna()</code>."
+  },
+  {
+    "term": "Index",
+    "syn": [
+      "row labels",
+      "zeilenindex"
+    ],
+    "def": "The labels assigned to the rows (or, for columns, to the columns) of a DataFrame. By default a <code>RangeIndex</code> 0…n−1, but may be set to any meaningful key (date, identifier)."
+  },
+  {
+    "term": "inner join",
+    "syn": [
+      "inner",
+      "schnittmenge"
+    ],
+    "def": "A join that retains only rows whose key is present in both tables."
+  },
+  {
+    "term": "JSON",
+    "syn": [
+      "javascript object notation"
+    ],
+    "def": "A widely used text format for structured data: nested combinations of objects (key-value pairs), arrays, strings, numbers, booleans, and <code>null</code>. The default response format of most HTTP APIs. Read with <code>pd.read_json</code> or parsed with Python's built-in <code>json</code> module."
+  },
+  {
+    "term": "key",
+    "syn": [
+      "join key",
+      "schluessel"
+    ],
+    "def": "The column whose values determine which row of one table corresponds to which row of another in a merge."
+  },
+  {
+    "term": "keyword argument",
+    "syn": [
+      "kwarg",
+      "named argument",
+      "schluesselwortargument"
+    ],
+    "def": "An argument passed to a function by name: <code>encoding='utf-8'</code>. Keyword arguments may appear in any order after the positional arguments and typically have defaults that may be omitted."
+  },
+  {
+    "term": "lambda",
+    "syn": [
+      "anonymous function",
+      "anonyme funktion",
+      "inline function"
+    ],
+    "def": "A small, unnamed function defined inline: <code>lambda x: x.upper()</code>. Used where a one-line function is needed for a single call, as in <code>df['x'].apply(lambda v: v.strip())</code>."
+  },
+  {
+    "term": "left join",
+    "syn": [
+      "left",
+      "links"
+    ],
+    "def": "A join that retains every row of the left (calling) table, filling missing matches from the right table with <code>NaN</code>."
+  },
+  {
+    "term": "mask",
+    "syn": [
+      "boolean mask",
+      "filter"
+    ],
+    "def": "A boolean array (or Series) used to select rows. <code>df[mask]</code> returns the rows where <code>mask</code> is <code>True</code>."
+  },
+  {
+    "term": "mean",
+    "syn": [
+      "average",
+      "durchschnitt",
+      "mittelwert",
+      "arithmetic mean"
+    ],
+    "def": "The arithmetic average — the sum of values divided by the count. Sensitive to outliers: a single extreme value can shift the mean substantially. Compare with the median, which is robust."
+  },
+  {
+    "term": "median",
+    "syn": [
+      "zentralwert",
+      "middle value"
+    ],
+    "def": "The middle value when the column is sorted — half the values lie below it, half above. Robust to outliers: unlike the mean, it is not pulled by extreme values. Preferred over the mean for skewed distributions."
+  },
+  {
+    "term": "method",
+    "syn": [
+      "methode"
+    ],
+    "def": "A function attached to an object, called with dot notation: <code>df.head()</code>. The object on which it is called provides part of the input."
+  },
+  {
+    "term": "mutable",
+    "syn": [
+      "mutable",
+      "immutable",
+      "mutability"
+    ],
+    "def": "A mutable object can be changed in place (lists, dictionaries, DataFrames). An immutable object cannot (tuples, strings, integers). Mutability matters because mutable defaults in function definitions are shared across calls."
+  },
+  {
+    "term": "NaN",
+    "syn": [
+      "null",
+      "na",
+      "missing",
+      "fehlend",
+      "lücke",
+      "leer"
+    ],
+    "def": "«Not a Number» — the marker pandas uses for missing values. NaN is never equal to anything, including itself; missingness is tested with <code>isna()</code>, not <code>== NaN</code>."
+  },
+  {
+    "term": "NaT",
+    "syn": [
+      "not a time"
+    ],
+    "def": "The missing-value marker for datetime columns — the temporal analogue of <code>NaN</code>."
+  },
+  {
+    "term": "normalise",
+    "syn": [
+      "normalize",
+      "standardise",
+      "normalisieren"
+    ],
+    "def": "To bring values into a single, consistent form. In data cleaning: collapsing alternate spellings of a category to a canonical label. In statistics: rescaling values to a common range, such as 0–1 or zero-mean unit-variance."
+  },
+  {
+    "term": "outer join",
+    "syn": [
+      "outer",
+      "union",
+      "vereinigung"
+    ],
+    "def": "A join that retains every row from both tables, filling missing matches with <code>NaN</code>. Useful for auditing which keys are present in only one source."
+  },
+  {
+    "term": "outlier",
+    "syn": [
+      "ausreisser",
+      "ausreißer",
+      "extreme value",
+      "extremwert"
+    ],
+    "def": "A value that lies far from the bulk of the data. May indicate a measurement error, an input error, or a genuine rare event. Outliers disproportionately influence the mean, the range, and least-squares fits; the median and the quantiles are robust to them."
+  },
+  {
+    "term": "parameter",
+    "syn": [
+      "argument",
+      "kwarg",
+      "keyword argument"
+    ],
+    "def": "A named input to a function. <em>Positional</em> arguments are matched by position; <em>keyword</em> arguments by name (<code>sep=','</code>)."
+  },
+  {
+    "term": "path",
+    "syn": [
+      "pfad",
+      "filepath"
+    ],
+    "def": "The location of a file in the filesystem. Constructed with <code>pathlib.Path</code> for portability across operating systems."
+  },
+  {
+    "term": "pip",
+    "syn": [
+      "package",
+      "paket"
+    ],
+    "def": "Python's package installer. <code>pip install pandas</code> installs the pandas library into the active Python environment."
+  },
+  {
+    "term": "pivot",
+    "syn": [
+      "wide",
+      "crosstab"
+    ],
+    "def": "A reshaping that turns long-format data into wide format: distinct values of one variable become the column labels of the result."
+  },
+  {
+    "term": "propagate",
+    "syn": [
+      "propagation",
+      "fortpflanzen",
+      "nan propagation"
+    ],
+    "def": "To let a value travel through subsequent computations unchanged. With respect to <code>NaN</code>: a propagating operation returns <code>NaN</code> wherever an input was <code>NaN</code>. Pandas's <code>mean</code>, <code>sum</code>, and <code>groupby</code> do <em>not</em> propagate <code>NaN</code> by default — they skip it. The option <code>skipna=False</code> forces propagation, useful when the presence of any missingness should make the result itself missing."
+  },
+  {
+    "term": "pseudo-random",
+    "syn": [
+      "random",
+      "seed",
+      "reproducibility",
+      "reproduzierbar",
+      "random seed"
+    ],
+    "def": "Produced by a deterministic algorithm that, given a starting state (the <em>seed</em>), generates a sequence resembling randomness. Reproducible: the same seed yields the same sequence. Necessary for teaching examples, statistical simulations, and any analysis whose results must be verifiable."
+  },
+  {
+    "term": "quartile",
+    "syn": [
+      "IQR",
+      "percentile",
+      "quantile",
+      "quantil",
+      "interquartile range"
+    ],
+    "def": "Quartiles divide an ordered distribution into four equal parts: Q1 (25th percentile), Q2 (median), Q3 (75th percentile). The interquartile range (IQR) is Q3 − Q1, a robust measure of spread."
+  },
+  {
+    "term": "raster",
+    "syn": [
+      "png",
+      "jpg",
+      "bitmap",
+      "pixel image"
+    ],
+    "def": "An image stored as a grid of pixels; quality depends on resolution. PNG and JPG are raster formats. In contrast, vector formats (PDF, SVG) store geometric instructions and remain sharp at any size."
+  },
+  {
+    "term": "recode",
+    "syn": [
+      "recoding",
+      "umkodieren",
+      "relabel"
+    ],
+    "def": "To replace a value or category with another that better serves the analysis — for instance, mapping <code>NaN</code> to the explicit category <code>\"Unknown\"</code>, or collapsing several specific diagnoses into a broader class."
+  },
+  {
+    "term": "reset_index",
+    "syn": [
+      "reindex",
+      "index zurücksetzen"
+    ],
+    "def": "A pandas method that renumbers the rows to a clean <code>0…n-1</code> sequence. After filtering or dropping rows, the index has gaps; <code>reset_index(drop=True)</code> restores consecutive numbering and discards the old index instead of retaining it as an additional column."
+  },
+  {
+    "term": "row",
+    "syn": [
+      "zeile",
+      "observation",
+      "record",
+      "case"
+    ],
+    "def": "A horizontal slice of a DataFrame — one observation across all variables. Accessed by position with <code>df.iloc[i]</code> or by label with <code>df.loc[label]</code>."
+  },
+  {
+    "term": "scalar",
+    "syn": [
+      "single value",
+      "skalar"
+    ],
+    "def": "A single value, as opposed to an array or Series. A number, a string, a boolean — anything that is not a collection. Most NumPy and pandas operations broadcast scalars across the whole array or column."
+  },
+  {
+    "term": "sentinel value",
+    "syn": [
+      "sentinel",
+      "platzhalter",
+      "-1",
+      "9999",
+      "-99",
+      "placeholder value"
+    ],
+    "def": "A special, agreed-upon value used by a source system to signal \"no valid value here\" — typically because the export format cannot store <code>NaN</code> directly. Common conventions: <code>-1</code>, <code>-99</code>, <code>9999</code>, the string <code>\"N/A\"</code>. Sentinel values must be translated to <code>NaN</code> before analysis; otherwise they are treated as genuine measurements and distort every subsequent statistic."
+  },
+  {
+    "term": "Series",
+    "syn": [
+      "spalte",
+      "vector",
+      "column"
+    ],
+    "def": "A one-dimensional, labelled array — a single column of a DataFrame, or a standalone 1D structure. Carries both values and an index."
+  },
+  {
+    "term": "shape",
+    "syn": [
+      "form",
+      "dimensions",
+      "groesse",
+      "größe"
+    ],
+    "def": "The dimensions of an array or DataFrame as a tuple: <code>(rows, columns)</code> for a 2D structure, <code>(n,)</code> for a 1D Series or array. Accessed as the <code>.shape</code> attribute, without parentheses."
+  },
+  {
+    "term": "skipna",
+    "syn": [
+      "skip na",
+      "skip nan"
+    ],
+    "def": "An argument to many pandas aggregations controlling whether <code>NaN</code> values are excluded from the calculation. Default is <code>True</code> — <code>NaN</code> is ignored. <code>skipna=False</code> forces <code>NaN</code> to propagate, so the result is <code>NaN</code> whenever any input was <code>NaN</code>."
+  },
+  {
+    "term": "slicing",
+    "syn": [
+      "slice",
+      "ausschnitt",
+      "subrange"
+    ],
+    "def": "A selection of a subrange of a sequence or array using <code>start:stop:step</code> notation. <code>arr[2:7]</code> takes elements 2 through 6; <code>df.iloc[:, 1:4]</code> takes columns 1 through 3 of every row."
+  },
+  {
+    "term": "split-apply-combine",
+    "syn": [
+      "groupby model"
+    ],
+    "def": "The conceptual model of groupby: <em>split</em> the table by a key, <em>apply</em> a function to each group, <em>combine</em> the results into a single summary."
+  },
+  {
+    "term": "subplot",
+    "syn": [
+      "axes grid",
+      "multiple plots",
+      "mehrere plots"
+    ],
+    "def": "One of several axes arranged in a grid within a single figure. Created with <code>fig, axes = plt.subplots(2, 3)</code> for a 2×3 grid; each cell is then drawn on with <code>axes[i, j]</code>."
+  },
+  {
+    "term": "subset",
+    "syn": [
+      "teilmenge",
+      "selection",
+      "portion"
+    ],
+    "def": "A portion of a DataFrame — a selection of certain rows, columns, or both. Used as an argument name in pandas (e.g. <code>dropna(subset=['col'])</code> restricts the operation to specified columns)."
+  },
+  {
+    "term": "tidy data",
+    "syn": [
+      "long format"
+    ],
+    "def": "A convention in which each variable forms a column, each observation forms a row, and each type of observational unit forms a table. Pandas operations are most natural on tidy data."
+  },
+  {
+    "term": "tight_layout",
+    "syn": [
+      "matplotlib spacing",
+      "auto layout"
+    ],
+    "def": "A Matplotlib function that recomputes the spacing between axes elements so that titles, labels, and tick marks do not overlap. Called immediately before <code>savefig</code> or <code>show</code>."
+  },
+  {
+    "term": "traceback",
+    "syn": [
+      "stack trace",
+      "fehlerstapel"
+    ],
+    "def": "The chain of function calls that led to an exception, printed when an error occurs. Read from bottom upward: the last line names the exception type and its message; the lines above show the path through which the error was reached. The deepest entry inside the user's own code is usually where to start investigating."
+  },
+  {
+    "term": "tuple",
+    "syn": [
+      "tupel",
+      "ordered pair"
+    ],
+    "def": "An ordered, immutable Python sequence, written with parentheses: <code>(1, 2, 3)</code>. Used for fixed-length records where the position of each element is meaningful — for instance, the <code>.shape</code> of a DataFrame is a tuple."
+  },
+  {
+    "term": "validate",
+    "syn": [
+      "merge validate",
+      "validate=",
+      "kardinalitätsprüfung"
+    ],
+    "def": "A keyword argument to <code>pd.merge</code> that asserts the expected cardinality of the join (<code>'1:1'</code>, <code>'1:m'</code>, <code>'m:1'</code>, or <code>'m:m'</code>) and raises an exception if the assumption is violated. Recommended on any non-trivial merge as protection against silently inflated results."
+  },
+  {
+    "term": "vectorisation",
+    "syn": [
+      "vectorization",
+      "vektorisierung"
+    ],
+    "def": "The application of an operation to a whole array or column in a single step, dispatched to compiled code. Markedly faster than the equivalent Python loop."
+  },
+  {
+    "term": "whitespace",
+    "syn": [
+      "leerzeichen",
+      "spaces",
+      "tabs",
+      "blank"
+    ],
+    "def": "Characters that appear blank: ordinary spaces, tabs, and line breaks. Often present at the start or end of strings from manual data entry; removed by <code>.str.strip()</code> before grouping or comparison."
+  }
+]

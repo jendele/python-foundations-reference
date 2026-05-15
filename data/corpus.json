@@ -1,0 +1,2155 @@
+[
+  {
+    "id": "open_with",
+    "code": "with open(\"file.txt\", encoding=\"utf-8\") as f: ...",
+    "stage": "load",
+    "short": "Open a file in a context that guarantees closure.",
+    "what": "Python's built-in mechanism for working with a file. The <code>with</code> block ensures the file is closed automatically when the block ends, even if an exception is raised.",
+    "tokens": [
+      [
+        "open(...)",
+        "Built-in function returning a file object."
+      ],
+      [
+        "\"file.txt\"",
+        "The path to the file."
+      ],
+      [
+        "encoding=\"utf-8\"",
+        "The character encoding used to interpret the bytes."
+      ],
+      [
+        "as f",
+        "A binding of the file object to the name <code>f</code> for the duration of the block."
+      ]
+    ],
+    "requires": [
+      "a path to a text file"
+    ],
+    "important": [
+      "the file is not tabular and pandas loaders do not apply",
+      "line-by-line iteration is desired"
+    ],
+    "avoid": [
+      "calling <code>open</code> without <code>with</code> in interactive work (forgetting to close)"
+    ],
+    "reach": "When the file is plain text without a tabular structure, or when one needs streaming access.",
+    "example": "<pre><span class=\"k\">with</span> open(<span class=\"s\">\"notes.txt\"</span>, encoding=<span class=\"s\">\"utf-8\"</span>) <span class=\"k\">as</span> f:\n    <span class=\"k\">for</span> line <span class=\"k\">in</span> f:\n        <span class=\"k\">print</span>(line.strip())</pre>",
+    "tags": [
+      "load",
+      "file",
+      "open",
+      "text",
+      "context",
+      "stream",
+      "datei"
+    ]
+  },
+  {
+    "id": "Path",
+    "code": "Path(\"data\") / \"encounters.csv\"",
+    "stage": "load",
+    "short": "Construct a file path in an OS-independent manner.",
+    "what": "Builds a path object using the <code>pathlib</code> module. The <code>/</code> operator joins path components irrespective of the operating system's separator.",
+    "tokens": [
+      [
+        "Path(...)",
+        "A class from <code>pathlib</code> representing a filesystem path."
+      ],
+      [
+        "\"data\"",
+        "The first component of the path."
+      ],
+      [
+        "/",
+        "Operator that joins path components."
+      ]
+    ],
+    "requires": [
+      "<code>from pathlib import Path</code>"
+    ],
+    "important": [
+      "the code may run on multiple operating systems",
+      "paths are built from several components"
+    ],
+    "avoid": [
+      "hard-coding paths with backslashes or forward slashes in string form"
+    ],
+    "reach": "Whenever a path is constructed; preferable to string concatenation in all cases.",
+    "example": "<pre><span class=\"k\">from</span> pathlib <span class=\"k\">import</span> Path\np = Path(<span class=\"s\">\"data\"</span>) / <span class=\"s\">\"encounters.csv\"</span>\ndf = pd.read_csv(p)</pre>",
+    "tags": [
+      "load",
+      "path",
+      "pathlib",
+      "file",
+      "windows",
+      "os"
+    ]
+  },
+  {
+    "id": "read_csv",
+    "code": "pd.read_csv(\"file.csv\")",
+    "stage": "load",
+    "short": "Read a comma-separated file into a DataFrame.",
+    "what": "Reads a delimited text file from disk and returns a pandas <span class='glossary-link' data-term='DataFrame'>DataFrame</span> in memory. The default delimiter is a comma and the default encoding is UTF-8.",
+    "tokens": [
+      [
+        "pd",
+        "The conventional alias for the pandas library after <code>import pandas as pd</code>."
+      ],
+      [
+        ".read_csv(...)",
+        "A pandas function that parses a text file containing delimited records."
+      ],
+      [
+        "\"file.csv\"",
+        "A path to the file. May be absolute or relative to the working directory of the notebook."
+      ]
+    ],
+    "requires": [
+      "pandas imported (<code>import pandas as pd</code>)",
+      "a file path that resolves to a readable file"
+    ],
+    "important": [
+      "the delimiter is not a comma (set <code>sep=';'</code>)",
+      "the file uses non-UTF-8 encoding (set <code>encoding='latin-1'</code> or <code>'cp1252'</code>)",
+      "date columns should be parsed at load time (<code>parse_dates=[...]</code>)"
+    ],
+    "avoid": [
+      "loading a file larger than available memory without <code>nrows=</code> or <code>chunksize=</code>",
+      "ignoring encoding errors silently"
+    ],
+    "reach": "When the input is a delimited text file and the entire table is intended to be present in memory.",
+    "example": "<pre>df = pd.read_csv(<span class=\"s\">\"data/encounters.csv\"</span>,\n                 encoding=<span class=\"s\">\"utf-8\"</span>,\n                 sep=<span class=\"s\">\",\"</span>,\n                 parse_dates=[<span class=\"s\">\"admission_date\"</span>])</pre>",
+    "tags": [
+      "load",
+      "read",
+      "import",
+      "csv",
+      "file",
+      "delimited",
+      "comma",
+      "datei",
+      "laden",
+      "einlesen"
+    ]
+  },
+  {
+    "id": "read_excel",
+    "code": "pd.read_excel(\"file.xlsx\", sheet_name=\"Q1\")",
+    "stage": "load",
+    "short": "Read an Excel sheet into a DataFrame.",
+    "what": "Reads a single sheet of an Excel workbook into a DataFrame. Requires the auxiliary package <code>openpyxl</code> for <code>.xlsx</code> files.",
+    "tokens": [
+      [
+        ".read_excel(...)",
+        "Pandas function that parses an Excel workbook."
+      ],
+      [
+        "\"file.xlsx\"",
+        "The path to the workbook."
+      ],
+      [
+        "sheet_name=\"Q1\"",
+        "Which sheet to read. May also be an integer index or <code>None</code> to obtain a dictionary of all sheets."
+      ]
+    ],
+    "requires": [
+      "<code>openpyxl</code> installed",
+      "a workbook with at least one readable sheet"
+    ],
+    "important": [
+      "the workbook contains formulas (values are read, not formulas)",
+      "multiple sheets are required (use <code>sheet_name=None</code>)"
+    ],
+    "avoid": [
+      "relying on cell formatting (colour, font) as data — it is not preserved"
+    ],
+    "reach": "When the source data is an Excel workbook, particularly when the file already contains tabular structure rather than complex layout.",
+    "example": "<pre>df = pd.read_excel(<span class=\"s\">\"data/staffing_2026Q1.xlsx\"</span>,\n                   sheet_name=<span class=\"s\">\"Q1\"</span>)</pre>",
+    "tags": [
+      "load",
+      "excel",
+      "xlsx",
+      "sheet",
+      "workbook",
+      "arbeitsblatt"
+    ]
+  },
+  {
+    "id": "read_json",
+    "code": "pd.read_json(\"file.json\")",
+    "stage": "load",
+    "short": "Read a JSON document into a DataFrame.",
+    "what": "Parses a JSON file or JSON string into a DataFrame. The structure of the JSON determines how rows and columns are inferred.",
+    "tokens": [
+      [
+        ".read_json(...)",
+        "Pandas function for JSON input."
+      ],
+      [
+        "\"file.json\"",
+        "The path or URL of the JSON resource."
+      ]
+    ],
+    "requires": [
+      "a JSON document whose structure is convertible to tabular form"
+    ],
+    "important": [
+      "the JSON is deeply nested (consider <code>pd.json_normalize</code> instead)",
+      "records are stored under a key (<code>orient='records'</code> or extracting first)"
+    ],
+    "avoid": [
+      "reading very large JSON streams without preprocessing"
+    ],
+    "reach": "When data is delivered by an API or stored in a JSON file with a tabular structure.",
+    "example": "<pre>df = pd.read_json(<span class=\"s\">\"data/triage.json\"</span>)</pre>",
+    "tags": [
+      "load",
+      "json",
+      "api",
+      "read",
+      "import"
+    ]
+  },
+  {
+    "id": "read_parquet",
+    "code": "pd.read_parquet(\"file.parquet\")",
+    "stage": "load",
+    "short": "Read a Parquet file into a DataFrame.",
+    "what": "Reads a columnar binary format optimised for analytical workloads. Considerably faster and smaller than CSV for the same data.",
+    "tokens": [
+      [
+        ".read_parquet(...)",
+        "Pandas function for Parquet input."
+      ],
+      [
+        "\"file.parquet\"",
+        "The path to the Parquet file or directory."
+      ]
+    ],
+    "requires": [
+      "<code>pyarrow</code> or <code>fastparquet</code> installed"
+    ],
+    "important": [
+      "working with intermediate files between Python steps",
+      "data exceeds approximately 10⁶ rows"
+    ],
+    "avoid": [
+      "sharing data with non-technical recipients (Parquet is not human-readable)"
+    ],
+    "reach": "For intermediate storage between analysis steps, or when working with files generated by data engineering pipelines.",
+    "example": "<pre>df = pd.read_parquet(<span class=\"s\">\"data/encounters.parquet\"</span>)</pre>",
+    "tags": [
+      "load",
+      "parquet",
+      "columnar",
+      "binary",
+      "fast"
+    ]
+  },
+  {
+    "id": "describe",
+    "code": "df.describe()",
+    "stage": "inspect",
+    "short": "Return descriptive statistics for numeric columns.",
+    "what": "Returns count, mean, standard deviation, minimum, the three quartiles, and maximum for each numeric column. With <code>include='all'</code>, non-numeric columns are also summarised.",
+    "tokens": [
+      [
+        ".describe()",
+        "Method returning a summary table."
+      ]
+    ],
+    "requires": [
+      "a DataFrame containing at least one numeric column"
+    ],
+    "important": [
+      "one wishes to see the central tendency, spread, and range of every numeric variable in a single view"
+    ],
+    "avoid": [
+      "interpreting <code>describe</code> on categorical columns without <code>include='all'</code>"
+    ],
+    "reach": "For an initial impression of the distribution of every numeric variable.",
+    "example": "<pre>df.describe()\ndf.describe(include=<span class=\"s\">\"all\"</span>)</pre>",
+    "tags": [
+      "inspect",
+      "describe",
+      "stats",
+      "statistics",
+      "summary",
+      "mean",
+      "median",
+      "quartile"
+    ]
+  },
+  {
+    "id": "dtypes",
+    "code": "df.dtypes",
+    "stage": "inspect",
+    "short": "Return the data type of each column.",
+    "what": "Returns a Series mapping column names to their <span class='glossary-link' data-term='dtype'>dtype</span>. An attribute, not a method.",
+    "tokens": [
+      [
+        ".dtypes",
+        "Attribute returning a Series of dtypes per column."
+      ]
+    ],
+    "requires": [
+      "a DataFrame"
+    ],
+    "important": [
+      "one suspects a column was loaded as <code>object</code> when a numeric type was expected"
+    ],
+    "avoid": [],
+    "reach": "To verify that types were inferred correctly, particularly after loading from CSV.",
+    "example": "<pre>df.dtypes</pre>",
+    "tags": [
+      "inspect",
+      "types",
+      "dtypes",
+      "datentyp"
+    ]
+  },
+  {
+    "id": "duplicated",
+    "code": "df.duplicated().sum()",
+    "stage": "inspect",
+    "short": "Count duplicate rows.",
+    "what": "<code>duplicated()</code> returns a boolean Series marking rows that repeat a previous row; <code>sum()</code> counts the marked rows.",
+    "tokens": [
+      [
+        ".duplicated()",
+        "Returns <code>True</code> for rows that are exact repetitions of an earlier row."
+      ],
+      [
+        ".sum()",
+        "Counts the <code>True</code> values."
+      ]
+    ],
+    "requires": [
+      "a DataFrame"
+    ],
+    "important": [
+      "the data is an export from another system that may have produced repeated rows"
+    ],
+    "avoid": [
+      "assuming uniqueness without checking <code>duplicated(subset=[key])</code> for the key column"
+    ],
+    "reach": "Routinely after loading from an external system.",
+    "example": "<pre>df.duplicated().sum()\ndf.duplicated(subset=[<span class=\"s\">\"patient_id\"</span>]).sum()</pre>",
+    "tags": [
+      "inspect",
+      "duplicates",
+      "duplicated",
+      "unique",
+      "duplikat"
+    ]
+  },
+  {
+    "id": "head",
+    "code": "df.head(10)",
+    "stage": "inspect",
+    "short": "Return the first n rows.",
+    "what": "Returns the first <em>n</em> rows of the DataFrame as a smaller DataFrame. The default is five.",
+    "tokens": [
+      [
+        "df",
+        "The DataFrame."
+      ],
+      [
+        ".head(...)",
+        "Method returning the leading rows."
+      ],
+      [
+        "10",
+        "The number of rows to return; optional."
+      ]
+    ],
+    "requires": [
+      "a DataFrame"
+    ],
+    "important": [
+      "one wishes to inspect the structure of the data without printing the entire table"
+    ],
+    "avoid": [
+      "relying on <code>head</code> to identify anomalies — the leading rows are not a random sample"
+    ],
+    "reach": "To verify that the loader produced the expected columns, and to read example values.",
+    "example": "<pre>df.head()</pre>",
+    "tags": [
+      "inspect",
+      "head",
+      "preview",
+      "first",
+      "top",
+      "anfang",
+      "vorschau"
+    ]
+  },
+  {
+    "id": "info",
+    "code": "df.info()",
+    "stage": "inspect",
+    "short": "Print a concise summary of the DataFrame.",
+    "what": "Prints, for each column, its name, the count of non-null values, and the <span class='glossary-link' data-term='dtype'>dtype</span>. Also reports total memory use. The output is printed, not returned.",
+    "tokens": [
+      [
+        "df",
+        "The DataFrame under inspection."
+      ],
+      [
+        ".info()",
+        "A method that prints structural information."
+      ]
+    ],
+    "requires": [
+      "a DataFrame object"
+    ],
+    "important": [
+      "one wishes to see, in a single view, types and missingness across all columns"
+    ],
+    "avoid": [
+      "expecting a return value to assign — the method prints rather than returns"
+    ],
+    "reach": "As the second check after loading, when one wishes a single view of types and non-null counts.",
+    "example": "<pre>df.info()</pre>",
+    "tags": [
+      "inspect",
+      "info",
+      "types",
+      "dtypes",
+      "summary",
+      "strukturuebersicht"
+    ]
+  },
+  {
+    "id": "isna_sum",
+    "code": "df.isna().sum()",
+    "stage": "inspect",
+    "short": "Count missing values per column.",
+    "what": "Composes two methods: <code>isna()</code> returns a boolean DataFrame in which <code>True</code> marks missing cells; <code>sum()</code> then totals the <code>True</code> values along each column.",
+    "tokens": [
+      [
+        ".isna()",
+        "Returns a boolean DataFrame with <code>True</code> where the value is <code>NaN</code>."
+      ],
+      [
+        ".sum()",
+        "Sums the boolean values along columns (treating <code>True</code> as 1)."
+      ]
+    ],
+    "requires": [
+      "a DataFrame"
+    ],
+    "important": [
+      "one wishes to know, for every column, how many values are missing",
+      "precedes any decision about imputation or dropping"
+    ],
+    "avoid": [],
+    "reach": "Routinely after loading, to determine the prevalence of missingness in each column.",
+    "example": "<pre>df.isna().sum()\ndf.isna().mean()   <span class=\"c\"># proportion missing</span></pre>",
+    "tags": [
+      "inspect",
+      "missing",
+      "nan",
+      "null",
+      "isna",
+      "isnull",
+      "fehlend",
+      "leer"
+    ]
+  },
+  {
+    "id": "sample",
+    "code": "df.sample(5)",
+    "stage": "inspect",
+    "short": "Return a random sample of n rows.",
+    "what": "Returns a random sample of <em>n</em> rows. Unlike <code>head</code>, the sample is not biased toward the start of the file.",
+    "tokens": [
+      [
+        ".sample(...)",
+        "Method returning a random subset of rows."
+      ],
+      [
+        "5",
+        "The sample size."
+      ]
+    ],
+    "requires": [
+      "a DataFrame"
+    ],
+    "important": [
+      "the data is sorted or grouped at load time and <code>head</code> would not be representative"
+    ],
+    "avoid": [
+      "sampling without <code>random_state</code> when reproducibility is needed"
+    ],
+    "reach": "When inspecting a file whose order is not random, particularly large export files.",
+    "example": "<pre>df.sample(<span class=\"s\">5</span>, random_state=<span class=\"s\">42</span>)</pre>",
+    "tags": [
+      "inspect",
+      "sample",
+      "random",
+      "preview",
+      "stichprobe"
+    ]
+  },
+  {
+    "id": "shape",
+    "code": "df.shape",
+    "stage": "inspect",
+    "short": "Return the dimensions of the DataFrame.",
+    "what": "Returns a two-tuple containing the number of rows and the number of columns. An attribute, not a method — therefore no parentheses.",
+    "tokens": [
+      [
+        "df",
+        "The DataFrame under inspection."
+      ],
+      [
+        ".shape",
+        "Attribute returning <code>(n_rows, n_columns)</code>."
+      ]
+    ],
+    "requires": [
+      "a DataFrame or Series object"
+    ],
+    "important": [
+      "the first check after loading; confirms the loader produced the expected size"
+    ],
+    "avoid": [
+      "confusing with <code>.size</code>, which returns the total number of cells"
+    ],
+    "reach": "Immediately after loading, and after any operation that may change the number of rows.",
+    "example": "<pre>df.shape   <span class=\"c\"># e.g. (320, 8)</span></pre>",
+    "tags": [
+      "inspect",
+      "shape",
+      "size",
+      "rows",
+      "columns",
+      "dim",
+      "dimension",
+      "groesse"
+    ]
+  },
+  {
+    "id": "value_counts",
+    "code": "df[\"col\"].value_counts()",
+    "stage": "inspect",
+    "short": "Count occurrences of each unique value in a column.",
+    "what": "Returns a Series whose index is the unique values of the column and whose values are the counts, sorted descending.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the column named <code>col</code> from the DataFrame, returning a Series."
+      ],
+      [
+        ".value_counts()",
+        "Method counting the frequency of each unique value."
+      ]
+    ],
+    "requires": [
+      "a column (Series), typically categorical or of low cardinality"
+    ],
+    "important": [
+      "one wishes to inspect the categories present in a column, and their balance",
+      "missing values should be counted explicitly (use <code>dropna=False</code>)"
+    ],
+    "avoid": [
+      "calling on a continuous numeric column with many distinct values (produces a long, unhelpful list)"
+    ],
+    "reach": "For any categorical or low-cardinality column, to inspect the categories present and their balance.",
+    "example": "<pre>df[<span class=\"s\">\"ward\"</span>].value_counts()\ndf[<span class=\"s\">\"gender\"</span>].value_counts(dropna=<span class=\"k\">False</span>)</pre>",
+    "tags": [
+      "inspect",
+      "count",
+      "frequency",
+      "categorical",
+      "values",
+      "value_counts",
+      "haeufigkeit"
+    ]
+  },
+  {
+    "id": "astype",
+    "code": "df[\"age\"].astype(int)",
+    "stage": "clean",
+    "short": "Cast a column to a specified type.",
+    "what": "Returns a Series whose values have been converted to the requested type. Fails on values that cannot be converted (including <code>NaN</code> for integer types).",
+    "tokens": [
+      [
+        ".astype(...)",
+        "Method casting to a new dtype."
+      ],
+      [
+        "int",
+        "The target type. May also be <code>float</code>, <code>str</code>, <code>'category'</code>, or a numpy dtype."
+      ]
+    ],
+    "requires": [
+      "a column whose values are convertible to the target type",
+      "no <code>NaN</code> when casting to <code>int</code>"
+    ],
+    "important": [
+      "a column was loaded as <code>object</code> when a numeric type was expected",
+      "memory savings are desired (cast to <code>'category'</code>)"
+    ],
+    "avoid": [
+      "casting a column with <code>NaN</code> to <code>int</code> (use <code>'Int64'</code> instead, which supports missing values)"
+    ],
+    "reach": "When a column's inferred type does not match its intended use.",
+    "example": "<pre>df[<span class=\"s\">\"age\"</span>] = df[<span class=\"s\">\"age\"</span>].astype(<span class=\"s\">\"Int64\"</span>)\ndf[<span class=\"s\">\"ward\"</span>] = df[<span class=\"s\">\"ward\"</span>].astype(<span class=\"s\">\"category\"</span>)</pre>",
+    "tags": [
+      "clean",
+      "astype",
+      "cast",
+      "convert",
+      "type",
+      "umwandeln"
+    ]
+  },
+  {
+    "id": "clip",
+    "code": "df[\"x\"].clip(lower=0, upper=120)",
+    "stage": "clean",
+    "short": "Constrain values to a specified range.",
+    "what": "Returns a Series in which values below <code>lower</code> are set to <code>lower</code> and values above <code>upper</code> are set to <code>upper</code>.",
+    "tokens": [
+      [
+        ".clip(...)",
+        "Method bounding values to a range."
+      ],
+      [
+        "lower=0",
+        "The lower bound."
+      ],
+      [
+        "upper=120",
+        "The upper bound."
+      ]
+    ],
+    "requires": [
+      "a numeric Series"
+    ],
+    "important": [
+      "the domain has known physical bounds (age, percentages)",
+      "outliers are known to be input errors"
+    ],
+    "avoid": [
+      "clipping silently — values at the bound become indistinguishable, which may bias subsequent statistics"
+    ],
+    "reach": "When values outside a plausible range are best treated as the bound rather than dropped.",
+    "example": "<pre>df[<span class=\"s\">\"age\"</span>] = df[<span class=\"s\">\"age\"</span>].clip(lower=<span class=\"s\">0</span>, upper=<span class=\"s\">120</span>)</pre>",
+    "tags": [
+      "clean",
+      "clip",
+      "outlier",
+      "bound",
+      "range",
+      "ausreisser"
+    ]
+  },
+  {
+    "id": "drop_duplicates",
+    "code": "df.drop_duplicates(subset=[\"patient_id\"], keep=\"last\")",
+    "stage": "clean",
+    "short": "Remove duplicate rows.",
+    "what": "Returns a DataFrame in which rows whose values in the <code>subset</code> columns repeat earlier rows are removed. <code>keep</code> selects which occurrence to retain.",
+    "tokens": [
+      [
+        ".drop_duplicates(...)",
+        "Method removing duplicate rows."
+      ],
+      [
+        "subset=[\"patient_id\"]",
+        "Restricts the duplicate check to specified columns."
+      ],
+      [
+        "keep=\"last\"",
+        "Retains the last occurrence rather than the first."
+      ]
+    ],
+    "requires": [
+      "a DataFrame"
+    ],
+    "important": [
+      "the data are exported from a system whose updates produce successive rows for the same entity"
+    ],
+    "avoid": [
+      "applying without <code>subset</code> when only certain columns define identity"
+    ],
+    "reach": "After loading, when the source system may produce repeated records.",
+    "example": "<pre>df = df.drop_duplicates(subset=[<span class=\"s\">\"patient_id\"</span>], keep=<span class=\"s\">\"last\"</span>)</pre>",
+    "tags": [
+      "clean",
+      "duplicates",
+      "drop",
+      "unique",
+      "duplikat",
+      "entfernen"
+    ]
+  },
+  {
+    "id": "dropna",
+    "code": "df.dropna(subset=[\"col\"])",
+    "stage": "clean",
+    "short": "Remove rows that contain missing values.",
+    "what": "Returns a DataFrame from which rows containing <code>NaN</code> in the specified columns have been removed. Without <code>subset</code>, any <code>NaN</code> in any column causes the row to be removed.",
+    "tokens": [
+      [
+        ".dropna(...)",
+        "Method removing rows with missing values."
+      ],
+      [
+        "subset=[\"col\"]",
+        "Restricts the check to specified columns; only <code>NaN</code> in these columns triggers removal."
+      ]
+    ],
+    "requires": [
+      "a DataFrame containing at least one <code>NaN</code>"
+    ],
+    "important": [
+      "the column listed in <code>subset</code> is essential to the analysis",
+      "the loss of rows is acceptable (typically below five per cent)"
+    ],
+    "avoid": [
+      "calling <code>dropna()</code> with no arguments on real data — it removes any row with any missing value, often discarding most of the table"
+    ],
+    "reach": "When a value in an essential column is missing and no defensible substitute exists.",
+    "example": "<pre>df_clean = df.dropna(subset=[<span class=\"s\">\"patient_id\"</span>, <span class=\"s\">\"admission_date\"</span>])</pre>",
+    "tags": [
+      "clean",
+      "drop",
+      "remove",
+      "missing",
+      "nan",
+      "dropna",
+      "zeile loeschen",
+      "entfernen"
+    ]
+  },
+  {
+    "id": "ffill",
+    "code": "df.ffill()",
+    "stage": "clean",
+    "short": "Propagate the most recent known value forward.",
+    "what": "Replaces each <code>NaN</code> with the most recent non-missing value preceding it. <code>bfill</code> propagates backward.",
+    "tokens": [
+      [
+        ".ffill()",
+        "Forward fill."
+      ]
+    ],
+    "requires": [
+      "data with a meaningful order (typically time)"
+    ],
+    "important": [
+      "the underlying state changes infrequently and the last observation is a reasonable proxy"
+    ],
+    "avoid": [
+      "filling across long gaps where the state is likely to have changed"
+    ],
+    "reach": "For sparse measurements where the most recent reading is the best available estimate.",
+    "example": "<pre>df = df.sort_values(<span class=\"s\">\"timestamp\"</span>).ffill()</pre>",
+    "tags": [
+      "clean",
+      "ffill",
+      "forward fill",
+      "bfill",
+      "missing",
+      "time"
+    ]
+  },
+  {
+    "id": "fillna",
+    "code": "df[\"col\"].fillna(value)",
+    "stage": "clean",
+    "short": "Replace missing values with a specified substitute.",
+    "what": "Returns a Series (or DataFrame) in which <code>NaN</code> is replaced by the value supplied. The substitute may be a scalar, a dictionary mapping columns to values, or another Series aligned on the index.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the column to operate on."
+      ],
+      [
+        ".fillna(...)",
+        "Method replacing missing values."
+      ],
+      [
+        "value",
+        "The substitute. For numeric columns, frequently <code>df['col'].median()</code>; for categorical, a sentinel such as <code>'unknown'</code>."
+      ]
+    ],
+    "requires": [
+      "a Series or DataFrame containing <code>NaN</code>",
+      "a defensible substitute value"
+    ],
+    "important": [
+      "the missingness is plausibly random rather than informative",
+      "the column is numeric and a central tendency provides a sensible default"
+    ],
+    "avoid": [
+      "filling with zero unless zero is a meaningful default in the domain",
+      "filling more than approximately a third of a column without acknowledging the assumption"
+    ],
+    "reach": "When a missing value can be defensibly replaced rather than dropped or allowed to propagate.",
+    "example": "<pre>df[<span class=\"s\">\"age\"</span>] = df[<span class=\"s\">\"age\"</span>].fillna(df[<span class=\"s\">\"age\"</span>].median())\ndf = df.fillna({<span class=\"s\">\"gender\"</span>: <span class=\"s\">\"unknown\"</span>, <span class=\"s\">\"age\"</span>: df[<span class=\"s\">\"age\"</span>].median()})</pre>",
+    "tags": [
+      "clean",
+      "fill",
+      "fillna",
+      "impute",
+      "missing",
+      "nan",
+      "replace",
+      "auffuellen",
+      "ersetzen"
+    ]
+  },
+  {
+    "id": "interpolate",
+    "code": "df[\"x\"].interpolate()",
+    "stage": "clean",
+    "short": "Estimate missing values by interpolation between known values.",
+    "what": "Replaces <code>NaN</code> with values estimated from neighbouring known values. The default is linear interpolation.",
+    "tokens": [
+      [
+        ".interpolate()",
+        "Method computing interpolated replacements."
+      ]
+    ],
+    "requires": [
+      "a numeric Series with known values on both sides of the missing cells"
+    ],
+    "important": [
+      "the data are ordered (typically time-indexed)",
+      "the underlying process is plausibly continuous"
+    ],
+    "avoid": [
+      "interpolating across long stretches of missing data",
+      "using on categorical columns"
+    ],
+    "reach": "For time series with isolated missing values within an otherwise continuous record.",
+    "example": "<pre>df[<span class=\"s\">\"temperature\"</span>] = df[<span class=\"s\">\"temperature\"</span>].interpolate()</pre>",
+    "tags": [
+      "clean",
+      "interpolate",
+      "missing",
+      "nan",
+      "time series",
+      "zeitreihe"
+    ]
+  },
+  {
+    "id": "replace",
+    "code": "df[\"x\"].replace({\"M\": \"male\", \"F\": \"female\"})",
+    "stage": "clean",
+    "short": "Map specific values to replacements.",
+    "what": "Returns a Series in which exact-match values are replaced by their counterparts in the mapping dictionary.",
+    "tokens": [
+      [
+        ".replace(...)",
+        "Method substituting values."
+      ],
+      [
+        "{\"M\": \"male\", \"F\": \"female\"}",
+        "A mapping from old values to new values."
+      ]
+    ],
+    "requires": [
+      "a Series and a mapping"
+    ],
+    "important": [
+      "categorical encoding must be made consistent",
+      "sentinel codes (-99, 999) should be mapped to <code>NaN</code>"
+    ],
+    "avoid": [
+      "using <code>replace</code> for partial-string substitution — use <code>str.replace</code>"
+    ],
+    "reach": "When category labels must be standardised to a canonical form.",
+    "example": "<pre><span class=\"k\">import</span> numpy <span class=\"k\">as</span> np\ndf[<span class=\"s\">\"score\"</span>] = df[<span class=\"s\">\"score\"</span>].replace({<span class=\"s\">-99</span>: np.nan})</pre>",
+    "tags": [
+      "clean",
+      "replace",
+      "map",
+      "recode",
+      "mapping",
+      "ersetzen"
+    ]
+  },
+  {
+    "id": "str_strip",
+    "code": "df[\"x\"].str.strip().str.lower()",
+    "stage": "clean",
+    "short": "Normalise string values.",
+    "what": "The <code>.str</code> accessor exposes string methods that operate element-wise. <code>.strip()</code> removes leading/trailing whitespace; <code>.lower()</code> converts to lowercase.",
+    "tokens": [
+      [
+        ".str",
+        "Accessor for vectorised string operations on a Series of strings."
+      ],
+      [
+        ".strip()",
+        "Removes leading and trailing whitespace."
+      ],
+      [
+        ".lower()",
+        "Converts to lowercase."
+      ]
+    ],
+    "requires": [
+      "a Series of strings"
+    ],
+    "important": [
+      "the same category appears in several spellings",
+      "whitespace from an export distorts grouping"
+    ],
+    "avoid": [
+      "chaining many string operations without intermediate inspection"
+    ],
+    "reach": "Before any operation that depends on string equality (grouping, joining, filtering by value).",
+    "example": "<pre>df[<span class=\"s\">\"gender\"</span>] = (df[<span class=\"s\">\"gender\"</span>]\n                  .str.strip()\n                  .str.lower()\n                  .replace({<span class=\"s\">\"m\"</span>: <span class=\"s\">\"male\"</span>, <span class=\"s\">\"w\"</span>: <span class=\"s\">\"female\"</span>}))</pre>",
+    "tags": [
+      "clean",
+      "string",
+      "str",
+      "strip",
+      "lower",
+      "normalize",
+      "whitespace",
+      "kategorie"
+    ]
+  },
+  {
+    "id": "to_datetime",
+    "code": "pd.to_datetime(df[\"date\"], errors=\"coerce\")",
+    "stage": "clean",
+    "short": "Parse a column of date strings into datetime objects.",
+    "what": "Converts strings to <code>datetime64</code>. With <code>errors='coerce'</code>, unparseable values become <code>NaT</code> (not-a-time).",
+    "tokens": [
+      [
+        "pd.to_datetime(...)",
+        "Function parsing dates."
+      ],
+      [
+        "errors=\"coerce\"",
+        "Failures become <code>NaT</code> rather than raising."
+      ]
+    ],
+    "requires": [
+      "a column whose values represent dates"
+    ],
+    "important": [
+      "date arithmetic, sorting, or time-based aggregation is required"
+    ],
+    "avoid": [
+      "relying on auto-inference for ambiguous formats (provide <code>format=</code> explicitly)"
+    ],
+    "reach": "Whenever a column representing dates was loaded as text.",
+    "example": "<pre>df[<span class=\"s\">\"admission_date\"</span>] = pd.to_datetime(\n    df[<span class=\"s\">\"admission_date\"</span>], format=<span class=\"s\">\"%Y-%m-%d\"</span>, errors=<span class=\"s\">\"coerce\"</span>)</pre>",
+    "tags": [
+      "clean",
+      "datetime",
+      "date",
+      "parse",
+      "convert",
+      "datum"
+    ]
+  },
+  {
+    "id": "to_numeric",
+    "code": "pd.to_numeric(df[\"x\"], errors=\"coerce\")",
+    "stage": "clean",
+    "short": "Convert a column to numeric, coercing failures to NaN.",
+    "what": "Converts strings to numbers. With <code>errors='coerce'</code>, values that cannot be parsed become <code>NaN</code> rather than raising an exception.",
+    "tokens": [
+      [
+        "pd.to_numeric(...)",
+        "Function converting to a numeric type."
+      ],
+      [
+        "errors=\"coerce\"",
+        "Values that fail conversion are replaced by <code>NaN</code>."
+      ]
+    ],
+    "requires": [
+      "a column whose values are mostly numeric in string form"
+    ],
+    "important": [
+      "the column was loaded as string (<code>object</code>) due to stray non-numeric values"
+    ],
+    "avoid": [
+      "coercing silently in production data without auditing the resulting <code>NaN</code> count"
+    ],
+    "reach": "When numeric data have been polluted by stray text (e.g. a currency sign, a footnote marker).",
+    "example": "<pre>df[<span class=\"s\">\"cost\"</span>] = pd.to_numeric(df[<span class=\"s\">\"cost\"</span>], errors=<span class=\"s\">\"coerce\"</span>)</pre>",
+    "tags": [
+      "clean",
+      "numeric",
+      "convert",
+      "coerce",
+      "to_numeric"
+    ]
+  },
+  {
+    "id": "cut",
+    "code": "pd.cut(df[\"age\"], bins=[0,18,65,120], labels=[\"child\",\"adult\",\"senior\"])",
+    "stage": "transform",
+    "short": "Bin a continuous variable into named ranges.",
+    "what": "Returns a categorical Series in which each value is assigned to the bin whose range contains it.",
+    "tokens": [
+      [
+        "pd.cut(...)",
+        "Function binning continuous values."
+      ],
+      [
+        "bins=[...]",
+        "The bin edges."
+      ],
+      [
+        "labels=[...]",
+        "Names assigned to the resulting categories."
+      ]
+    ],
+    "requires": [
+      "a numeric Series",
+      "bin edges that cover the range of values"
+    ],
+    "important": [
+      "a continuous variable must be summarised by category for plotting or grouping"
+    ],
+    "avoid": [
+      "forgetting that bins are right-inclusive by default"
+    ],
+    "reach": "When age, time, or any continuous variable should be discretised for analysis.",
+    "example": "<pre>df[<span class=\"s\">\"age_group\"</span>] = pd.cut(df[<span class=\"s\">\"age\"</span>],\n                          bins=[<span class=\"s\">0</span>,<span class=\"s\">18</span>,<span class=\"s\">65</span>,<span class=\"s\">120</span>],\n                          labels=[<span class=\"s\">\"child\"</span>,<span class=\"s\">\"adult\"</span>,<span class=\"s\">\"senior\"</span>])</pre>",
+    "tags": [
+      "transform",
+      "cut",
+      "bin",
+      "discretize",
+      "categories",
+      "klassieren"
+    ]
+  },
+  {
+    "id": "filter_mask",
+    "code": "df[df[\"age\"] > 65]",
+    "stage": "transform",
+    "short": "Filter rows by a boolean condition.",
+    "what": "Returns a DataFrame containing only those rows for which the boolean expression evaluates to true. The expression is evaluated element-wise across the column.",
+    "tokens": [
+      [
+        "df[\"age\"] > 65",
+        "A boolean Series — <code>True</code> where age exceeds 65."
+      ],
+      [
+        "df[ ... ]",
+        "Selects rows where the supplied mask is <code>True</code>."
+      ]
+    ],
+    "requires": [
+      "a column suitable for comparison"
+    ],
+    "important": [
+      "combining multiple conditions: each must be parenthesised, and the operators are <code>&amp;</code> (and) and <code>|</code> (or)"
+    ],
+    "avoid": [
+      "using Python's <code>and</code> / <code>or</code> instead of <code>&amp;</code> / <code>|</code>",
+      "writing back into a filtered view (use <code>.loc</code> for assignment)"
+    ],
+    "reach": "For any row-level filter on a single or compound condition.",
+    "example": "<pre>df[(df[<span class=\"s\">\"age\"</span>] &gt; <span class=\"s\">65</span>) &amp; (df[<span class=\"s\">\"ward\"</span>] == <span class=\"s\">\"ICU\"</span>)]</pre>",
+    "tags": [
+      "transform",
+      "filter",
+      "mask",
+      "subset",
+      "where",
+      "boolean",
+      "zeile filtern"
+    ]
+  },
+  {
+    "id": "isin",
+    "code": "df[df[\"drg\"].isin([\"A01\",\"A02\"])]",
+    "stage": "transform",
+    "short": "Filter rows by membership in a set.",
+    "what": "<code>isin(values)</code> returns a boolean Series, true where the column's value appears in the supplied collection.",
+    "tokens": [
+      [
+        ".isin([...])",
+        "Returns <code>True</code> where the value is in the list."
+      ]
+    ],
+    "requires": [
+      "a column and a list (or set) of acceptable values"
+    ],
+    "important": [
+      "one wishes to keep rows matching any of several categories"
+    ],
+    "avoid": [
+      "using a generator expression — <code>isin</code> requires a concrete collection"
+    ],
+    "reach": "For a set-membership filter — preferable to chained <code>|</code> comparisons.",
+    "example": "<pre>df[df[<span class=\"s\">\"drg_code\"</span>].isin([<span class=\"s\">\"A01\"</span>,<span class=\"s\">\"A02\"</span>,<span class=\"s\">\"B05\"</span>])]</pre>",
+    "tags": [
+      "transform",
+      "filter",
+      "isin",
+      "set",
+      "membership",
+      "in"
+    ]
+  },
+  {
+    "id": "new_col",
+    "code": "df[\"new\"] = df[\"a\"] - df[\"b\"]",
+    "stage": "transform",
+    "short": "Create a new column by vectorised arithmetic.",
+    "what": "Assigns a new column to the DataFrame, computed element-wise from existing columns. The arithmetic is applied to every row in a single operation.",
+    "tokens": [
+      [
+        "df[\"new\"] = ...",
+        "Creates (or overwrites) the column named <code>new</code>."
+      ],
+      [
+        "df[\"a\"] - df[\"b\"]",
+        "Element-wise difference of two columns."
+      ]
+    ],
+    "requires": [
+      "the columns referenced exist and contain compatible types"
+    ],
+    "important": [
+      "the computation is the same for every row",
+      "performance matters (vectorised arithmetic is markedly faster than a loop)"
+    ],
+    "avoid": [
+      "writing a Python loop to compute a column that could be expressed as vector arithmetic"
+    ],
+    "reach": "For any derived numeric column where the formula is the same for every row.",
+    "example": "<pre>df[<span class=\"s\">\"margin\"</span>] = df[<span class=\"s\">\"reimbursement\"</span>] - df[<span class=\"s\">\"cost\"</span>]</pre>",
+    "tags": [
+      "transform",
+      "new",
+      "column",
+      "compute",
+      "derive",
+      "vectorize",
+      "spalte"
+    ]
+  },
+  {
+    "id": "nlargest",
+    "code": "df.nlargest(10, \"cost\")",
+    "stage": "transform",
+    "short": "Return the n rows with the largest values in a column.",
+    "what": "Returns the top <em>n</em> rows ordered by the specified column. Faster than a full sort followed by <code>head</code>.",
+    "tokens": [
+      [
+        ".nlargest(...)",
+        "Method returning top-n rows by a column."
+      ]
+    ],
+    "requires": [
+      "a numeric column"
+    ],
+    "important": [
+      "only the extremes are of interest"
+    ],
+    "avoid": [
+      "calling on a categorical column"
+    ],
+    "reach": "For top-N selection without sorting the entire table.",
+    "example": "<pre>df.nlargest(<span class=\"s\">10</span>, <span class=\"s\">\"cost\"</span>)\ndf.nsmallest(<span class=\"s\">5</span>, <span class=\"s\">\"margin\"</span>)</pre>",
+    "tags": [
+      "transform",
+      "top",
+      "largest",
+      "smallest",
+      "nlargest",
+      "nsmallest",
+      "rank"
+    ]
+  },
+  {
+    "id": "np_select",
+    "code": "np.select(conditions, choices, default=...)",
+    "stage": "transform",
+    "short": "Multi-way conditional assignment.",
+    "what": "Returns an array containing the choice corresponding to the first true condition for each element. A default value is used where no condition is true.",
+    "tokens": [
+      [
+        "np.select(...)",
+        "Function for multi-way conditional selection."
+      ],
+      [
+        "conditions",
+        "A list of boolean arrays, evaluated in order."
+      ],
+      [
+        "choices",
+        "A list of values corresponding to the conditions."
+      ],
+      [
+        "default=...",
+        "Value used where no condition is true."
+      ]
+    ],
+    "requires": [
+      "NumPy imported",
+      "matched lists of conditions and choices"
+    ],
+    "important": [
+      "several mutually exclusive cases must be expressed"
+    ],
+    "avoid": [
+      "overlapping conditions where the order accidentally determines the result"
+    ],
+    "reach": "For multi-way conditional logic that would otherwise nest <code>np.where</code>.",
+    "example": "<pre>conds = [df[<span class=\"s\">\"age\"</span>] &lt; <span class=\"s\">18</span>,\n         df[<span class=\"s\">\"age\"</span>] &lt; <span class=\"s\">65</span>,\n         df[<span class=\"s\">\"age\"</span>] &gt;= <span class=\"s\">65</span>]\nlabels = [<span class=\"s\">\"child\"</span>, <span class=\"s\">\"adult\"</span>, <span class=\"s\">\"senior\"</span>]\ndf[<span class=\"s\">\"band\"</span>] = np.select(conds, labels, default=<span class=\"s\">\"unknown\"</span>)</pre>",
+    "tags": [
+      "transform",
+      "select",
+      "conditional",
+      "multi",
+      "if",
+      "np.select",
+      "mehrwertig"
+    ]
+  },
+  {
+    "id": "np_where",
+    "code": "np.where(cond, a, b)",
+    "stage": "transform",
+    "short": "Two-way conditional assignment.",
+    "what": "Returns an array (or Series) containing <code>a</code> where <code>cond</code> is true and <code>b</code> where it is false. Vectorised, applies element by element.",
+    "tokens": [
+      [
+        "np.where(...)",
+        "Function for element-wise conditional selection."
+      ],
+      [
+        "cond",
+        "A boolean array or Series (typically derived from a comparison)."
+      ],
+      [
+        "a",
+        "Value (or array) used where <code>cond</code> is true."
+      ],
+      [
+        "b",
+        "Value (or array) used where <code>cond</code> is false."
+      ]
+    ],
+    "requires": [
+      "NumPy imported (<code>import numpy as np</code>)",
+      "a boolean mask and two alternatives"
+    ],
+    "important": [
+      "the new value depends on a binary distinction (above/below a threshold, in/not in a list)"
+    ],
+    "avoid": [
+      "nesting <code>np.where</code> more than twice — use <code>np.select</code> for multi-way logic"
+    ],
+    "reach": "For a two-way conditional assignment.",
+    "example": "<pre><span class=\"k\">import</span> numpy <span class=\"k\">as</span> np\ndf[<span class=\"s\">\"band\"</span>] = np.where(df[<span class=\"s\">\"age\"</span>] &gt;= <span class=\"s\">65</span>, <span class=\"s\">\"senior\"</span>, <span class=\"s\">\"adult\"</span>)</pre>",
+    "tags": [
+      "transform",
+      "where",
+      "conditional",
+      "if",
+      "binary",
+      "np.where",
+      "bedingt"
+    ]
+  },
+  {
+    "id": "query",
+    "code": "df.query(\"age > 65 and ward == 'ICU'\")",
+    "stage": "transform",
+    "short": "Filter rows using a string expression.",
+    "what": "Returns a DataFrame filtered by the supplied expression, written as if it were ordinary Python syntax but evaluated within the DataFrame's column namespace.",
+    "tokens": [
+      [
+        ".query('...')",
+        "Method filtering by a string expression."
+      ]
+    ],
+    "requires": [
+      "column names that are valid Python identifiers (no spaces)"
+    ],
+    "important": [
+      "the filter is long enough that a string expression is more readable than a boolean mask"
+    ],
+    "avoid": [
+      "interpolating untrusted user input into the query string"
+    ],
+    "reach": "For longer or more complex filters, where the readability of a string expression exceeds that of a chain of <code>&amp;</code> and <code>|</code>.",
+    "example": "<pre>df.query(<span class=\"s\">\"age &gt; 65 and ward == 'ICU'\"</span>)</pre>",
+    "tags": [
+      "transform",
+      "query",
+      "filter",
+      "string",
+      "subset",
+      "expression"
+    ]
+  },
+  {
+    "id": "rename",
+    "code": "df.rename(columns={\"pid\":\"patient_id\"})",
+    "stage": "transform",
+    "short": "Rename columns or index labels.",
+    "what": "Returns a DataFrame with the specified columns renamed according to the mapping.",
+    "tokens": [
+      [
+        ".rename(...)",
+        "Method renaming axis labels."
+      ],
+      [
+        "columns={\"old\":\"new\"}",
+        "Mapping from current names to replacements."
+      ]
+    ],
+    "requires": [
+      "a DataFrame with the named columns"
+    ],
+    "important": [
+      "column names from an export are not consistent with conventions used elsewhere in the analysis"
+    ],
+    "avoid": [],
+    "reach": "To standardise column names across sources, particularly before a merge.",
+    "example": "<pre>df = df.rename(columns={<span class=\"s\">\"pid\"</span>: <span class=\"s\">\"patient_id\"</span>,\n                        <span class=\"s\">\"adm_dt\"</span>: <span class=\"s\">\"admission_date\"</span>})</pre>",
+    "tags": [
+      "transform",
+      "rename",
+      "columns",
+      "umbenennen"
+    ]
+  },
+  {
+    "id": "sort_values",
+    "code": "df.sort_values(\"los_days\", ascending=False)",
+    "stage": "transform",
+    "short": "Sort the DataFrame by one or more columns.",
+    "what": "Returns a DataFrame whose rows are ordered according to the values of the supplied column(s).",
+    "tokens": [
+      [
+        ".sort_values(...)",
+        "Method ordering rows."
+      ],
+      [
+        "\"los_days\"",
+        "The column on which to sort."
+      ],
+      [
+        "ascending=False",
+        "Reverses the default ascending order."
+      ]
+    ],
+    "requires": [
+      "the column(s) supplied exist and are orderable"
+    ],
+    "important": [
+      "the table is to be presented to a reader who locates rows by magnitude"
+    ],
+    "avoid": [
+      "sorting the whole table when only the top-N is required (use <code>nlargest</code>)"
+    ],
+    "reach": "To prepare a table for display or for selection by rank.",
+    "example": "<pre>df.sort_values([<span class=\"s\">\"ward\"</span>, <span class=\"s\">\"los_days\"</span>], ascending=[<span class=\"k\">True</span>, <span class=\"k\">False</span>])</pre>",
+    "tags": [
+      "transform",
+      "sort",
+      "order",
+      "values",
+      "rank",
+      "sortieren"
+    ]
+  },
+  {
+    "id": "groupby_agg",
+    "code": "df.groupby(\"ward\").agg({\"los_days\":\"mean\", \"cost\":\"sum\"})",
+    "stage": "aggregate",
+    "short": "Compute different statistics for different columns.",
+    "what": "<code>agg</code> accepts a dictionary mapping each column to the statistic (or list of statistics) to compute. Returns a DataFrame of summaries.",
+    "tokens": [
+      [
+        ".agg({...})",
+        "Method applying named aggregations per column."
+      ]
+    ],
+    "requires": [
+      "a column to group by; columns and statistics for aggregation"
+    ],
+    "important": [
+      "several different statistics are required in a single summary"
+    ],
+    "avoid": [],
+    "reach": "When the per-group summary involves more than one column or more than one statistic.",
+    "example": "<pre>summary = df.groupby(<span class=\"s\">\"ward\"</span>).agg(\n    avg_los = (<span class=\"s\">\"los_days\"</span>, <span class=\"s\">\"mean\"</span>),\n    total_cost = (<span class=\"s\">\"cost\"</span>, <span class=\"s\">\"sum\"</span>),\n    n_cases = (<span class=\"s\">\"patient_id\"</span>, <span class=\"s\">\"nunique\"</span>)\n)</pre>",
+    "tags": [
+      "aggregate",
+      "groupby",
+      "agg",
+      "multiple",
+      "summary",
+      "statistik"
+    ]
+  },
+  {
+    "id": "groupby_mean",
+    "code": "df.groupby(\"ward\")[\"los_days\"].mean()",
+    "stage": "aggregate",
+    "short": "Compute the mean of a column within each group.",
+    "what": "Splits the DataFrame by the values in <code>ward</code>, takes the column <code>los_days</code> within each group, and computes its mean.",
+    "tokens": [
+      [
+        ".groupby(\"ward\")",
+        "Partitions the DataFrame by unique values of <code>ward</code>."
+      ],
+      [
+        "[\"los_days\"]",
+        "Selects a single column within each partition."
+      ],
+      [
+        ".mean()",
+        "Computes the mean per group."
+      ]
+    ],
+    "requires": [
+      "a column to group by and a numeric column to aggregate"
+    ],
+    "important": [
+      "a summary statistic is required for each level of a categorical variable"
+    ],
+    "avoid": [
+      "forgetting <code>.reset_index()</code> when a flat DataFrame is needed for downstream use"
+    ],
+    "reach": "For any per-group summary of a single statistic.",
+    "example": "<pre>df.groupby(<span class=\"s\">\"ward\"</span>)[<span class=\"s\">\"los_days\"</span>].mean()</pre>",
+    "tags": [
+      "aggregate",
+      "groupby",
+      "group",
+      "mean",
+      "average",
+      "summary",
+      "durchschnitt"
+    ]
+  },
+  {
+    "id": "groupby_size",
+    "code": "df.groupby(\"ward\").size()",
+    "stage": "aggregate",
+    "short": "Count the number of rows in each group.",
+    "what": "Returns a Series mapping each group to its number of rows.",
+    "tokens": [
+      [
+        ".size()",
+        "Method returning row counts per group."
+      ]
+    ],
+    "requires": [
+      "a column to group by"
+    ],
+    "important": [
+      "one wishes to know how many observations underlie each group's summary"
+    ],
+    "avoid": [
+      "confusing <code>size</code> with <code>count</code>: <code>count</code> ignores <code>NaN</code> per column; <code>size</code> counts all rows in the group"
+    ],
+    "reach": "To accompany any per-group summary with an explicit count.",
+    "example": "<pre>df.groupby(<span class=\"s\">\"ward\"</span>).size()</pre>",
+    "tags": [
+      "aggregate",
+      "size",
+      "count",
+      "groupby",
+      "frequency",
+      "anzahl"
+    ]
+  },
+  {
+    "id": "pivot_table",
+    "code": "pd.pivot_table(df, index=\"ward\", columns=\"month\", values=\"los_days\", aggfunc=\"mean\")",
+    "stage": "aggregate",
+    "short": "Produce a wide-format summary indexed by two variables.",
+    "what": "Creates a table whose rows are the values of <code>index</code>, columns are the values of <code>columns</code>, and cells contain the chosen aggregation of <code>values</code>.",
+    "tokens": [
+      [
+        "pd.pivot_table(...)",
+        "Function producing a wide summary."
+      ],
+      [
+        "index=\"ward\"",
+        "Variable forming the rows."
+      ],
+      [
+        "columns=\"month\"",
+        "Variable forming the columns."
+      ],
+      [
+        "values=\"los_days\"",
+        "Variable to aggregate."
+      ],
+      [
+        "aggfunc=\"mean\"",
+        "Aggregation function."
+      ]
+    ],
+    "requires": [
+      "a DataFrame with the named columns"
+    ],
+    "important": [
+      "the summary is to be presented to a reader rather than processed further"
+    ],
+    "avoid": [
+      "pivoting on a high-cardinality column (produces an unmanageably wide table)"
+    ],
+    "reach": "For a presentation-ready summary indexed by two categorical variables.",
+    "example": "<pre>pd.pivot_table(df, index=<span class=\"s\">\"ward\"</span>, columns=<span class=\"s\">\"month\"</span>,\n               values=<span class=\"s\">\"los_days\"</span>, aggfunc=<span class=\"s\">\"mean\"</span>)</pre>",
+    "tags": [
+      "aggregate",
+      "pivot",
+      "pivot_table",
+      "wide",
+      "crosstab",
+      "summary"
+    ]
+  },
+  {
+    "id": "transform",
+    "code": "df.groupby(\"ward\")[\"los_days\"].transform(\"mean\")",
+    "stage": "aggregate",
+    "short": "Broadcast a group-level statistic back to every row.",
+    "what": "Returns a Series of the same length as the original DataFrame, in which each row carries the statistic computed for its group.",
+    "tokens": [
+      [
+        ".transform('mean')",
+        "Computes the group mean and assigns it to every row of the group."
+      ]
+    ],
+    "requires": [
+      "a column to group by"
+    ],
+    "important": [
+      "a deviation from the group mean (or other per-group reference) is required"
+    ],
+    "avoid": [
+      "confusing <code>transform</code> with <code>agg</code>: <code>agg</code> reduces; <code>transform</code> broadcasts"
+    ],
+    "reach": "When a per-row variable depends on a per-group statistic (e.g. <em>deviation from ward mean</em>).",
+    "example": "<pre>df[<span class=\"s\">\"ward_avg_los\"</span>] = df.groupby(<span class=\"s\">\"ward\"</span>)[<span class=\"s\">\"los_days\"</span>].transform(<span class=\"s\">\"mean\"</span>)\ndf[<span class=\"s\">\"los_above_ward_avg\"</span>] = df[<span class=\"s\">\"los_days\"</span>] - df[<span class=\"s\">\"ward_avg_los\"</span>]</pre>",
+    "tags": [
+      "aggregate",
+      "transform",
+      "broadcast",
+      "groupby",
+      "per-row"
+    ]
+  },
+  {
+    "id": "combine_first",
+    "code": "a.combine_first(b)",
+    "stage": "merge",
+    "short": "Use one DataFrame to fill in the gaps of another.",
+    "what": "Cell by cell: where <code>a</code> has a value, that value is retained; where <code>a</code> is <code>NaN</code>, the corresponding value from <code>b</code> is used. The two DataFrames are aligned on index and columns.",
+    "tokens": [
+      [
+        ".combine_first(b)",
+        "Method using <code>b</code> as a fallback source for missing cells in <code>a</code>."
+      ]
+    ],
+    "requires": [
+      "two DataFrames describing the same entities, aligned on index"
+    ],
+    "important": [
+      "<code>a</code> is the primary source but contains gaps that <code>b</code> can supply"
+    ],
+    "avoid": [
+      "confusing with <code>merge</code> — <code>combine_first</code> operates cell-by-cell on aligned tables, not key-by-key"
+    ],
+    "reach": "When two sources describe the same entities and one is to be used as a fallback for the other.",
+    "example": "<pre>combined = primary.combine_first(fallback)\ncombined.isna().sum()   <span class=\"c\"># compare before and after</span></pre>",
+    "tags": [
+      "merge",
+      "combine_first",
+      "complement",
+      "fill",
+      "fallback",
+      "luecke fuellen"
+    ]
+  },
+  {
+    "id": "concat",
+    "code": "pd.concat([a, b], ignore_index=True)",
+    "stage": "merge",
+    "short": "Stack two DataFrames vertically or side by side.",
+    "what": "Combines DataFrames along an axis. <code>axis=0</code> stacks rows (default); <code>axis=1</code> stacks columns. <code>ignore_index=True</code> renumbers the rows of the result.",
+    "tokens": [
+      [
+        "pd.concat([...], ...)",
+        "Function concatenating DataFrames."
+      ],
+      [
+        "[a, b]",
+        "The DataFrames to combine."
+      ],
+      [
+        "ignore_index=True",
+        "Discards original indices and renumbers."
+      ]
+    ],
+    "requires": [
+      "DataFrames whose columns align (for <code>axis=0</code>) or whose indices align (for <code>axis=1</code>)"
+    ],
+    "important": [
+      "the two sources represent the same kind of records (e.g. successive months)"
+    ],
+    "avoid": [
+      "concatenating without checking that the columns match"
+    ],
+    "reach": "For combining records of the same shape from different periods or sources.",
+    "example": "<pre>full_year = pd.concat([q1, q2, q3, q4], ignore_index=<span class=\"k\">True</span>)</pre>",
+    "tags": [
+      "merge",
+      "concat",
+      "stack",
+      "append",
+      "union",
+      "stapeln"
+    ]
+  },
+  {
+    "id": "merge",
+    "code": "a.merge(b, on=\"patient_id\", how=\"left\")",
+    "stage": "merge",
+    "short": "Join two DataFrames on a shared key.",
+    "what": "Combines two DataFrames row-by-row by matching values in a key column. <code>how</code> determines which rows are retained when a key is missing on one side.",
+    "tokens": [
+      [
+        ".merge(b, ...)",
+        "Method joining the calling DataFrame with another."
+      ],
+      [
+        "on=\"patient_id\"",
+        "The column present in both tables, used as the join key."
+      ],
+      [
+        "how=\"left\"",
+        "Retains all rows of the calling DataFrame; rows of <code>b</code> without a match are dropped."
+      ]
+    ],
+    "requires": [
+      "two DataFrames sharing a key column"
+    ],
+    "important": [
+      "the cardinality of the key is asserted (<code>validate='1:m'</code>) to catch unintended fan-out",
+      "an <code>indicator</code> column is added during debugging to audit the match outcome"
+    ],
+    "avoid": [
+      "merging on a column whose name differs between tables without <code>left_on</code> / <code>right_on</code>",
+      "merging with duplicate keys on both sides — the result grows multiplicatively"
+    ],
+    "reach": "Whenever information from two tables must be combined along a shared identifier.",
+    "example": "<pre>full = encounters.merge(patients, on=<span class=\"s\">\"patient_id\"</span>, how=<span class=\"s\">\"left\"</span>,\n                        validate=<span class=\"s\">\"m:1\"</span>, indicator=<span class=\"k\">True</span>)\nfull[<span class=\"s\">\"_merge\"</span>].value_counts()</pre>",
+    "tags": [
+      "merge",
+      "join",
+      "key",
+      "inner",
+      "left",
+      "right",
+      "outer",
+      "verknuepfen"
+    ]
+  },
+  {
+    "id": "np_column_stack",
+    "code": "np.column_stack([a, b])",
+    "stage": "merge",
+    "short": "Treat several 1D arrays as columns of a 2D result.",
+    "what": "Combines 1D arrays into a 2D array, with each input becoming one column.",
+    "tokens": [
+      [
+        "np.column_stack([...])",
+        "Function forming a 2D array from 1D columns."
+      ]
+    ],
+    "requires": [
+      "1D arrays of the same length"
+    ],
+    "important": [
+      "one wishes to build a table column by column from separate vectors"
+    ],
+    "avoid": [],
+    "reach": "When several 1D arrays of equal length should become the columns of a 2D table.",
+    "example": "<pre>ages   = np.array([<span class=\"s\">34</span>, <span class=\"s\">58</span>, <span class=\"s\">72</span>])\ncosts  = np.array([<span class=\"s\">450</span>, <span class=\"s\">1200</span>, <span class=\"s\">2300</span>])\nnp.column_stack([ages, costs])   <span class=\"c\"># shape (3, 2)</span></pre>",
+    "tags": [
+      "merge",
+      "numpy",
+      "column_stack",
+      "columns",
+      "1d",
+      "2d",
+      "table"
+    ]
+  },
+  {
+    "id": "np_concatenate",
+    "code": "np.concatenate([a, b], axis=0)",
+    "stage": "merge",
+    "short": "Concatenate NumPy arrays along an existing axis.",
+    "what": "Joins arrays end-to-end along the specified axis. For 1D arrays, the result is the two arrays placed in sequence; for 2D, <code>axis=0</code> stacks rows, <code>axis=1</code> stacks columns.",
+    "tokens": [
+      [
+        "np.concatenate([...], axis=...)",
+        "Function joining arrays along an existing dimension."
+      ],
+      [
+        "axis=0",
+        "Concatenate along rows."
+      ],
+      [
+        "axis=1",
+        "Concatenate along columns."
+      ]
+    ],
+    "requires": [
+      "arrays whose shapes match on all axes other than the concatenation axis"
+    ],
+    "important": [
+      "combining batches of data with the same number of features"
+    ],
+    "avoid": [
+      "concatenating arrays of incompatible shape — the error message is sometimes terse"
+    ],
+    "reach": "For combining NumPy arrays where pandas would be unnecessary overhead.",
+    "example": "<pre><span class=\"k\">import</span> numpy <span class=\"k\">as</span> np\nnp.concatenate([a, b])             <span class=\"c\"># 1D: end to end</span>\nnp.concatenate([A, B], axis=<span class=\"s\">0</span>)   <span class=\"c\"># 2D: more rows</span>\nnp.concatenate([A, B], axis=<span class=\"s\">1</span>)   <span class=\"c\"># 2D: more columns</span></pre>",
+    "tags": [
+      "merge",
+      "numpy",
+      "concatenate",
+      "array",
+      "1d",
+      "2d",
+      "axis",
+      "verbinden"
+    ]
+  },
+  {
+    "id": "np_hstack",
+    "code": "np.hstack([a, b])",
+    "stage": "merge",
+    "short": "Stack arrays horizontally (side by side).",
+    "what": "Places the inputs side by side. For 1D inputs, the result is end-to-end (equivalent to <code>concatenate</code>); for 2D inputs, the arrays are joined column-wise.",
+    "tokens": [
+      [
+        "np.hstack([...])",
+        "Function stacking arrays horizontally."
+      ]
+    ],
+    "requires": [
+      "arrays with the same number of rows (or 1D arrays)"
+    ],
+    "important": [
+      "one wishes to extend a 2D array with additional columns"
+    ],
+    "avoid": [],
+    "reach": "For horizontal stacking — additional columns onto a 2D array, or end-to-end for 1D.",
+    "example": "<pre>np.hstack([A, B])</pre>",
+    "tags": [
+      "merge",
+      "numpy",
+      "hstack",
+      "stack",
+      "horizontal",
+      "columns"
+    ]
+  },
+  {
+    "id": "np_vstack",
+    "code": "np.vstack([a, b])",
+    "stage": "merge",
+    "short": "Stack arrays vertically (as further rows).",
+    "what": "Places the inputs one above the other. For 1D inputs, each becomes a row of the resulting 2D array.",
+    "tokens": [
+      [
+        "np.vstack([...])",
+        "Function stacking arrays vertically."
+      ]
+    ],
+    "requires": [
+      "arrays with the same number of columns (or 1D arrays of the same length)"
+    ],
+    "important": [
+      "one wishes to produce a 2D result from 1D inputs"
+    ],
+    "avoid": [],
+    "reach": "For vertical stacking of NumPy arrays; works uniformly for 1D and 2D inputs.",
+    "example": "<pre>np.vstack([a, b])   <span class=\"c\"># 1D + 1D → 2D shape (2, n)</span></pre>",
+    "tags": [
+      "merge",
+      "numpy",
+      "vstack",
+      "stack",
+      "vertical",
+      "rows"
+    ]
+  },
+  {
+    "id": "ax_bar",
+    "code": "ax.bar(x, y)",
+    "stage": "visualize",
+    "short": "Draw a bar chart.",
+    "what": "Draws bars whose heights are the values <code>y</code> at positions <code>x</code>. For categorical <code>x</code>, the positions are the categories themselves.",
+    "tokens": [
+      [
+        "ax.bar(...)",
+        "Method drawing bars on the axes <code>ax</code>."
+      ],
+      [
+        "x",
+        "Positions or category labels."
+      ],
+      [
+        "y",
+        "Heights."
+      ]
+    ],
+    "requires": [
+      "an axes object and matching <code>x</code> and <code>y</code> arrays"
+    ],
+    "important": [
+      "the question concerns comparison of a single number across categories"
+    ],
+    "avoid": [
+      "using bars for continuous time series — prefer a line plot"
+    ],
+    "reach": "For comparison of a single quantity across a small number of categories.",
+    "example": "<pre>ax.bar(df[<span class=\"s\">\"ward\"</span>], df[<span class=\"s\">\"occupancy\"</span>])\nax.set_title(<span class=\"s\">\"Bed occupancy by ward\"</span>)</pre>",
+    "tags": [
+      "visualize",
+      "bar",
+      "barchart",
+      "matplotlib",
+      "ax.bar",
+      "balkendiagramm"
+    ]
+  },
+  {
+    "id": "ax_hist",
+    "code": "ax.hist(values, bins=30)",
+    "stage": "visualize",
+    "short": "Draw a histogram.",
+    "what": "Bins the values and draws a bar for each bin whose height is the count of values in the bin.",
+    "tokens": [
+      [
+        "ax.hist(...)",
+        "Method drawing a histogram."
+      ],
+      [
+        "values",
+        "The data."
+      ],
+      [
+        "bins=30",
+        "Number of bins (or explicit bin edges)."
+      ]
+    ],
+    "requires": [
+      "a numeric array or Series"
+    ],
+    "important": [
+      "the question concerns the distribution of a single continuous variable"
+    ],
+    "avoid": [
+      "accepting the default bin count without inspecting the result"
+    ],
+    "reach": "For the distribution of a single continuous variable.",
+    "example": "<pre>ax.hist(df[<span class=\"s\">\"los_days\"</span>], bins=<span class=\"s\">30</span>)\nax.set_xlabel(<span class=\"s\">\"Length of stay (days)\"</span>)</pre>",
+    "tags": [
+      "visualize",
+      "hist",
+      "histogram",
+      "distribution",
+      "matplotlib",
+      "verteilung"
+    ]
+  },
+  {
+    "id": "ax_plot",
+    "code": "ax.plot(x, y)",
+    "stage": "visualize",
+    "short": "Draw a line plot.",
+    "what": "Connects successive (x, y) points with line segments.",
+    "tokens": [
+      [
+        "ax.plot(...)",
+        "Method drawing a line plot."
+      ]
+    ],
+    "requires": [
+      "paired arrays of equal length"
+    ],
+    "important": [
+      "the question concerns evolution over an ordered variable, typically time"
+    ],
+    "avoid": [
+      "using line plots for unordered categories"
+    ],
+    "reach": "For trends over an ordered or continuous variable.",
+    "example": "<pre>ax.plot(monthly.index, monthly[<span class=\"s\">\"admissions\"</span>])\nax.set_xlabel(<span class=\"s\">\"Month\"</span>); ax.set_ylabel(<span class=\"s\">\"Admissions\"</span>)</pre>",
+    "tags": [
+      "visualize",
+      "line",
+      "plot",
+      "trend",
+      "time",
+      "matplotlib",
+      "liniendiagramm"
+    ]
+  },
+  {
+    "id": "ax_set",
+    "code": "ax.set_title(\"...\"); ax.set_xlabel(\"...\"); ax.set_ylabel(\"...\")",
+    "stage": "visualize",
+    "short": "Label the axes and the plot.",
+    "what": "Three methods setting the title and axis labels. A plot intended for any external reader requires all three.",
+    "tokens": [
+      [
+        "ax.set_title('...')",
+        "Sets the plot title."
+      ],
+      [
+        "ax.set_xlabel('...')",
+        "Sets the label of the x-axis."
+      ],
+      [
+        "ax.set_ylabel('...')",
+        "Sets the label of the y-axis."
+      ]
+    ],
+    "requires": [
+      "an axes object"
+    ],
+    "important": [
+      "always, on any plot intended to be read by anyone other than the author at the moment of writing"
+    ],
+    "avoid": [
+      "omitting axis units — they are part of the label"
+    ],
+    "reach": "After every plotting call, before saving or showing.",
+    "example": "<pre>ax.set_title(<span class=\"s\">\"Bed occupancy by ward — Q1 2026\"</span>)\nax.set_xlabel(<span class=\"s\">\"Ward\"</span>)\nax.set_ylabel(<span class=\"s\">\"Occupancy rate (%)\"</span>)</pre>",
+    "tags": [
+      "visualize",
+      "title",
+      "label",
+      "axis",
+      "matplotlib",
+      "beschriftung"
+    ]
+  },
+  {
+    "id": "savefig",
+    "code": "plt.savefig(\"fig.png\", dpi=200, bbox_inches=\"tight\")",
+    "stage": "visualize",
+    "short": "Save the current figure to a file.",
+    "what": "Writes the figure to disk in the format implied by the file extension. <code>dpi</code> controls raster resolution; <code>bbox_inches='tight'</code> trims excess whitespace.",
+    "tokens": [
+      [
+        "plt.savefig(...)",
+        "Function saving the current figure."
+      ],
+      [
+        "\"fig.png\"",
+        "File path; extension determines format."
+      ],
+      [
+        "dpi=200",
+        "Resolution in dots per inch."
+      ],
+      [
+        "bbox_inches=\"tight\"",
+        "Crops surrounding whitespace."
+      ]
+    ],
+    "requires": [
+      "a figure produced by previous plotting calls"
+    ],
+    "important": [
+      "called <em>before</em> <code>plt.show()</code> — calling after may save an empty canvas"
+    ],
+    "avoid": [
+      "saving without <code>bbox_inches='tight'</code> for figures with rotated tick labels"
+    ],
+    "reach": "Whenever a figure is to leave the notebook.",
+    "example": "<pre>plt.tight_layout()\nplt.savefig(<span class=\"s\">\"figures/occupancy.png\"</span>, dpi=<span class=\"s\">200</span>, bbox_inches=<span class=\"s\">\"tight\"</span>)\nplt.show()</pre>",
+    "tags": [
+      "visualize",
+      "save",
+      "savefig",
+      "export",
+      "figure",
+      "png",
+      "pdf"
+    ]
+  },
+  {
+    "id": "subplots",
+    "code": "fig, ax = plt.subplots(figsize=(10,6))",
+    "stage": "visualize",
+    "short": "Create a figure and a set of axes.",
+    "what": "Initialises a Matplotlib figure (the canvas) and one or more axes (the coordinate systems on which to draw). The figure is the object eventually saved; the axes carry the drawing commands.",
+    "tokens": [
+      [
+        "plt.subplots(...)",
+        "Function returning a figure and axes."
+      ],
+      [
+        "figsize=(10,6)",
+        "Width and height of the figure in inches."
+      ],
+      [
+        "fig, ax",
+        "Unpacks the two returned objects."
+      ]
+    ],
+    "requires": [
+      "<code>import matplotlib.pyplot as plt</code>"
+    ],
+    "important": [
+      "every plot intended for external use should begin with this call (object-oriented interface)"
+    ],
+    "avoid": [
+      "mixing <code>plt.</code>-style and <code>ax.</code>-style calls in the same plot"
+    ],
+    "reach": "As the first line of any plot beyond a quick exploratory view.",
+    "example": "<pre><span class=\"k\">import</span> matplotlib.pyplot <span class=\"k\">as</span> plt\nfig, ax = plt.subplots(figsize=(<span class=\"s\">10</span>, <span class=\"s\">6</span>))</pre>",
+    "tags": [
+      "visualize",
+      "matplotlib",
+      "figure",
+      "axes",
+      "subplots",
+      "plot"
+    ]
+  },
+  {
+    "id": "to_csv",
+    "code": "df.to_csv(\"out.csv\", index=False)",
+    "stage": "export",
+    "short": "Write the DataFrame to a CSV file.",
+    "what": "Writes the DataFrame as comma-separated text. <code>index=False</code> suppresses writing the row index as an additional column.",
+    "tokens": [
+      [
+        ".to_csv(...)",
+        "Method writing to CSV."
+      ],
+      [
+        "\"out.csv\"",
+        "Destination path."
+      ],
+      [
+        "index=False",
+        "Omits the row index from the output."
+      ]
+    ],
+    "requires": [
+      "a DataFrame"
+    ],
+    "important": [
+      "recipient is a human or a tool that reads CSV",
+      "UTF-8 encoding suffices, or a specific encoding is given"
+    ],
+    "avoid": [
+      "writing the index when the default <code>RangeIndex</code> is uninformative",
+      "using comma as separator when the data themselves contain commas (use a different <code>sep=</code>)"
+    ],
+    "reach": "For data delivery to a human reader or to a downstream non-Python tool.",
+    "example": "<pre>df.to_csv(<span class=\"s\">\"output/summary.csv\"</span>, index=<span class=\"k\">False</span>, encoding=<span class=\"s\">\"utf-8\"</span>)</pre>",
+    "tags": [
+      "export",
+      "csv",
+      "write",
+      "save",
+      "output",
+      "schreiben"
+    ]
+  },
+  {
+    "id": "to_excel",
+    "code": "df.to_excel(\"out.xlsx\", sheet_name=\"Q1\", index=False)",
+    "stage": "export",
+    "short": "Write the DataFrame to an Excel sheet.",
+    "what": "Writes the DataFrame to an Excel workbook. Requires <code>openpyxl</code>.",
+    "tokens": [
+      [
+        ".to_excel(...)",
+        "Method writing to Excel."
+      ],
+      [
+        "\"out.xlsx\"",
+        "Destination path."
+      ],
+      [
+        "sheet_name=\"Q1\"",
+        "Name of the sheet to create."
+      ]
+    ],
+    "requires": [
+      "<code>openpyxl</code> installed"
+    ],
+    "important": [
+      "recipient expects an Excel file"
+    ],
+    "avoid": [
+      "using Excel as an intermediate format between two Python steps (Parquet is faster and lossless)"
+    ],
+    "reach": "For deliverables intended to be opened in Excel.",
+    "example": "<pre>df.to_excel(<span class=\"s\">\"output/q1.xlsx\"</span>, sheet_name=<span class=\"s\">\"Q1\"</span>, index=<span class=\"k\">False</span>)</pre>",
+    "tags": [
+      "export",
+      "excel",
+      "xlsx",
+      "write",
+      "save"
+    ]
+  },
+  {
+    "id": "to_parquet",
+    "code": "df.to_parquet(\"out.parquet\")",
+    "stage": "export",
+    "short": "Write the DataFrame to a Parquet file.",
+    "what": "Saves the DataFrame in a columnar binary format that preserves types and is substantially faster to read than CSV.",
+    "tokens": [
+      [
+        ".to_parquet(...)",
+        "Method writing to Parquet."
+      ]
+    ],
+    "requires": [
+      "<code>pyarrow</code> or <code>fastparquet</code> installed"
+    ],
+    "important": [
+      "the data are to be re-read by another Python step",
+      "types must be preserved exactly"
+    ],
+    "avoid": [
+      "choosing Parquet when the recipient cannot read it"
+    ],
+    "reach": "For intermediate storage in a Python pipeline.",
+    "example": "<pre>df.to_parquet(<span class=\"s\">\"intermediates/cleaned_encounters.parquet\"</span>)</pre>",
+    "tags": [
+      "export",
+      "parquet",
+      "write",
+      "save",
+      "fast",
+      "binary"
+    ]
+  }
+]
