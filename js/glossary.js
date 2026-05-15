@@ -96,6 +96,11 @@ const Glossary = (() => {
         span.className = "glossary-link";
         span.dataset.term = tm.key;
         span.textContent = matched;
+        // Keyboard/AT operability: the auto-linker is the signature feature,
+        // so the inline trigger must be reachable without a mouse.
+        span.setAttribute("role", "button");
+        span.setAttribute("tabindex", "0");
+        span.setAttribute("aria-label", "Glossary: " + tm.key);
         frag.appendChild(span);
         lastIdx = m.index + matched.length;
         replaced = true;
@@ -143,21 +148,49 @@ const Glossary = (() => {
     const glossaryEl = document.getElementById("glossary");
     const scrim = document.getElementById("scrim");
 
-    function openGlossary() { glossaryEl.classList.add("open"); scrim.classList.add("open"); renderGlossary(""); }
-    function closeGlossary() { glossaryEl.classList.remove("open"); scrim.classList.remove("open"); }
+    // Remember what to restore focus to when the drawer closes (WCAG 2.4.3).
+    let returnFocusTo = null;
+
+    function openGlossary(opener) {
+      returnFocusTo = opener || document.activeElement;
+      glossaryEl.classList.add("open");
+      scrim.classList.add("open");
+      glossaryEl.setAttribute("aria-hidden", "false");
+      renderGlossary("");
+      const search = document.getElementById("g-search");
+      if (search) setTimeout(() => search.focus(), 50);
+    }
+    function closeGlossary() {
+      glossaryEl.classList.remove("open");
+      scrim.classList.remove("open");
+      glossaryEl.setAttribute("aria-hidden", "true");
+      if (returnFocusTo && typeof returnFocusTo.focus === "function") returnFocusTo.focus();
+      returnFocusTo = null;
+    }
 
     document.getElementById("open-glossary").addEventListener("click", openGlossary);
     document.getElementById("close-glossary").addEventListener("click", closeGlossary);
     scrim.addEventListener("click", closeGlossary);
     document.getElementById("g-search").addEventListener("input", e => renderGlossary(e.target.value));
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape" && glossaryEl.classList.contains("open")) closeGlossary();
+    });
 
-    /* Click an inline glossary-link anywhere → open the drawer to that term. */
+    /* Open the drawer to a term from an inline link, by mouse or keyboard. */
+    function activateLink(target) {
+      const term = target.dataset.term;
+      openGlossary(target);
+      document.getElementById("g-search").value = term;
+      renderGlossary(term);
+    }
     document.body.addEventListener("click", e => {
-      if (e.target.classList.contains("glossary-link")) {
-        const term = e.target.dataset.term;
-        openGlossary();
-        document.getElementById("g-search").value = term;
-        renderGlossary(term);
+      if (e.target.classList.contains("glossary-link")) activateLink(e.target);
+    });
+    document.body.addEventListener("keydown", e => {
+      if (e.target.classList.contains("glossary-link") &&
+          (e.key === "Enter" || e.key === " " || e.key === "Spacebar")) {
+        e.preventDefault();
+        activateLink(e.target);
       }
     });
   }

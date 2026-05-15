@@ -20,10 +20,10 @@
 <button class="floating-glossary-btn" id="open-glossary" aria-label="Open glossary">Glossary ▸</button>
 <button class="back-top" id="back-top" aria-label="Back to top">↑ Top</button>
 
-<div class="ask-overlay" id="ask-overlay">
-  <div class="ask-panel">
+<div class="ask-overlay" id="ask-overlay" aria-hidden="true">
+  <div class="ask-panel" role="dialog" aria-modal="true" aria-labelledby="ask-title">
     <button class="ask-close" id="ask-close" aria-label="Close">×</button>
-    <h3>What are you trying to do?</h3>
+    <h3 id="ask-title">What are you trying to do?</h3>
     <p class="ask-sub">Type a question. The reference will suggest matching commands.</p>
     <div class="ask-row">
       <input id="q" placeholder="How do I remove rows where age is missing?" />
@@ -167,8 +167,8 @@
 
 <!-- =================== GLOSSARY DRAWER =================== -->
 <div class="scrim" id="scrim"></div>
-<aside class="drawer" id="glossary">
-  <button class="close-x" id="close-glossary" aria-label="Close">×</button>
+<aside class="drawer" id="glossary" role="dialog" aria-modal="true" aria-label="Glossary" aria-hidden="true">
+  <button class="close-x" id="close-glossary" aria-label="Close glossary">×</button>
   <h2>Glossary</h2>
   <p style="font-size:13px;color:var(--grey);margin:4px 0 0;">Search by term or concept. Synonyms (English/German) are supported.</p>
   <input id="g-search" placeholder="e.g. axis, NaN, vectorisation, Spalte" />

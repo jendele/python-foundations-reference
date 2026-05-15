@@ -71,30 +71,38 @@ const Search = (() => {
       return;
     }
 
+    // Each suggestion is a real button so keyboard and screen-reader users
+    // can select it (was a click-only div — WCAG 2.1.1).
     const hitsHtml = ranked.map(c => `
-      <div class="hit" data-id="${c.id}">
+      <button type="button" class="hit" data-id="${c.id}">
         <div><code>${c.code}</code></div>
         <div class="why">${c.short} <em style="color:var(--grey-light);">— stage: ${c.stage}</em></div>
-      </div>`).join("");
+      </button>`).join("");
 
     out.innerHTML = `<div class="sg-header"><span>${ranked.length} suggestion${ranked.length === 1 ? "" : "s"}</span>${closeBtnHtml}</div>` + hitsHtml;
     out.querySelector(".sg-close").addEventListener("click", clearAll);
 
+    function gotoCommand(id) {
+      const el = document.getElementById("cmd-" + id);
+      if (!el) return;
+      // Open the parent stage-bar so the command is reachable.
+      let p = el.parentElement;
+      while (p && !p.classList.contains("stage-bar")) p = p.parentElement;
+      if (p) p.open = true;
+      el.open = true;
+      const ov = document.getElementById("ask-overlay");
+      if (ov) ov.classList.remove("open");
+      setTimeout(() => {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        const s = el.querySelector("summary");
+        if (s) s.focus();
+      }, 220);
+    }
+
     out.querySelectorAll(".hit").forEach(h => {
-      h.addEventListener("click", () => {
-        const id = h.dataset.id;
-        const el = document.getElementById("cmd-" + id);
-        if (el) {
-          // Open the parent stage-bar so the command is reachable.
-          let p = el.parentElement;
-          while (p && !p.classList.contains("stage-bar")) p = p.parentElement;
-          if (p) p.open = true;
-          el.open = true;
-          const ov = document.getElementById("ask-overlay");
-          if (ov) ov.classList.remove("open");
-          setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "center" }), 220);
-        }
-      });
+      // A <button> fires click on Enter/Space natively, so one handler covers
+      // mouse and keyboard.
+      h.addEventListener("click", () => gotoCommand(h.dataset.id));
     });
   }
 
@@ -104,13 +112,37 @@ const Search = (() => {
     const askOverlay = document.getElementById("ask-overlay");
     const askClose   = document.getElementById("ask-close");
 
+    let returnFocusTo = null;
+
     function openAsk() {
       if (!askOverlay) return;
+      returnFocusTo = document.activeElement;
       askOverlay.classList.add("open");
+      askOverlay.setAttribute("aria-hidden", "false");
       setTimeout(() => { const q = document.getElementById("q"); if (q) q.focus(); }, 50);
     }
     function closeAsk() {
-      if (askOverlay) askOverlay.classList.remove("open");
+      if (!askOverlay) return;
+      askOverlay.classList.remove("open");
+      askOverlay.setAttribute("aria-hidden", "true");
+      // Return focus to whatever opened the modal (WCAG 2.4.3).
+      if (returnFocusTo && typeof returnFocusTo.focus === "function") returnFocusTo.focus();
+      returnFocusTo = null;
+    }
+
+    // Keep Tab inside the open dialog (WCAG 2.4.3 focus trap).
+    function trapFocus(e) {
+      if (e.key !== "Tab" || !askOverlay.classList.contains("open")) return;
+      const focusable = askOverlay.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      const list = [...focusable].filter(el => el.offsetParent !== null);
+      if (!list.length) return;
+      const first = list[0], last = list[list.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault(); last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault(); first.focus();
+      }
     }
 
     if (askFab)   askFab.addEventListener("click", openAsk);
@@ -119,6 +151,7 @@ const Search = (() => {
       askOverlay.addEventListener("click", e => {
         if (e.target === askOverlay) closeAsk();
       });
+      askOverlay.addEventListener("keydown", trapFocus);
     }
     document.addEventListener("keydown", e => {
       if (e.key === "Escape" && askOverlay && askOverlay.classList.contains("open")) closeAsk();

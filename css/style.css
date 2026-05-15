@@ -20,6 +20,22 @@
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
+
+/* Visible keyboard focus everywhere (WCAG 2.4.7). Per-component rules may
+   override with a tighter style; this is the safety net so no interactive
+   element is ever focused invisibly. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; }
+}
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   color: var(--ink);
@@ -106,6 +122,10 @@ header.top .meta {
 }
 #suggestions:empty { margin: 0; }
 #suggestions .hit {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
   background: var(--orange-soft);
   border: 1px solid var(--orange);
   border-radius: 4px;
@@ -115,6 +135,10 @@ header.top .meta {
   cursor: pointer;
 }
 #suggestions .hit:hover { background: #F8D9BC; }
+#suggestions .hit:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
 #suggestions .hit code {
   background: rgba(255,255,255,0.7);
   padding: 1px 6px;
@@ -156,7 +180,10 @@ header.top .meta {
 #suggestions .sg-close:hover { background: var(--grey-soft); color: var(--ink); border-color: var(--orange); }
 
 /* ============== WORKED EXAMPLE ============== */
-section.example .quick-stages {
+/* The example section is <section class="card example"> at parse time but
+   convertToAccordion() turns it into <details class="stage-bar example">,
+   so these must key off the surviving `.example` class, not `section`. */
+.example .quick-stages {
   background: var(--grey-soft);
   padding: 12px 16px;
   border-radius: 4px;
@@ -164,7 +191,7 @@ section.example .quick-stages {
   font-size: 13.5px;
   line-height: 1.65;
 }
-section.example .copy-row {
+.example .copy-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -172,16 +199,17 @@ section.example .copy-row {
   flex-wrap: wrap;
   margin: 14px 0 4px;
 }
-section.example .copy-row .label {
+.example .copy-row .label {
   font-size: 13px;
   color: var(--grey);
   flex: 1;
 }
-section.example .copy-btn {
+.example .copy-btn {
   background: var(--orange);
   color: #fff;
   border: 0;
-  padding: 8px 16px;
+  padding: 12px 18px;
+  min-height: 44px;
   font-size: 12px;
   font-weight: 600;
   border-radius: 3px;
@@ -190,9 +218,13 @@ section.example .copy-btn {
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
-section.example .copy-btn:hover { background: #C45F08; }
-section.example .copy-btn.done { background: var(--green); }
-section.example pre.full {
+.example .copy-btn:hover { background: #C45F08; }
+.example .copy-btn:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.example .copy-btn.done { background: var(--green); }
+.example pre.full {
   background: var(--code-bg);
   color: var(--code-fg);
   padding: 18px 20px;
@@ -203,11 +235,11 @@ section.example pre.full {
   font-family: "SF Mono", Menlo, Consolas, monospace;
   margin: 6px 0 4px;
 }
-section.example pre.full .c { color: var(--code-comment); font-style: italic; }
-section.example pre.full .h { color: #8AD7FF; font-style: italic; }
-section.example pre.full .k { color: var(--code-key); }
-section.example pre.full .s { color: var(--code-str); }
-section.example .footer-note {
+.example pre.full .c { color: var(--code-comment); font-style: italic; }
+.example pre.full .h { color: #8AD7FF; font-style: italic; }
+.example pre.full .k { color: var(--code-key); }
+.example pre.full .s { color: var(--code-str); }
+.example .footer-note {
   font-size: 12.5px;
   color: var(--grey);
   margin-top: 8px;
@@ -458,10 +490,18 @@ section.card p { font-size: 14.5px; }
 .cmd .body pre .c { color: var(--code-comment); font-style: italic; }
 .cmd .body pre .k { color: var(--code-key); }
 .cmd .body pre .s { color: var(--code-str); }
-.cmd .body .glossary-link {
+/* Auto-linked terms appear in command cards and also in decision boxes,
+   the worked example, and the intro prose — style them everywhere. */
+.glossary-link {
   color: var(--blue);
   text-decoration: underline dotted;
   cursor: pointer;
+}
+.glossary-link:hover { text-decoration-style: solid; }
+.glossary-link:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 /* ============== ORIENTATION BLOCK ============== */
@@ -535,9 +575,15 @@ aside.drawer.open { right: 0; }
 aside.drawer h2 { margin: 0 0 4px; font-size: 18px; }
 aside.drawer .close-x {
   position: absolute;
-  top: 14px; right: 18px;
+  top: 10px; right: 12px;
   background: none; border: 0;
   cursor: pointer; font-size: 20px; color: var(--grey);
+  min-width: 44px; min-height: 44px;
+  display: flex; align-items: center; justify-content: center;
+}
+aside.drawer .close-x:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
 }
 aside.drawer input {
   width: 100%;
