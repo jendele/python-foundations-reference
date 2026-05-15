@@ -2127,6 +2127,55 @@
     ]
   },
   {
+    "id": "ax_annotate",
+    "code": "ax.annotate(\"peak\", xy=(x, y), xytext=(x, y+5), arrowprops={})",
+    "stage": "visualize",
+    "short": "Add an explanatory annotation, optionally with an arrow.",
+    "what": "Places text at <code>xytext</code> pointing at the data location <code>xy</code>, with an optional arrow. Used to draw the reader's attention to a specific feature of the plot — a peak, an outlier, an event.",
+    "tokens": [
+      [
+        "ax.annotate(",
+        "Adds an annotation anchored to a data point."
+      ],
+      [
+        "\"peak\"",
+        "The annotation text."
+      ],
+      [
+        "xy=(x, y)",
+        "The data point being annotated."
+      ],
+      [
+        "xytext=(x, y+5)",
+        "Where the text is placed."
+      ],
+      [
+        "arrowprops={}",
+        "If given, draws an arrow from text to point."
+      ]
+    ],
+    "requires": [
+      "a Matplotlib axes",
+      "the data coordinates of the feature"
+    ],
+    "important": [
+      "a specific feature of the figure must be called out for the reader"
+    ],
+    "avoid": [
+      "cluttering the plot with many annotations"
+    ],
+    "reach": "When a particular point of a figure needs an explanatory callout.",
+    "example": "<pre>ax.annotate(<span class=\"s\">\"outbreak\"</span>, xy=(<span class=\"s\">d</span>, <span class=\"s\">peak</span>),\n            xytext=(<span class=\"s\">d</span>, peak*<span class=\"s\">1.2</span>), arrowprops={<span class=\"s\">\"arrowstyle\"</span>: <span class=\"s\">\"-&gt;\"</span>})</pre>",
+    "tags": [
+      "visualize",
+      "annotate",
+      "annotation",
+      "arrow",
+      "callout",
+      "beschriftung"
+    ]
+  },
+  {
     "id": "ax_bar",
     "code": "ax.bar(x, y)",
     "stage": "visualize",
@@ -2164,6 +2213,137 @@
       "matplotlib",
       "ax.bar",
       "balkendiagramm"
+    ]
+  },
+  {
+    "id": "ax_boxplot",
+    "code": "ax.boxplot([a, b, c], labels=[...])",
+    "stage": "visualize",
+    "short": "Box plot comparing distributions across groups.",
+    "what": "Draws, for each supplied array, a box from the first to the third quartile with the median marked and whiskers to the data extremes (outliers as points). The standard way to compare the distribution and spread of a numeric variable across a few groups.",
+    "tokens": [
+      [
+        "ax.boxplot(",
+        "Draws box-and-whisker summaries."
+      ],
+      [
+        "[a, b, c]",
+        "A list of arrays, one box per group."
+      ],
+      [
+        "labels=[...]",
+        "The category label under each box."
+      ]
+    ],
+    "requires": [
+      "a Matplotlib axes",
+      "the values split into one array per group"
+    ],
+    "important": [
+      "the spread and skew of a numeric variable must be compared across a small number of groups"
+    ],
+    "avoid": [
+      "very many groups (the figure becomes unreadable)",
+      "presenting a box plot to an audience unfamiliar with quartiles without explanation"
+    ],
+    "reach": "When distributions of a numeric variable must be compared across categories, including their spread and outliers.",
+    "example": "<pre>groups = [g[<span class=\"s\">\"los_days\"</span>].values <span class=\"k\">for</span> _, g <span class=\"k\">in</span> df.groupby(<span class=\"s\">\"ward\"</span>)]\nax.boxplot(groups)</pre>",
+    "tags": [
+      "visualize",
+      "boxplot",
+      "distribution",
+      "quartile",
+      "outlier",
+      "boxplot"
+    ]
+  },
+  {
+    "id": "ax_errorbar",
+    "code": "ax.errorbar(x, y, yerr=err, fmt='o')",
+    "stage": "visualize",
+    "short": "Points or line with error bars.",
+    "what": "Plots y against x with vertical (and/or horizontal) error bars of length <code>yerr</code>. Used to display a mean together with its uncertainty (standard deviation, standard error, or confidence interval).",
+    "tokens": [
+      [
+        "ax.errorbar(",
+        "Plots data with error bars."
+      ],
+      [
+        "x, y",
+        "The point coordinates (e.g. category and mean)."
+      ],
+      [
+        "yerr=err",
+        "Half-length of each vertical error bar."
+      ],
+      [
+        "fmt='o'",
+        "Marker style; 'o' shows points without a connecting line."
+      ]
+    ],
+    "requires": [
+      "a Matplotlib axes",
+      "an uncertainty value per point"
+    ],
+    "important": [
+      "a summary statistic must be shown together with its uncertainty"
+    ],
+    "avoid": [
+      "plotting error bars whose statistical meaning (SD vs SE vs CI) is not stated"
+    ],
+    "reach": "When estimates must be presented with their uncertainty, such as group means with confidence intervals.",
+    "example": "<pre>m = df.groupby(<span class=\"s\">\"ward\"</span>)[<span class=\"s\">\"los_days\"</span>].mean()\ns = df.groupby(<span class=\"s\">\"ward\"</span>)[<span class=\"s\">\"los_days\"</span>].std()\nax.errorbar(m.index, m, yerr=s, fmt=<span class=\"s\">\"o\"</span>)</pre>",
+    "tags": [
+      "visualize",
+      "errorbar",
+      "uncertainty",
+      "confidence",
+      "fehlerbalken"
+    ]
+  },
+  {
+    "id": "ax_fill_between",
+    "code": "ax.fill_between(x, lo, hi, alpha=0.2)",
+    "stage": "visualize",
+    "short": "Shade a band between two curves.",
+    "what": "Fills the area between the lower and upper curves across x. Most often used behind a line to depict a confidence or prediction band.",
+    "tokens": [
+      [
+        "ax.fill_between(",
+        "Shades the region between two y-series."
+      ],
+      [
+        "x",
+        "Shared x coordinates."
+      ],
+      [
+        "lo, hi",
+        "Lower and upper bounds of the band."
+      ],
+      [
+        "alpha=0.2",
+        "Transparency so an overlaid line stays visible."
+      ]
+    ],
+    "requires": [
+      "a Matplotlib axes",
+      "aligned lower and upper bound arrays"
+    ],
+    "important": [
+      "a confidence or prediction interval must be shown around a line"
+    ],
+    "avoid": [
+      "an opaque fill that hides the central line"
+    ],
+    "reach": "When a band of uncertainty must accompany a line, such as a confidence interval around a trend.",
+    "example": "<pre>ax.plot(x, mean)\nax.fill_between(x, mean - sd, mean + sd, alpha=<span class=\"s\">0.2</span>)</pre>",
+    "tags": [
+      "visualize",
+      "fill_between",
+      "band",
+      "confidence",
+      "interval",
+      "fläche"
     ]
   },
   {
@@ -2240,6 +2420,44 @@
     ]
   },
   {
+    "id": "ax_scatter",
+    "code": "ax.scatter(df[\"x\"], df[\"y\"])",
+    "stage": "visualize",
+    "short": "Scatter plot of two numeric variables.",
+    "what": "Draws one point per observation at (x, y). The standard display for the relationship between two continuous variables. <code>c=</code> colours points by a third variable, <code>s=</code> sizes them, <code>alpha=</code> reveals density where points overlap.",
+    "tokens": [
+      [
+        "ax.scatter(",
+        "Plots individual points on the axes."
+      ],
+      [
+        "df[\"x\"], df[\"y\"]",
+        "The x and y coordinates of each point."
+      ]
+    ],
+    "requires": [
+      "a Matplotlib axes (<code>fig, ax = plt.subplots()</code>)",
+      "two aligned numeric Series"
+    ],
+    "important": [
+      "the relationship or correlation between two continuous variables is the question",
+      "overplotting is likely — set <code>alpha</code> below 1"
+    ],
+    "avoid": [
+      "one axis is categorical (use a bar or box plot)",
+      "tens of thousands of points without transparency or sampling"
+    ],
+    "reach": "When the association between two continuous variables must be shown point by point.",
+    "example": "<pre>fig, ax = plt.subplots()\nax.scatter(df[<span class=\"s\">\"age\"</span>], df[<span class=\"s\">\"cost_eur\"</span>], alpha=<span class=\"s\">0.4</span>)</pre>",
+    "tags": [
+      "visualize",
+      "scatter",
+      "points",
+      "correlation",
+      "streudiagramm"
+    ]
+  },
+  {
     "id": "ax_set",
     "code": "ax.set_title(\"...\"); ax.set_xlabel(\"...\"); ax.set_ylabel(\"...\")",
     "stage": "visualize",
@@ -2277,6 +2495,79 @@
       "axis",
       "matplotlib",
       "beschriftung"
+    ]
+  },
+  {
+    "id": "ax_text",
+    "code": "ax.text(x, y, \"label\")",
+    "stage": "visualize",
+    "short": "Place free text at data coordinates.",
+    "what": "Writes a string at the data position (x, y) — used for value labels on bars, or a note inside the plotting area. Simpler than <code>annotate</code>: no arrow, no separate text position.",
+    "tokens": [
+      [
+        "ax.text(",
+        "Places text at a data coordinate."
+      ],
+      [
+        "x, y",
+        "The position in data units."
+      ],
+      [
+        "\"label\"",
+        "The string to display."
+      ]
+    ],
+    "requires": [
+      "a Matplotlib axes",
+      "the data coordinates for the text"
+    ],
+    "important": [
+      "bars or points should carry their value as a label"
+    ],
+    "avoid": [
+      "positioning in axes-fraction coordinates is needed (use <code>transform=ax.transAxes</code>)"
+    ],
+    "reach": "When values or short notes must be written directly onto the plot.",
+    "example": "<pre><span class=\"k\">for</span> i, v <span class=\"k\">in</span> <span class=\"k\">enumerate</span>(vals):\n    ax.text(i, v + <span class=\"s\">0.5</span>, <span class=\"k\">str</span>(v), ha=<span class=\"s\">\"center\"</span>)</pre>",
+    "tags": [
+      "visualize",
+      "text",
+      "label",
+      "value label",
+      "beschriftung"
+    ]
+  },
+  {
+    "id": "ax_twinx",
+    "code": "ax2 = ax.twinx()",
+    "stage": "visualize",
+    "short": "A second y-axis sharing the same x-axis.",
+    "what": "Creates a twinned axes sharing the x-axis but with an independent y-axis on the right, so two series on different scales can be drawn together. Use sparingly and label both axes clearly — dual-axis charts are easy to read incorrectly.",
+    "tokens": [
+      [
+        "ax2 = ax.twinx()",
+        "Creates a right-hand y-axis sharing the original x-axis."
+      ]
+    ],
+    "requires": [
+      "an existing axes",
+      "two series that genuinely require different scales"
+    ],
+    "important": [
+      "two related series on incomparable scales must share one time axis"
+    ],
+    "avoid": [
+      "using a second axis where the series could share one scale — it invites misreading",
+      "leaving either y-axis unlabelled"
+    ],
+    "reach": "When two series on different units must be compared over the same x-axis, with explicit labelling.",
+    "example": "<pre>ax.plot(t, admissions)\nax2 = ax.twinx()\nax2.plot(t, cost, color=<span class=\"s\">\"C1\"</span>)</pre>",
+    "tags": [
+      "visualize",
+      "twinx",
+      "secondary axis",
+      "dual axis",
+      "zweite achse"
     ]
   },
   {
@@ -2322,6 +2613,140 @@
       "figure",
       "png",
       "pdf"
+    ]
+  },
+  {
+    "id": "sns_boxplot",
+    "code": "sns.boxplot(data=df, x=\"ward\", y=\"los_days\")",
+    "stage": "visualize",
+    "short": "Box plot by category (seaborn, tidy input).",
+    "what": "Draws a box plot of <code>y</code> grouped by <code>x</code> directly from a tidy DataFrame — no manual splitting into arrays. <code>hue=</code> adds a second categorical split. The concise seaborn counterpart of <code>ax.boxplot</code>.",
+    "tokens": [
+      [
+        "sns.boxplot(",
+        "Box plot from tidy data."
+      ],
+      [
+        "data=df",
+        "The tidy DataFrame."
+      ],
+      [
+        "x=\"ward\"",
+        "Categorical variable defining the groups."
+      ],
+      [
+        "y=\"los_days\"",
+        "Numeric variable summarised per group."
+      ]
+    ],
+    "requires": [
+      "seaborn imported",
+      "tidy (long) data with a category and a numeric column"
+    ],
+    "important": [
+      "distributions across categories must be compared with minimal code",
+      "a second split is needed (use <code>hue=</code>)"
+    ],
+    "avoid": [
+      "wide-format data (melt it to long first)"
+    ],
+    "reach": "When comparing a numeric distribution across categories straight from a tidy DataFrame.",
+    "example": "<pre>sns.boxplot(data=df, x=<span class=\"s\">\"ward\"</span>, y=<span class=\"s\">\"los_days\"</span>)</pre>",
+    "tags": [
+      "visualize",
+      "seaborn",
+      "boxplot",
+      "distribution",
+      "tidy",
+      "boxplot"
+    ]
+  },
+  {
+    "id": "sns_heatmap",
+    "code": "sns.heatmap(corr, annot=True, cmap='coolwarm')",
+    "stage": "visualize",
+    "short": "Colour-encoded matrix (seaborn).",
+    "what": "Renders a 2-D matrix as a grid of coloured cells. The usual display for a correlation matrix or any pivoted table of magnitudes. <code>annot=True</code> overlays the numeric values; a diverging colormap suits data centred on zero.",
+    "tokens": [
+      [
+        "sns.heatmap(",
+        "Draws a matrix as coloured cells."
+      ],
+      [
+        "corr",
+        "The 2-D matrix (often the output of <code>df.corr()</code>)."
+      ],
+      [
+        "annot=True",
+        "Writes each cell's value on it."
+      ],
+      [
+        "cmap='coolwarm'",
+        "A diverging colormap for values around zero."
+      ]
+    ],
+    "requires": [
+      "seaborn imported (<code>import seaborn as sns</code>)",
+      "a 2-D numeric matrix or DataFrame"
+    ],
+    "important": [
+      "a correlation matrix or a small pivot table must be displayed visually"
+    ],
+    "avoid": [
+      "a very large matrix with annotations (unreadable)",
+      "a sequential colormap for diverging data centred on zero"
+    ],
+    "reach": "When a matrix of magnitudes — typically a correlation matrix — must be shown at a glance.",
+    "example": "<pre>sns.heatmap(df.corr(numeric_only=<span class=\"k\">True</span>), annot=<span class=\"k\">True</span>, cmap=<span class=\"s\">\"coolwarm\"</span>)</pre>",
+    "tags": [
+      "visualize",
+      "seaborn",
+      "heatmap",
+      "correlation",
+      "matrix",
+      "hitzekarte"
+    ]
+  },
+  {
+    "id": "sns_regplot",
+    "code": "sns.regplot(data=df, x=\"age\", y=\"cost_eur\")",
+    "stage": "visualize",
+    "short": "Scatter with a fitted regression line (seaborn).",
+    "what": "Draws a scatter of y against x and overlays an ordinary-least-squares fit with a confidence band. A quick visual check of a linear relationship; it does not return model coefficients.",
+    "tokens": [
+      [
+        "sns.regplot(",
+        "Scatter plus fitted regression line."
+      ],
+      [
+        "data=df",
+        "The DataFrame."
+      ],
+      [
+        "x=\"age\", y=\"cost_eur\"",
+        "The predictor and response columns."
+      ]
+    ],
+    "requires": [
+      "seaborn imported",
+      "two numeric columns"
+    ],
+    "important": [
+      "a linear trend between two variables must be assessed visually"
+    ],
+    "avoid": [
+      "treating it as a model fit — it shows a line but returns no coefficients",
+      "a clearly non-linear relationship without <code>order=</code> or <code>lowess=True</code>"
+    ],
+    "reach": "When a linear relationship between two numeric variables must be inspected quickly.",
+    "example": "<pre>sns.regplot(data=df, x=<span class=\"s\">\"age\"</span>, y=<span class=\"s\">\"cost_eur\"</span>)</pre>",
+    "tags": [
+      "visualize",
+      "seaborn",
+      "regplot",
+      "regression",
+      "trend",
+      "scatter"
     ]
   },
   {
@@ -4420,6 +4845,425 @@
       "multiindex",
       "pivot",
       "umformen"
+    ]
+  },
+  {
+    "id": "np_arange",
+    "code": "np.arange(0, 10, 2)",
+    "stage": "numpy",
+    "short": "Evenly spaced values by step.",
+    "what": "Returns an array from start (inclusive) to stop (exclusive) in increments of step — the array analogue of Python's <code>range</code>, but it accepts floats. For a fixed count of points use <code>linspace</code> instead.",
+    "tokens": [
+      [
+        "np.arange(",
+        "Generates a range as an array."
+      ],
+      [
+        "0, 10, 2",
+        "start (inclusive), stop (exclusive), step."
+      ]
+    ],
+    "requires": [
+      "numpy imported"
+    ],
+    "important": [
+      "a sequence defined by a step size is needed"
+    ],
+    "avoid": [
+      "a fixed number of points spanning a range (use <code>linspace</code>)",
+      "relying on the exact endpoint with a float step (rounding)"
+    ],
+    "reach": "When a regularly stepped numeric sequence is required.",
+    "example": "<pre>x = np.arange(<span class=\"s\">0</span>, <span class=\"s\">1</span>, <span class=\"s\">0.1</span>)</pre>",
+    "tags": [
+      "numpy",
+      "arange",
+      "range",
+      "sequence",
+      "step"
+    ]
+  },
+  {
+    "id": "np_argsort",
+    "code": "np.argsort(a)",
+    "stage": "numpy",
+    "short": "Indices that would sort an array.",
+    "what": "Returns the array of indices that, used to index the array, yield it in sorted order. Use it to reorder one array by another, or to find the positions of the smallest/largest values without sorting the data itself.",
+    "tokens": [
+      [
+        "np.argsort(",
+        "Returns sorting indices, not sorted values."
+      ],
+      [
+        "a",
+        "The array to be ordered."
+      ]
+    ],
+    "requires": [
+      "numpy imported",
+      "a 1-D array or Series"
+    ],
+    "important": [
+      "another array must be reordered to match this one's sort order",
+      "the positions of the n smallest/largest are needed"
+    ],
+    "avoid": [
+      "the sorted values themselves are wanted (use <code>np.sort</code> or <code>Series.sort_values</code>)"
+    ],
+    "reach": "When ordering positions — rather than ordered values — are required, e.g. to align a second array.",
+    "example": "<pre>order = np.argsort(scores)[::<span class=\"s\">-1</span>]   <span class=\"c\"># indices, best first</span></pre>",
+    "tags": [
+      "numpy",
+      "argsort",
+      "indices",
+      "sort order",
+      "ranking"
+    ]
+  },
+  {
+    "id": "np_array",
+    "code": "np.array([1, 2, 3])",
+    "stage": "numpy",
+    "short": "Create an ndarray from a sequence.",
+    "what": "Builds an n-dimensional array from a list (or list of lists). All elements share one dtype, which is what makes array operations vectorised and fast. A pandas column's underlying values are such an array (<code>df['c'].to_numpy()</code>).",
+    "tokens": [
+      [
+        "np.array(",
+        "Constructs an ndarray."
+      ],
+      [
+        "[1, 2, 3]",
+        "The source sequence; nesting lists creates further dimensions."
+      ]
+    ],
+    "requires": [
+      "numpy imported (<code>import numpy as np</code>)",
+      "a sequence of values of compatible type"
+    ],
+    "important": [
+      "explicit numeric array operations are needed outside a DataFrame"
+    ],
+    "avoid": [
+      "mixing incompatible types (everything is coerced to one dtype, often object)"
+    ],
+    "reach": "When numeric data must be held and operated on as a homogeneous array rather than a Python list.",
+    "example": "<pre>a = np.array([<span class=\"s\">1.0</span>, <span class=\"s\">2.0</span>, <span class=\"s\">3.0</span>])</pre>",
+    "tags": [
+      "numpy",
+      "array",
+      "ndarray",
+      "vector",
+      "create"
+    ]
+  },
+  {
+    "id": "np_clip",
+    "code": "np.clip(a, lo, hi)",
+    "stage": "numpy",
+    "short": "Bound values to a range.",
+    "what": "Returns the array with every value below <code>lo</code> raised to <code>lo</code> and every value above <code>hi</code> lowered to <code>hi</code>. Used to cap outliers or enforce a valid domain (e.g. non-negative quantities).",
+    "tokens": [
+      [
+        "np.clip(",
+        "Limits values to an interval."
+      ],
+      [
+        "a",
+        "The array (or Series) to bound."
+      ],
+      [
+        "lo, hi",
+        "The lower and upper limits."
+      ]
+    ],
+    "requires": [
+      "numpy imported",
+      "a defensible lower and/or upper bound"
+    ],
+    "important": [
+      "outliers must be capped (winsorising) or values forced into a valid range"
+    ],
+    "avoid": [
+      "clipping away genuine signal without recording the decision"
+    ],
+    "reach": "When values must be constrained to a plausible range, for instance to limit the influence of outliers.",
+    "example": "<pre>df[<span class=\"s\">\"cost_eur\"</span>] = np.clip(df[<span class=\"s\">\"cost_eur\"</span>], <span class=\"s\">0</span>, <span class=\"k\">None</span>)</pre>",
+    "tags": [
+      "numpy",
+      "clip",
+      "cap",
+      "winsorise",
+      "bound",
+      "begrenzen"
+    ]
+  },
+  {
+    "id": "np_linspace",
+    "code": "np.linspace(0, 1, 50)",
+    "stage": "numpy",
+    "short": "A fixed number of evenly spaced values.",
+    "what": "Returns exactly <code>num</code> values evenly spaced from start to stop, both endpoints included by default. Preferred over <code>arange</code> when the count matters — for instance to build a smooth x-axis for a curve.",
+    "tokens": [
+      [
+        "np.linspace(",
+        "Generates evenly spaced samples."
+      ],
+      [
+        "0, 1, 50",
+        "start, stop (inclusive), and how many points."
+      ]
+    ],
+    "requires": [
+      "numpy imported"
+    ],
+    "important": [
+      "a precise number of points across an interval is needed (plot grid, parameter sweep)"
+    ],
+    "avoid": [
+      "a step-defined sequence is wanted (use <code>arange</code>)"
+    ],
+    "reach": "When a set number of evenly spaced points across a range is required.",
+    "example": "<pre>xs = np.linspace(<span class=\"s\">0</span>, <span class=\"s\">2*np.pi</span>, <span class=\"s\">200</span>)</pre>",
+    "tags": [
+      "numpy",
+      "linspace",
+      "evenly spaced",
+      "grid",
+      "points"
+    ]
+  },
+  {
+    "id": "np_log_exp",
+    "code": "np.log(a)  /  np.exp(a)",
+    "stage": "numpy",
+    "short": "Natural logarithm and its inverse, element-wise.",
+    "what": "<code>np.log</code> applies the natural logarithm to every element; <code>np.exp</code> the inverse. A log transform compresses a right-skewed positive variable toward symmetry; <code>np.log1p</code> / <code>np.expm1</code> handle zeros safely.",
+    "tokens": [
+      [
+        "np.log(a)",
+        "Natural log of each element (undefined for ≤ 0)."
+      ],
+      [
+        "np.exp(a)",
+        "e raised to each element — the inverse of log."
+      ]
+    ],
+    "requires": [
+      "numpy imported",
+      "for <code>log</code>, strictly positive values"
+    ],
+    "important": [
+      "a positively skewed variable must be transformed toward symmetry before modelling or plotting"
+    ],
+    "avoid": [
+      "<code>np.log</code> on zero or negative values (yields -inf or NaN — use <code>np.log1p</code>)"
+    ],
+    "reach": "When a skewed positive variable should be transformed, or a log-scaled quantity returned to its original scale.",
+    "example": "<pre>df[<span class=\"s\">\"log_cost\"</span>] = np.log1p(df[<span class=\"s\">\"cost_eur\"</span>])</pre>",
+    "tags": [
+      "numpy",
+      "log",
+      "exp",
+      "transform",
+      "skew",
+      "logarithmus"
+    ]
+  },
+  {
+    "id": "np_percentile",
+    "code": "np.percentile(a, [25, 50, 75])",
+    "stage": "numpy",
+    "short": "Percentile values of an array.",
+    "what": "Returns the value(s) below which the given percentage of the data falls — the array-level counterpart of <code>Series.quantile</code> (note percentile takes 0–100, quantile 0–1). Used for robust spread and threshold computation on plain arrays.",
+    "tokens": [
+      [
+        "np.percentile(",
+        "Computes percentile values."
+      ],
+      [
+        "a",
+        "The numeric array."
+      ],
+      [
+        "[25, 50, 75]",
+        "The percentiles, on a 0–100 scale."
+      ]
+    ],
+    "requires": [
+      "numpy imported",
+      "a numeric array"
+    ],
+    "important": [
+      "robust spread (IQR) or thresholds are needed on a NumPy array rather than a Series"
+    ],
+    "avoid": [
+      "passing fractions 0–1 (that is <code>quantile</code>, not <code>percentile</code>)"
+    ],
+    "reach": "When percentile thresholds or a robust spread are needed for a plain array.",
+    "example": "<pre>p10, p90 = np.percentile(arr, [<span class=\"s\">10</span>, <span class=\"s\">90</span>])</pre>",
+    "tags": [
+      "numpy",
+      "percentile",
+      "quantile",
+      "iqr",
+      "threshold"
+    ]
+  },
+  {
+    "id": "np_random_choice",
+    "code": "rng.choice(options, size=10, replace=False)",
+    "stage": "numpy",
+    "short": "Draw a random sample from a set of options.",
+    "what": "Selects <code>size</code> elements from the supplied array. <code>replace=False</code> samples without replacement (no element twice); <code>p=</code> supplies non-uniform selection probabilities. Called on a seeded generator for reproducibility.",
+    "tokens": [
+      [
+        "rng.choice(",
+        "Draws random elements from an array."
+      ],
+      [
+        "options",
+        "The pool to sample from."
+      ],
+      [
+        "size=10",
+        "How many to draw."
+      ],
+      [
+        "replace=False",
+        "Without replacement — each element at most once."
+      ]
+    ],
+    "requires": [
+      "a seeded generator (<code>np.random.default_rng</code>)",
+      "a pool to sample from"
+    ],
+    "important": [
+      "a random subsample or a randomised assignment is needed reproducibly"
+    ],
+    "avoid": [
+      "<code>replace=False</code> with <code>size</code> larger than the pool (raises)"
+    ],
+    "reach": "When a reproducible random sample or assignment must be drawn from a set of values.",
+    "example": "<pre>picks = rng.choice(df[<span class=\"s\">\"patient_id\"</span>], size=<span class=\"s\">20</span>, replace=<span class=\"k\">False</span>)</pre>",
+    "tags": [
+      "numpy",
+      "random",
+      "choice",
+      "sample",
+      "stichprobe"
+    ]
+  },
+  {
+    "id": "np_random_rng",
+    "code": "rng = np.random.default_rng(seed=42)",
+    "stage": "numpy",
+    "short": "Create a seeded random number generator.",
+    "what": "Returns a Generator whose seed fixes its starting state, so every run produces the same sequence — essential for reproducible examples and simulations. Draw from it with <code>rng.integers</code>, <code>rng.normal</code>, <code>rng.choice</code>. The modern replacement for the legacy <code>np.random.seed</code> API.",
+    "tokens": [
+      [
+        "np.random.default_rng(",
+        "Constructs the recommended modern generator."
+      ],
+      [
+        "seed=42",
+        "Fixes the starting state for reproducibility."
+      ]
+    ],
+    "requires": [
+      "numpy imported"
+    ],
+    "important": [
+      "any analysis whose random results must be reproducible by a colleague",
+      "generating synthetic example data"
+    ],
+    "avoid": [
+      "the legacy global <code>np.random.seed</code> / <code>np.random.rand</code> API in new code"
+    ],
+    "reach": "Whenever randomness is used and the results must be reproducible.",
+    "example": "<pre>rng = np.random.default_rng(seed=<span class=\"s\">42</span>)\nsample = rng.normal(<span class=\"s\">0</span>, <span class=\"s\">1</span>, size=<span class=\"s\">100</span>)</pre>",
+    "tags": [
+      "numpy",
+      "random",
+      "default_rng",
+      "seed",
+      "reproducible",
+      "zufall"
+    ]
+  },
+  {
+    "id": "np_reshape",
+    "code": "a.reshape(3, 4)  /  a.T",
+    "stage": "numpy",
+    "short": "Change an array's shape, or transpose it.",
+    "what": "<code>reshape</code> reinterprets the same data under a new shape whose element count must match (one dimension may be <code>-1</code> to be inferred). <code>.T</code> transposes — rows become columns. Both return views where possible, so changes can affect the original.",
+    "tokens": [
+      [
+        "a.reshape(3, 4)",
+        "Reinterprets the data as a 3×4 array (total size must match)."
+      ],
+      [
+        "a.T",
+        "Transposes the array (swaps axes)."
+      ]
+    ],
+    "requires": [
+      "numpy imported",
+      "for reshape, a new shape with the same number of elements"
+    ],
+    "important": [
+      "data must be arranged into a matrix for a linear-algebra or model API",
+      "rows and columns must be swapped"
+    ],
+    "avoid": [
+      "a new shape inconsistent with the element count (raises)",
+      "assuming a copy — reshape often returns a view"
+    ],
+    "reach": "When an array must be re-laid-out into a different shape or transposed for a downstream API.",
+    "example": "<pre>matrix = np.arange(<span class=\"s\">12</span>).reshape(<span class=\"s\">3</span>, <span class=\"s\">4</span>)</pre>",
+    "tags": [
+      "numpy",
+      "reshape",
+      "transpose",
+      "shape",
+      "matrix",
+      "umformen"
+    ]
+  },
+  {
+    "id": "np_zeros_ones",
+    "code": "np.zeros((3, 4))  /  np.ones(5)",
+    "stage": "numpy",
+    "short": "Pre-allocate an array of zeros or ones.",
+    "what": "Creates an array of the given shape filled with 0.0 (<code>zeros</code>) or 1.0 (<code>ones</code>). Used to pre-allocate a result that a computation will fill, or to build a constant array. The shape is a tuple for more than one dimension.",
+    "tokens": [
+      [
+        "np.zeros((3, 4))",
+        "A 3×4 array of zeros (shape given as a tuple)."
+      ],
+      [
+        "np.ones(5)",
+        "A length-5 array of ones."
+      ]
+    ],
+    "requires": [
+      "numpy imported",
+      "the desired shape"
+    ],
+    "important": [
+      "a result array must be pre-allocated before a loop fills it",
+      "a constant array is needed as a starting point"
+    ],
+    "avoid": [
+      "growing an array element by element instead of pre-allocating (slow)"
+    ],
+    "reach": "When an array of known shape must be created before being filled or used as a constant.",
+    "example": "<pre>acc = np.zeros(<span class=\"s\">len</span>(groups))</pre>",
+    "tags": [
+      "numpy",
+      "zeros",
+      "ones",
+      "allocate",
+      "constant"
     ]
   }
 ]

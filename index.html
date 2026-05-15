@@ -211,6 +211,18 @@
     <div class="commands" data-stage="reshape"></div>
   </section>
 
+  <!-- =================== NUMPY (reference) =================== -->
+  <section class="card" id="s-numpy">
+    <h2><span class="num">N</span> NumPy — the array layer beneath pandas</h2>
+    <div class="context">Every pandas column is a NumPy array underneath, and pandas borrows NumPy's vectorised arithmetic. Direct NumPy is needed when constructing data, generating reproducible random values, applying a vectorised conditional, or arranging data into the matrix form a modelling API expects.</div>
+
+    <div class="orient">
+      <strong>How to choose:</strong> Build arrays with <code>np.array</code>; build sequences with <code>np.arange</code> (by step) or <code>np.linspace</code> (by count); pre-allocate with <code>np.zeros</code> / <code>np.ones</code>. Use <code>np.where</code> for a vectorised if-else, <code>np.clip</code> to bound values, <code>np.log</code> to tame skew. For randomness, always go through a seeded <code>np.random.default_rng</code> so results are reproducible.
+    </div>
+
+    <div class="commands" data-stage="numpy"></div>
+  </section>
+
   <!-- =================== DECISIONS =================== -->
   <section class="card" id="decisions">
     <h2><span class="num">★</span> Decision boxes — the considered choices</h2>
