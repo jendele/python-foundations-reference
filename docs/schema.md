@@ -8,15 +8,17 @@ syntax-highlight spans) is permitted inside string fields and is injected via
 
 ## `corpus.json`
 
-Top-level array. Sorted by `stage` (in pipeline order:
-`load, inspect, clean, transform, aggregate, merge, visualize, export`) then by
-`id` alphabetically within each stage. Each entry is one command:
+Top-level array. Sorted by `stage` then by `id` alphabetically within each
+stage. The canonical stage order — pipeline stages first, then the §6
+reference stages — is the `STAGE_ORDER` constant in `scripts/sort-corpus.mjs`;
+run that script after editing to keep the file (and therefore the page) in
+order. Each entry is one command:
 
 | Field | Type | Meaning |
 |---|---|---|
 | `id` | string | Unique kebab/snake identifier; the DOM id is `cmd-<id>`. |
 | `code` | string | Canonical signature shown in the card summary. |
-| `stage` | string | One of: `load \| inspect \| clean \| transform \| aggregate \| merge \| visualize \| export \| stats \| strings \| datetime \| numpy \| reshape`. (v6 uses the first eight.) |
+| `stage` | string | One of: `load \| inspect \| clean \| transform \| aggregate \| merge \| visualize \| export` (the 8 pipeline stages) or the §6 reference stages `select \| stats \| strings \| datetime \| reshape \| numpy`. Each stage has a matching `<section>` in `index.html` with a `data-stage` mount. |
 | `short` | string | Single-sentence summary. |
 | `what` | string | Paragraph explanation; may contain glossary-link spans. |
 | `tokens` | array of `[snippet, explanation]` | Token-by-token decomposition of `code`. |
@@ -86,3 +88,17 @@ Object describing the single worked example:
 | `copyNote` | string | The label beside the copy button. |
 | `code` | string | The full Python script with verbatim syntax-highlight spans (`<span class="c\|k\|s\|h">`). Rendered inside `<pre class="full">`. |
 | `footerNote` | string | The closing note about reproducibility / real files. |
+
+## `errors.json`
+
+Object with `lede` (string, the section intro) and `items` (array). Each
+item is one error or warning students commonly hit:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `id` | string | Stable identifier; the DOM id is `err-<id>`. |
+| `symptom` | string | The message roughly as it appears to the student. |
+| `kind` | string | `error` or `warning`. Drives a colour cue in the UI. |
+| `cause` | string | Why it happens, in plain language; may contain `<code>`. |
+| `fix` | string | The concrete remedy; may contain `<code>`. |
+| `related` | string[] | Corpus `id`s the UI links to (the methods that resolve it). Every value must resolve to a real `corpus.json` entry. |

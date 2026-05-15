@@ -1,0 +1,85 @@
+{
+  "lede": "The errors and warnings students meet most often. Each gives the message as it appears, the underlying cause, the fix, and the command entry that resolves it. Read the last line of a traceback first: it names the exception type and message; the lines above show the path that reached it.",
+  "items": [
+    {
+      "id": "settingwithcopywarning",
+      "symptom": "SettingWithCopyWarning: A value is trying to be set on a copy of a slice from a DataFrame",
+      "kind": "warning",
+      "cause": "A value was assigned into the result of a filtering or slicing expression whose copy-or-view status pandas does not guarantee (chained indexing, e.g. <code>df[df.a > 0][\"b\"] = 1</code>). The write may land in a throwaway temporary and silently not reach the original.",
+      "fix": "Assign in one step through <code>.loc</code>: <code>df.loc[df.a &gt; 0, \"b\"] = 1</code>. If an independent subset is intended, take an explicit <code>.copy()</code> first and modify that.",
+      "related": ["copy_vs_view", "loc", "boolean_indexing"]
+    },
+    {
+      "id": "keyerror-column",
+      "symptom": "KeyError: 'colname'",
+      "kind": "error",
+      "cause": "A column (or index label) that does not exist was referenced — usually a typo, a trailing space in the header, or a different case than the file actually uses. Common immediately after <code>read_csv</code> when the delimiter was wrong, so the whole row landed in one column.",
+      "fix": "Print <code>df.columns.tolist()</code> and compare exactly. Strip header whitespace with <code>df.columns = df.columns.str.strip()</code>. If every field is in one column, fix the <code>sep=</code> argument of <code>read_csv</code>.",
+      "related": ["read_csv", "loc"]
+    },
+    {
+      "id": "keyerror-merge",
+      "symptom": "KeyError: 'patient_id' (during merge)",
+      "kind": "error",
+      "cause": "The key named in <code>on=</code> is not present in both DataFrames — frequently because the two sources spell the key differently (<code>patient_id</code> vs <code>PatientID</code>).",
+      "fix": "Use <code>left_on</code> / <code>right_on</code> when the names differ, or rename first. Verify both sides with <code>set(a.columns) &amp; set(b.columns)</code>.",
+      "related": ["merge"]
+    },
+    {
+      "id": "merge-row-explosion",
+      "symptom": "After merge the row count is far larger than expected",
+      "kind": "error",
+      "cause": "The join key is duplicated on both sides, so the merge is many-to-many and rows multiply combinatorially. No exception is raised — the result is just silently wrong.",
+      "fix": "State the expected cardinality with <code>validate=\"m:1\"</code> (or <code>\"1:1\"</code>); pandas then raises if the assumption is violated. Deduplicate the lookup table before joining.",
+      "related": ["merge"]
+    },
+    {
+      "id": "valueerror-ambiguous-truth",
+      "symptom": "ValueError: The truth value of a Series is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all()",
+      "kind": "error",
+      "cause": "Python <code>and</code> / <code>or</code> / <code>if</code> were applied to a whole boolean Series. Python cannot reduce an array of booleans to a single truth value.",
+      "fix": "Combine masks with the vectorised operators <code>&amp;</code> / <code>|</code> / <code>~</code>, wrapping each comparison in parentheses: <code>df[(df.a &gt; 0) &amp; (df.b &lt; 5)]</code>.",
+      "related": ["boolean_indexing"]
+    },
+    {
+      "id": "typeerror-datetime-compare",
+      "symptom": "TypeError: '<' not supported between instances of 'str' and 'Timestamp'",
+      "kind": "error",
+      "cause": "A column that looks like dates is still stored as strings (dtype object), so comparing it with a real timestamp fails — or sorting it orders lexically, not chronologically.",
+      "fix": "Parse the column once with <code>pd.to_datetime(df[\"col\"], errors=\"coerce\")</code> before any comparison, sort, or <code>.dt</code> access.",
+      "related": ["to_datetime", "dt_year"]
+    },
+    {
+      "id": "intcastingnan",
+      "symptom": "IntCastingNaNError / ValueError: cannot convert float NaN to integer",
+      "kind": "error",
+      "cause": "<code>astype(int)</code> was called on a column that contains NaN. The classic integer type has no missing-value representation.",
+      "fix": "Use the nullable integer dtype: <code>df[\"col\"].astype(\"Int64\")</code> (capital I). Or handle the NaN first with <code>fillna</code> / <code>dropna</code>.",
+      "related": ["astype", "fillna"]
+    },
+    {
+      "id": "nan-comparison",
+      "symptom": "Rows where a value equals NaN are not selected by == NaN",
+      "kind": "warning",
+      "cause": "NaN is not equal to anything, including itself, so <code>df[\"col\"] == np.nan</code> is always False and silently selects nothing.",
+      "fix": "Test missingness with <code>df[\"col\"].isna()</code> (and <code>.notna()</code> for the complement), never with <code>== NaN</code>.",
+      "related": ["isna_sum", "fillna"]
+    },
+    {
+      "id": "indexerror-iloc",
+      "symptom": "IndexError: single positional indexer is out-of-bounds",
+      "kind": "error",
+      "cause": "<code>iloc</code> was given a position beyond the number of rows or columns — often after a filter shrank the frame, or by confusing a label with a position.",
+      "fix": "Check <code>df.shape</code> first. Select by label with <code>loc</code> when the value, not the position, is what you know.",
+      "related": ["iloc", "loc"]
+    },
+    {
+      "id": "modulenotfounderror",
+      "symptom": "ModuleNotFoundError: No module named 'openpyxl'",
+      "kind": "error",
+      "cause": "An optional dependency required by the operation is not installed in the active environment — for example <code>openpyxl</code> for <code>.xlsx</code>, <code>pyarrow</code> for Parquet.",
+      "fix": "Install it into the running environment: <code>pip install openpyxl</code> (or <code>pyarrow</code>). In a notebook, restart the kernel afterwards.",
+      "related": ["read_excel", "read_parquet"]
+    }
+  ]
+}
