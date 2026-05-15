@@ -2151,5 +2151,745 @@
       "fast",
       "binary"
     ]
+  },
+  {
+    "id": "corr",
+    "code": "df.corr(numeric_only=True)",
+    "stage": "stats",
+    "short": "Pairwise correlation matrix of numeric columns.",
+    "what": "Returns a square DataFrame of pairwise Pearson correlation coefficients between every pair of numeric columns, each in the range −1 to 1. Pearson measures linear association only; <code>method='spearman'</code> gives a rank correlation robust to monotone non-linearity.",
+    "tokens": [
+      [
+        "df",
+        "The DataFrame whose numeric columns are correlated."
+      ],
+      [
+        ".corr(...)",
+        "Computes the pairwise correlation matrix."
+      ],
+      [
+        "numeric_only=True",
+        "Restricts the computation to numeric columns, avoiding errors on text."
+      ]
+    ],
+    "requires": [
+      "a DataFrame with at least two numeric columns"
+    ],
+    "important": [
+      "screening for linearly associated variables before modelling",
+      "a Spearman correlation is needed for monotone but non-linear relationships"
+    ],
+    "avoid": [
+      "inferring causation from a correlation",
+      "interpreting Pearson on clearly non-linear relationships"
+    ],
+    "reach": "When the strength of linear association between numeric variables must be screened, typically before regression or feature selection.",
+    "example": "<pre>c = df.corr(numeric_only=<span class=\"k\">True</span>)[<span class=\"s\">\"cost_eur\"</span>]</pre>",
+    "tags": [
+      "stats",
+      "corr",
+      "correlation",
+      "pearson",
+      "spearman",
+      "korrelation",
+      "association"
+    ]
+  },
+  {
+    "id": "cov",
+    "code": "df.cov(numeric_only=True)",
+    "stage": "stats",
+    "short": "Pairwise covariance matrix of numeric columns.",
+    "what": "Returns a square DataFrame of covariances between numeric columns. Covariance shares the sign of the correlation but its magnitude depends on the variables' units and scales, so it is rarely interpreted directly — it is an input to other procedures.",
+    "tokens": [
+      [
+        "df",
+        "The DataFrame whose numeric columns are used."
+      ],
+      [
+        ".cov(...)",
+        "Computes the pairwise covariance matrix."
+      ],
+      [
+        "numeric_only=True",
+        "Restricts to numeric columns."
+      ]
+    ],
+    "requires": [
+      "a DataFrame with at least two numeric columns"
+    ],
+    "important": [
+      "covariance is required as an input to a statistical method (PCA, portfolio variance)"
+    ],
+    "avoid": [
+      "interpreting covariance magnitude directly — standardise to a correlation instead"
+    ],
+    "reach": "When covariance is needed as an intermediate quantity for a downstream statistical computation.",
+    "example": "<pre>cov = df.cov(numeric_only=<span class=\"k\">True</span>)</pre>",
+    "tags": [
+      "stats",
+      "cov",
+      "covariance",
+      "kovarianz"
+    ]
+  },
+  {
+    "id": "cumsum",
+    "code": "df[\"col\"].cumsum()",
+    "stage": "stats",
+    "short": "Running (cumulative) sum.",
+    "what": "Returns a Series of the same length in which each element is the sum of all values up to and including that position. Order-dependent: sort the data meaningfully (typically by date) before applying it.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the numeric column."
+      ],
+      [
+        ".cumsum()",
+        "Produces the running total at each position."
+      ]
+    ],
+    "requires": [
+      "a numeric Series",
+      "a meaningful row order (usually sorted by time)"
+    ],
+    "important": [
+      "a cumulative total over time is required (running cost, cumulative admissions)"
+    ],
+    "avoid": [
+      "the data is unordered or the row order is arbitrary — the result is then meaningless"
+    ],
+    "reach": "When a running total along an ordered axis is required, such as cumulative cost over time.",
+    "example": "<pre>df[<span class=\"s\">\"cum_cost\"</span>] = df.sort_values(<span class=\"s\">\"date\"</span>)[<span class=\"s\">\"cost_eur\"</span>].cumsum()</pre>",
+    "tags": [
+      "stats",
+      "cumsum",
+      "cumulative",
+      "running total",
+      "kumulativ",
+      "laufende summe"
+    ]
+  },
+  {
+    "id": "diff",
+    "code": "df[\"col\"].diff()",
+    "stage": "stats",
+    "short": "Difference from the previous row.",
+    "what": "Returns a Series of the difference between each element and the one before it; the first element is NaN because it has no predecessor. Order-dependent — sort by the time axis first. <code>periods=n</code> differences against the value n rows earlier.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the numeric column."
+      ],
+      [
+        ".diff()",
+        "Subtracts each value's predecessor; first result is NaN."
+      ]
+    ],
+    "requires": [
+      "a numeric Series",
+      "the rows ordered by the relevant axis (usually time)"
+    ],
+    "important": [
+      "the period-on-period change (not the level) is the quantity of interest"
+    ],
+    "avoid": [
+      "the data is unordered",
+      "forgetting that the first value is NaN in any downstream aggregation"
+    ],
+    "reach": "When the change from one ordered observation to the next is required, such as daily change in admissions.",
+    "example": "<pre>df[<span class=\"s\">\"change\"</span>] = df.sort_values(<span class=\"s\">\"date\"</span>)[<span class=\"s\">\"admissions\"</span>].diff()</pre>",
+    "tags": [
+      "stats",
+      "diff",
+      "difference",
+      "change",
+      "differenz",
+      "veränderung"
+    ]
+  },
+  {
+    "id": "idxmax",
+    "code": "df[\"col\"].idxmax()",
+    "stage": "stats",
+    "short": "Index label of the maximum value.",
+    "what": "Returns the index label (not the value, not the position) at which the column attains its maximum. On a DataFrame, <code>df.idxmax()</code> returns, per column, the index label of that column's maximum. Distinct from <code>max</code> (the value) and <code>argmax</code> (the integer position).",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the column to search."
+      ],
+      [
+        ".idxmax()",
+        "Returns the index label where the maximum occurs."
+      ]
+    ],
+    "requires": [
+      "a Series with at least one non-missing value",
+      "a meaningful index (often set with <code>set_index</code>)"
+    ],
+    "important": [
+      "the identity of the row achieving the maximum is wanted, not the maximum itself",
+      "the index has been set to a meaningful key"
+    ],
+    "avoid": [
+      "the maximum value itself is needed (use <code>max</code>)",
+      "the positional location is needed (use <code>argmax</code>)",
+      "all values are NaN (raises)"
+    ],
+    "reach": "When the question is which row attains the maximum — for example which ward has the longest mean stay.",
+    "example": "<pre>worst = df.groupby(<span class=\"s\">\"ward\"</span>)[<span class=\"s\">\"los_days\"</span>].mean().idxmax()</pre>",
+    "tags": [
+      "stats",
+      "idxmax",
+      "argmax",
+      "which",
+      "label",
+      "maximum",
+      "welcher"
+    ]
+  },
+  {
+    "id": "idxmin",
+    "code": "df[\"col\"].idxmin()",
+    "stage": "stats",
+    "short": "Index label of the minimum value.",
+    "what": "Returns the index label at which the column attains its minimum — the counterpart of <code>idxmax</code>. Returns the label, not the value (<code>min</code>) and not the integer position (<code>argmin</code>).",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the column to search."
+      ],
+      [
+        ".idxmin()",
+        "Returns the index label where the minimum occurs."
+      ]
+    ],
+    "requires": [
+      "a Series with at least one non-missing value",
+      "a meaningful index"
+    ],
+    "important": [
+      "the identity of the row achieving the minimum is wanted"
+    ],
+    "avoid": [
+      "the minimum value itself is needed (use <code>min</code>)",
+      "all values are NaN (raises)"
+    ],
+    "reach": "When the question is which row attains the minimum, such as the least profitable DRG.",
+    "example": "<pre>cheapest = df.groupby(<span class=\"s\">\"drg_code\"</span>)[<span class=\"s\">\"cost_eur\"</span>].mean().idxmin()</pre>",
+    "tags": [
+      "stats",
+      "idxmin",
+      "argmin",
+      "which",
+      "label",
+      "minimum",
+      "welcher"
+    ]
+  },
+  {
+    "id": "kurt",
+    "code": "df[\"col\"].kurt()",
+    "stage": "stats",
+    "short": "Tailedness of a distribution (excess kurtosis).",
+    "what": "Returns the excess kurtosis (Fisher definition): zero for a normal distribution, positive for heavier tails and a sharper peak, negative for lighter tails. Indicates the propensity for extreme values relative to the normal.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the numeric column."
+      ],
+      [
+        ".kurt()",
+        "Returns the excess kurtosis (0 for a normal distribution)."
+      ]
+    ],
+    "requires": [
+      "a numeric Series with at least four values"
+    ],
+    "important": [
+      "assessing the prevalence of extreme values before relying on methods that assume normality"
+    ],
+    "avoid": [
+      "interpreting kurtosis on a small sample, where it is highly variable"
+    ],
+    "reach": "When the heaviness of a distribution's tails must be assessed, for instance before applying a method that assumes normality.",
+    "example": "<pre>k = df[<span class=\"s\">\"los_days\"</span>].kurt()</pre>",
+    "tags": [
+      "stats",
+      "kurt",
+      "kurtosis",
+      "kurtosis",
+      "tails",
+      "wölbung"
+    ]
+  },
+  {
+    "id": "mean",
+    "code": "df[\"col\"].mean()",
+    "stage": "stats",
+    "short": "Arithmetic mean of a numeric Series.",
+    "what": "Returns the sum of the values divided by their count. NaN is skipped by default, so the mean is taken over the present values only. Sensitive to outliers: a single extreme value shifts it noticeably.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the numeric column to summarise."
+      ],
+      [
+        ".mean()",
+        "Reduces the Series to a single number — the average."
+      ]
+    ],
+    "requires": [
+      "a numeric (or boolean) Series"
+    ],
+    "important": [
+      "the distribution is roughly symmetric, so the mean represents a typical value",
+      "the mean of a boolean Series is required — it is the proportion of <code>True</code>"
+    ],
+    "avoid": [
+      "the distribution is skewed or has outliers (prefer <code>median</code>)",
+      "the column is categorical or an identifier"
+    ],
+    "reach": "When a single representative value of a numeric column is required and the distribution is not strongly skewed.",
+    "example": "<pre>avg = df[<span class=\"s\">\"los_days\"</span>].mean()</pre>",
+    "tags": [
+      "stats",
+      "mean",
+      "average",
+      "durchschnitt",
+      "mittelwert",
+      "central"
+    ]
+  },
+  {
+    "id": "median",
+    "code": "df[\"col\"].median()",
+    "stage": "stats",
+    "short": "Middle value of a numeric Series.",
+    "what": "Returns the value separating the higher half from the lower half of the sorted column. Robust to outliers and skew: unlike the mean, extreme values do not pull it.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the numeric column."
+      ],
+      [
+        ".median()",
+        "Reduces to the central value of the sorted data."
+      ]
+    ],
+    "requires": [
+      "a numeric Series"
+    ],
+    "important": [
+      "the distribution is skewed or contains outliers",
+      "a robust measure of central tendency is required for reporting"
+    ],
+    "avoid": [
+      "a value that can be arithmetically combined downstream is needed and the data is symmetric (the mean is then conventional)"
+    ],
+    "reach": "When a typical value is required and the column is skewed or contains outliers — the default choice for length-of-stay, cost, or income style data.",
+    "example": "<pre>typical = df[<span class=\"s\">\"cost_eur\"</span>].median()</pre>",
+    "tags": [
+      "stats",
+      "median",
+      "zentralwert",
+      "robust",
+      "central",
+      "middle"
+    ]
+  },
+  {
+    "id": "mode",
+    "code": "df[\"col\"].mode()",
+    "stage": "stats",
+    "short": "Most frequent value(s) of a Series.",
+    "what": "Returns a Series of the value(s) that occur most often. The result may contain more than one entry when several values tie for the highest frequency, which is why a Series rather than a scalar is returned.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the column, numeric or categorical."
+      ],
+      [
+        ".mode()",
+        "Returns the most frequent value(s) as a Series."
+      ]
+    ],
+    "requires": [
+      "a Series with at least one non-missing value"
+    ],
+    "important": [
+      "the column is categorical and the most common category is of interest",
+      "a single value is required — take <code>.mode().iloc[0]</code>, acknowledging ties"
+    ],
+    "avoid": [
+      "a continuous numeric column where no value repeats meaningfully"
+    ],
+    "reach": "When the most common category or value is the quantity of interest, typically for categorical data.",
+    "example": "<pre>most_common = df[<span class=\"s\">\"ward\"</span>].mode().iloc[<span class=\"s\">0</span>]</pre>",
+    "tags": [
+      "stats",
+      "mode",
+      "frequent",
+      "modus",
+      "häufigster",
+      "categorical"
+    ]
+  },
+  {
+    "id": "nunique",
+    "code": "df[\"col\"].nunique()",
+    "stage": "stats",
+    "short": "Number of distinct values.",
+    "what": "Returns the count of distinct non-missing values in the column. NaN is excluded by default; pass <code>dropna=False</code> to count it as one further value. Used to gauge cardinality before grouping, pivoting, or treating a column as categorical.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the column."
+      ],
+      [
+        ".nunique()",
+        "Counts how many distinct values it contains."
+      ]
+    ],
+    "requires": [
+      "a Series"
+    ],
+    "important": [
+      "the cardinality of a key must be checked before a pivot or a wide reshape",
+      "deciding whether a column is effectively categorical"
+    ],
+    "avoid": [
+      "confusing it with <code>count</code> (number of non-missing rows) — <code>nunique</code> counts distinct values"
+    ],
+    "reach": "When the number of distinct categories or keys must be known, typically before grouping or reshaping.",
+    "example": "<pre>n_wards = df[<span class=\"s\">\"ward\"</span>].nunique()</pre>",
+    "tags": [
+      "stats",
+      "nunique",
+      "distinct",
+      "unique",
+      "cardinality",
+      "verschiedene"
+    ]
+  },
+  {
+    "id": "pct_change",
+    "code": "df[\"col\"].pct_change()",
+    "stage": "stats",
+    "short": "Fractional change from the previous row.",
+    "what": "Returns the fractional change between each element and the previous one: (xₜ − xₜ₋₁) / xₜ₋₁. The first element is NaN. Multiply by 100 for a percentage. Order-dependent and undefined where the previous value is zero.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the numeric column."
+      ],
+      [
+        ".pct_change()",
+        "Computes the fractional change against the previous row."
+      ]
+    ],
+    "requires": [
+      "a numeric Series ordered by the relevant axis",
+      "non-zero previous values"
+    ],
+    "important": [
+      "a growth rate rather than an absolute change is required"
+    ],
+    "avoid": [
+      "the previous value can be zero (division yields inf or NaN)",
+      "the data is unordered"
+    ],
+    "reach": "When a period-on-period growth rate is required, such as month-on-month change in cost.",
+    "example": "<pre>df[<span class=\"s\">\"growth\"</span>] = df.sort_values(<span class=\"s\">\"month\"</span>)[<span class=\"s\">\"cost_eur\"</span>].pct_change()</pre>",
+    "tags": [
+      "stats",
+      "pct_change",
+      "growth",
+      "percentage change",
+      "wachstum",
+      "rate"
+    ]
+  },
+  {
+    "id": "quantile",
+    "code": "df[\"col\"].quantile([0.25, 0.5, 0.75])",
+    "stage": "stats",
+    "short": "Value(s) at the given quantile position(s).",
+    "what": "Returns the value below which the given fraction of the data falls. A scalar argument returns one value; a list returns a Series indexed by the requested quantiles. The interquartile range is <code>quantile(0.75) − quantile(0.25)</code>.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the numeric column."
+      ],
+      [
+        ".quantile(...)",
+        "Computes the value at the requested quantile(s)."
+      ],
+      [
+        "[0.25, 0.5, 0.75]",
+        "The quantile positions; here the three quartiles."
+      ]
+    ],
+    "requires": [
+      "a numeric Series",
+      "quantile arguments in the range 0 to 1"
+    ],
+    "important": [
+      "a robust description of spread is required (the IQR)",
+      "thresholds such as the top decile must be located"
+    ],
+    "avoid": [
+      "a very small sample, where quantile estimates are unstable"
+    ],
+    "reach": "When robust spread (the IQR) or a distributional threshold such as a percentile cut-off is required.",
+    "example": "<pre>q1, q3 = df[<span class=\"s\">\"cost_eur\"</span>].quantile([<span class=\"s\">0.25</span>, <span class=\"s\">0.75</span>])\niqr = q3 - q1</pre>",
+    "tags": [
+      "stats",
+      "quantile",
+      "percentile",
+      "quartile",
+      "iqr",
+      "quantil",
+      "threshold"
+    ]
+  },
+  {
+    "id": "rank",
+    "code": "df[\"col\"].rank(method=\"dense\", ascending=False)",
+    "stage": "stats",
+    "short": "Ordinal rank of each value.",
+    "what": "Returns a Series assigning each value its rank within the column. <code>method</code> controls tie handling: <code>'average'</code> (default) averages tied ranks, <code>'min'</code> assigns the lowest, <code>'dense'</code> leaves no gaps after ties. <code>ascending=False</code> ranks the largest value first.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the numeric column to rank."
+      ],
+      [
+        ".rank(...)",
+        "Assigns an ordinal rank to each value."
+      ],
+      [
+        "method=\"dense\"",
+        "Tie policy: equal values share a rank and the next rank is not skipped."
+      ],
+      [
+        "ascending=False",
+        "Largest value receives rank 1."
+      ]
+    ],
+    "requires": [
+      "a numeric Series",
+      "an explicit tie policy via <code>method</code> when ties are likely"
+    ],
+    "important": [
+      "a ranking (league table) is required rather than the raw values",
+      "ties must be handled by a stated rule"
+    ],
+    "avoid": [
+      "leaving the tie policy implicit when ties matter to the result"
+    ],
+    "reach": "When values must be turned into a ranking, for instance to build a league table of wards by cost.",
+    "example": "<pre>df[<span class=\"s\">\"rank\"</span>] = df[<span class=\"s\">\"cost_eur\"</span>].rank(method=<span class=\"s\">\"dense\"</span>, ascending=<span class=\"k\">False</span>)</pre>",
+    "tags": [
+      "stats",
+      "rank",
+      "ranking",
+      "rang",
+      "league table",
+      "ordinal",
+      "ties"
+    ]
+  },
+  {
+    "id": "skew",
+    "code": "df[\"col\"].skew()",
+    "stage": "stats",
+    "short": "Asymmetry of a distribution.",
+    "what": "Returns the skewness coefficient. Approximately zero indicates a symmetric distribution; positive indicates a long right tail (mean above median); negative a long left tail. A useful numeric check of whether the mean or the median is the better summary.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the numeric column."
+      ],
+      [
+        ".skew()",
+        "Returns the skewness coefficient."
+      ]
+    ],
+    "requires": [
+      "a numeric Series with at least three values"
+    ],
+    "important": [
+      "deciding between mean and median as the central summary",
+      "checking a modelling assumption of symmetry"
+    ],
+    "avoid": [
+      "interpreting skew on a very small sample"
+    ],
+    "reach": "When the symmetry of a distribution must be quantified, often to justify choosing the median over the mean.",
+    "example": "<pre>s = df[<span class=\"s\">\"cost_eur\"</span>].skew()</pre>",
+    "tags": [
+      "stats",
+      "skew",
+      "skewness",
+      "schiefe",
+      "asymmetry",
+      "distribution"
+    ]
+  },
+  {
+    "id": "std",
+    "code": "df[\"col\"].std()",
+    "stage": "stats",
+    "short": "Sample standard deviation of a Series.",
+    "what": "Returns the spread of the values about their mean, in the same unit as the data. pandas uses the sample standard deviation (divisor n−1) by default; pass <code>ddof=0</code> for the population value.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the numeric column."
+      ],
+      [
+        ".std()",
+        "Reduces to the sample standard deviation (<code>ddof=1</code>)."
+      ]
+    ],
+    "requires": [
+      "a numeric Series with at least two values"
+    ],
+    "important": [
+      "the dispersion of a roughly symmetric distribution is required",
+      "results are compared with the mean (same unit)"
+    ],
+    "avoid": [
+      "the distribution is heavily skewed (the IQR via <code>quantile</code> is more interpretable)",
+      "comparing spread across columns on different scales without standardising"
+    ],
+    "reach": "When the variability of a numeric column must be quantified alongside its mean.",
+    "example": "<pre>spread = df[<span class=\"s\">\"cost_eur\"</span>].std()</pre>",
+    "tags": [
+      "stats",
+      "std",
+      "standard deviation",
+      "spread",
+      "streuung",
+      "dispersion",
+      "ddof"
+    ]
+  },
+  {
+    "id": "unique",
+    "code": "df[\"col\"].unique()",
+    "stage": "stats",
+    "short": "The distinct values themselves, as an array.",
+    "what": "Returns a NumPy array of the distinct values in order of first appearance (not sorted). Use it to inspect which categories actually occur — for example to discover inconsistent spellings before normalising.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the column."
+      ],
+      [
+        ".unique()",
+        "Returns the distinct values as an array, in order of appearance."
+      ]
+    ],
+    "requires": [
+      "a Series"
+    ],
+    "important": [
+      "the actual set of categories must be inspected (e.g. to find inconsistent labels)"
+    ],
+    "avoid": [
+      "only the number of distinct values is needed (use <code>nunique</code>)",
+      "a sorted, counted view is wanted (use <code>value_counts</code>)"
+    ],
+    "reach": "When the concrete set of values present in a column must be examined, often during cleaning.",
+    "example": "<pre>labels = df[<span class=\"s\">\"gender\"</span>].unique()</pre>",
+    "tags": [
+      "stats",
+      "unique",
+      "distinct",
+      "categories",
+      "verschiedene",
+      "inspect"
+    ]
+  },
+  {
+    "id": "value_counts_normalize",
+    "code": "df[\"col\"].value_counts(normalize=True)",
+    "stage": "stats",
+    "short": "Relative frequency of each category.",
+    "what": "Returns a Series whose index is the distinct values and whose values are their proportions of the total, sorted descending. Equivalent to <code>value_counts()</code> divided by the count, but computed in one step. NaN is excluded unless <code>dropna=False</code>.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the column whose category proportions are wanted."
+      ],
+      [
+        ".value_counts(...)",
+        "Counts occurrences of each distinct value."
+      ],
+      [
+        "normalize=True",
+        "Returns proportions (summing to 1) rather than raw counts."
+      ]
+    ],
+    "requires": [
+      "a Series, typically categorical or low-cardinality"
+    ],
+    "important": [
+      "the share of each category is more informative than the raw count",
+      "class balance must be assessed before modelling"
+    ],
+    "avoid": [
+      "a continuous numeric column with many distinct values (the result is long and uninformative)"
+    ],
+    "reach": "When the proportion of each category — rather than its absolute count — answers the question, such as assessing class balance.",
+    "example": "<pre>shares = df[<span class=\"s\">\"ward\"</span>].value_counts(normalize=<span class=\"k\">True</span>)</pre>",
+    "tags": [
+      "stats",
+      "value_counts",
+      "normalize",
+      "proportion",
+      "frequency",
+      "anteil",
+      "balance"
+    ]
+  },
+  {
+    "id": "var",
+    "code": "df[\"col\"].var()",
+    "stage": "stats",
+    "short": "Sample variance of a Series.",
+    "what": "Returns the mean squared deviation from the mean, the square of the standard deviation. Its unit is the square of the data's unit, which makes the standard deviation usually preferable for reporting.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the numeric column."
+      ],
+      [
+        ".var()",
+        "Reduces to the sample variance (<code>ddof=1</code>)."
+      ]
+    ],
+    "requires": [
+      "a numeric Series with at least two values"
+    ],
+    "important": [
+      "variance is required directly, for example in a statistical formula or an ANOVA-style decomposition"
+    ],
+    "avoid": [
+      "reporting spread to a reader — the standard deviation is in the data's own unit and is more interpretable"
+    ],
+    "reach": "When variance is needed as an input to a further statistical computation rather than for direct interpretation.",
+    "example": "<pre>v = df[<span class=\"s\">\"los_days\"</span>].var()</pre>",
+    "tags": [
+      "stats",
+      "var",
+      "variance",
+      "varianz",
+      "spread",
+      "ddof"
+    ]
   }
 ]

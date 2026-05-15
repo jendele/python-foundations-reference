@@ -151,6 +151,18 @@
     <div class="commands" data-stage="export"></div>
   </section>
 
+  <!-- =================== STATISTICS (reference) =================== -->
+  <section class="card" id="s-stats">
+    <h2><span class="num">Σ</span> Statistics — describing and summarising columns</h2>
+    <div class="context">Beyond the pipeline, a recurring need is to describe a single column or the relationship between columns: its centre, its spread, its shape, its extremes, and its distinct values. These reductions answer questions of the form "what is typical", "how variable", and "which is the largest".</div>
+
+    <div class="orient">
+      <strong>How to choose:</strong> For a typical value, prefer <code>median</code> over <code>mean</code> when the column is skewed or has outliers. For spread, <code>std</code> accompanies the mean; the interquartile range via <code>quantile</code> accompanies the median. To find <em>which</em> row attains an extreme, use <code>idxmax</code> / <code>idxmin</code>, not <code>max</code> / <code>min</code>. For categorical columns, <code>value_counts</code> and <code>nunique</code> replace the numeric summaries.
+    </div>
+
+    <div class="commands" data-stage="stats"></div>
+  </section>
+
   <!-- =================== DECISIONS =================== -->
   <section class="card" id="decisions">
     <h2><span class="num">★</span> Decision boxes — the considered choices</h2>

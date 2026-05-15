@@ -2,6 +2,21 @@
 // proved the render logic correct against real data; this confirms it in
 // an actual browser and captures any console error.
 import { chromium } from "playwright";
+import { readFileSync } from "node:fs";
+
+// Expected counts derive from the data files so the check stays correct as
+// §6 grows, instead of hardcoded baselines that rot on every content commit.
+const corpus = JSON.parse(readFileSync("data/corpus.json", "utf8"));
+const decisionsData = JSON.parse(readFileSync("data/decisions.json", "utf8"));
+const EXPECT_CARDS = corpus.length;
+// One stage bar per distinct corpus stage that has a section, plus the
+// decisions and worked-example bars.
+const EXPECT_STAGES = new Set(corpus.map(c => c.stage)).size;
+const EXPECT_BARS = EXPECT_STAGES + 2;
+const EXPECT_BOXES = decisionsData.boxes.length;
+const allOpts = decisionsData.boxes.flatMap(b => b.options);
+const EXPECT_OPTS = allOpts.length;
+const kindCount = k => allOpts.filter(o => o.kind === k).length;
 
 const browser = await chromium.launch();
 const page = await browser.newPage();
@@ -44,13 +59,13 @@ const askHits = await page.evaluate(() => document.querySelectorAll("#suggestion
 await browser.close();
 
 const checks = [
-  ["stage bars = 10 (8 stages + decisions + example)", r.stageBars === 10],
-  ["command cards = 57", r.cmds === 57],
-  ["decision boxes = 3", r.decisions === 3],
-  ["decision options = 16", r.opts === 16],
-  ["kill options = 2", r.killOpts === 2],
-  ["fill options = 13", r.fillOpts === 13],
-  ["ignore options = 1", r.ignoreOpts === 1],
+  [`stage bars = ${EXPECT_BARS} (${EXPECT_STAGES} stages + decisions + example)`, r.stageBars === EXPECT_BARS],
+  [`command cards = ${EXPECT_CARDS} (every corpus entry rendered)`, r.cmds === EXPECT_CARDS],
+  [`decision boxes = ${EXPECT_BOXES}`, r.decisions === EXPECT_BOXES],
+  [`decision options = ${EXPECT_OPTS}`, r.opts === EXPECT_OPTS],
+  [`kill options = ${kindCount("kill")}`, r.killOpts === kindCount("kill")],
+  [`fill options = ${kindCount("fill")}`, r.fillOpts === kindCount("fill")],
+  [`ignore options = ${kindCount("ignore")}`, r.ignoreOpts === kindCount("ignore")],
   ["example code round-trips (16177 chars HTML)", r.exampleCodeHTML === 16177],
   ["example code keeps highlight spans", r.exampleHasSpans],
   ["glossary auto-links present (>50)", r.glossaryLinks > 50],
