@@ -199,6 +199,18 @@
     <div class="commands" data-stage="datetime"></div>
   </section>
 
+  <!-- =================== RESHAPE (reference) =================== -->
+  <section class="card" id="s-reshape">
+    <h2><span class="num">⇄</span> Reshape — changing the table's layout</h2>
+    <div class="context">The same data can be held in a <em>long</em> (tidy) layout — one observation per row — or a <em>wide</em> layout — one row per entity with measures spread across columns. Analysis and grouping want long; display and matrices want wide. Reshaping moves between the two; it changes layout, not content.</div>
+
+    <div class="orient">
+      <strong>How to choose:</strong> Wide to long: <code>melt</code> (named columns) or <code>stack</code> (column index). Long to wide: <code>pivot</code> when each cell is unique, <code>pivot_table</code> when duplicates must be aggregated, <code>unstack</code> to lift an index level from a grouped result. Use <code>explode</code> to turn list-valued cells into rows, and <code>crosstab</code> for a contingency table of two categoricals.
+    </div>
+
+    <div class="commands" data-stage="reshape"></div>
+  </section>
+
   <!-- =================== DECISIONS =================== -->
   <section class="card" id="decisions">
     <h2><span class="num">★</span> Decision boxes — the considered choices</h2>

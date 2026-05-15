@@ -4183,5 +4183,243 @@
       "frequency",
       "zeitreihe"
     ]
+  },
+  {
+    "id": "crosstab",
+    "code": "pd.crosstab(df[\"ward\"], df[\"gender\"])",
+    "stage": "reshape",
+    "short": "Frequency table of two categorical variables.",
+    "what": "Builds a contingency table: rows are the distinct values of the first argument, columns those of the second, cells the counts of co-occurrence. <code>normalize='index'</code> turns counts into row proportions; <code>values=</code> with <code>aggfunc=</code> summarises a third column instead of counting.",
+    "tokens": [
+      [
+        "pd.crosstab(",
+        "Builds a cross-tabulation of two categoricals."
+      ],
+      [
+        "df[\"ward\"]",
+        "Values become the rows of the table."
+      ],
+      [
+        "df[\"gender\"]",
+        "Values become the columns of the table."
+      ]
+    ],
+    "requires": [
+      "two aligned categorical Series"
+    ],
+    "important": [
+      "the joint distribution of two categories is the question",
+      "row or column proportions are wanted (use <code>normalize=</code>)"
+    ],
+    "avoid": [
+      "high-cardinality inputs (the table becomes unreadable)",
+      "using it to aggregate a measure without <code>values</code> and <code>aggfunc</code>"
+    ],
+    "reach": "When the relationship between two categorical variables must be shown as a contingency table.",
+    "example": "<pre>tab = pd.crosstab(df[<span class=\"s\">\"ward\"</span>], df[<span class=\"s\">\"gender\"</span>], normalize=<span class=\"s\">\"index\"</span>)</pre>",
+    "tags": [
+      "reshape",
+      "crosstab",
+      "contingency",
+      "frequency table",
+      "kreuztabelle"
+    ]
+  },
+  {
+    "id": "explode",
+    "code": "df.explode(\"tags\")",
+    "stage": "reshape",
+    "short": "Expand list-valued cells into one row each.",
+    "what": "Takes a column whose cells are lists and produces one row per list element, repeating the other columns. The natural follow-up to <code>str.split</code> or <code>str.findall</code> when each original row should become several.",
+    "tokens": [
+      [
+        "df.explode(",
+        "Expands list-like cells into separate rows."
+      ],
+      [
+        "\"tags\"",
+        "The column whose lists are unpacked, one element per new row."
+      ]
+    ],
+    "requires": [
+      "a column whose values are lists (or list-like)"
+    ],
+    "important": [
+      "a multi-valued field must become one row per value for grouping or counting"
+    ],
+    "avoid": [
+      "the column is not list-like (no expansion occurs)",
+      "forgetting that empty lists yield a single NaN row"
+    ],
+    "reach": "When a column holds multiple values per row that must each become their own row.",
+    "example": "<pre>per_tag = df.assign(tags=df[<span class=\"s\">\"tags\"</span>].str.split(<span class=\"s\">\",\"</span>)).explode(<span class=\"s\">\"tags\"</span>)</pre>",
+    "tags": [
+      "reshape",
+      "explode",
+      "lists",
+      "one row per",
+      "split",
+      "aufteilen"
+    ]
+  },
+  {
+    "id": "melt",
+    "code": "df.melt(id_vars=\"patient_id\", var_name=\"metric\", value_name=\"value\")",
+    "stage": "reshape",
+    "short": "Wide → long: collapse many columns into key/value rows.",
+    "what": "Unpivots a wide table: the columns named in <code>id_vars</code> are kept as identifiers, every other column becomes two columns — one holding the former column name, one holding its value. The inverse of <code>pivot</code>, and the step that turns a spreadsheet-shaped table into tidy long form.",
+    "tokens": [
+      [
+        "df.melt(",
+        "Unpivots wide columns into long key/value rows."
+      ],
+      [
+        "id_vars=\"patient_id\"",
+        "Column(s) that identify a row and are kept as-is."
+      ],
+      [
+        "var_name=\"metric\"",
+        "Name for the new column holding the former column names."
+      ],
+      [
+        "value_name=\"value\"",
+        "Name for the new column holding the values."
+      ]
+    ],
+    "requires": [
+      "a wide DataFrame with several measure columns",
+      "the identifier column(s) to preserve"
+    ],
+    "important": [
+      "a spreadsheet-shaped table must be made tidy (one observation per row) for plotting or grouping"
+    ],
+    "avoid": [
+      "melting columns of incompatible meaning into one value column"
+    ],
+    "reach": "When a wide, spreadsheet-style table must be converted to tidy long form before grouping or plotting.",
+    "example": "<pre>long = df.melt(id_vars=<span class=\"s\">\"patient_id\"</span>,\n               var_name=<span class=\"s\">\"metric\"</span>, value_name=<span class=\"s\">\"value\"</span>)</pre>",
+    "tags": [
+      "reshape",
+      "melt",
+      "wide to long",
+      "unpivot",
+      "tidy",
+      "umformen"
+    ]
+  },
+  {
+    "id": "pivot",
+    "code": "df.pivot(index=\"date\", columns=\"ward\", values=\"los_days\")",
+    "stage": "reshape",
+    "short": "Long → wide: spread one column into many.",
+    "what": "Reshapes long data to wide: distinct values of <code>columns</code> become new column headers, indexed by <code>index</code>, filled from <code>values</code>. Unlike <code>pivot_table</code> it does not aggregate — it raises if an (index, column) pair is duplicated, which makes it a strict reshape.",
+    "tokens": [
+      [
+        "df.pivot(",
+        "Spreads a long table into wide form (no aggregation)."
+      ],
+      [
+        "index=\"date\"",
+        "Column whose values become the row index."
+      ],
+      [
+        "columns=\"ward\"",
+        "Column whose distinct values become new columns."
+      ],
+      [
+        "values=\"los_days\"",
+        "Column supplying the cell values."
+      ]
+    ],
+    "requires": [
+      "long-format data",
+      "at most one value per (index, column) pair"
+    ],
+    "important": [
+      "a tidy table must be turned into a wide display or matrix and no aggregation is wanted"
+    ],
+    "avoid": [
+      "duplicate (index, column) pairs exist — <code>pivot</code> raises; use <code>pivot_table</code> with an <code>aggfunc</code> instead"
+    ],
+    "reach": "When tidy long data must be spread into a wide matrix and each cell is uniquely determined.",
+    "example": "<pre>wide = df.pivot(index=<span class=\"s\">\"date\"</span>, columns=<span class=\"s\">\"ward\"</span>, values=<span class=\"s\">\"los_days\"</span>)</pre>",
+    "tags": [
+      "reshape",
+      "pivot",
+      "long to wide",
+      "spread",
+      "umformen"
+    ]
+  },
+  {
+    "id": "stack",
+    "code": "wide.stack()",
+    "stage": "reshape",
+    "short": "Move column labels down into the row index.",
+    "what": "Compresses the columns into the index: the result is a Series (or DataFrame) with an additional innermost index level taken from the former column labels. The usual way to turn a wide matrix back into a long, indexed series. NaN cells are dropped by default.",
+    "tokens": [
+      [
+        "wide",
+        "A wide DataFrame, often the result of a pivot."
+      ],
+      [
+        ".stack()",
+        "Pushes the column labels into a new innermost index level."
+      ]
+    ],
+    "requires": [
+      "a wide DataFrame (typically with a meaningful column index)"
+    ],
+    "important": [
+      "a wide matrix must be returned to a long, multi-indexed Series for further computation"
+    ],
+    "avoid": [
+      "expecting NaN cells to be retained (pass <code>dropna=False</code>)"
+    ],
+    "reach": "When a wide table must be folded back into a long, indexed form — the inverse of unstack.",
+    "example": "<pre>long = wide.stack().rename(<span class=\"s\">\"value\"</span>).reset_index()</pre>",
+    "tags": [
+      "reshape",
+      "stack",
+      "wide to long",
+      "multiindex",
+      "umformen"
+    ]
+  },
+  {
+    "id": "unstack",
+    "code": "grouped.unstack(\"ward\")",
+    "stage": "reshape",
+    "short": "Move an index level up into the columns.",
+    "what": "Pivots an index level into the columns — the inverse of <code>stack</code>. Most often applied to the MultiIndex Series produced by grouping on two keys, to obtain a readable wide table (one key down the rows, the other across the columns).",
+    "tokens": [
+      [
+        "grouped",
+        "A Series/DataFrame with a MultiIndex, e.g. from a two-key groupby."
+      ],
+      [
+        ".unstack(\"ward\")",
+        "Lifts the 'ward' index level up to become columns."
+      ]
+    ],
+    "requires": [
+      "a MultiIndex with at least two levels"
+    ],
+    "important": [
+      "a two-key grouped result must be presented as a wide cross-tabulation"
+    ],
+    "avoid": [
+      "unstacking a high-cardinality level (produces an unmanageably wide table)"
+    ],
+    "reach": "When a multi-key grouped Series must be reshaped into a readable wide table for display.",
+    "example": "<pre>table = (df.groupby([<span class=\"s\">\"month\"</span>, <span class=\"s\">\"ward\"</span>])[<span class=\"s\">\"los_days\"</span>]\n           .mean().unstack(<span class=\"s\">\"ward\"</span>))</pre>",
+    "tags": [
+      "reshape",
+      "unstack",
+      "long to wide",
+      "multiindex",
+      "pivot",
+      "umformen"
+    ]
   }
 ]
