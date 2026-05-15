@@ -3217,5 +3217,327 @@
       "spread",
       "ddof"
     ]
+  },
+  {
+    "id": "at",
+    "code": "df.at[label, \"col\"]",
+    "stage": "select",
+    "short": "Fast access to a single cell by label.",
+    "what": "Reads or writes one scalar cell, addressed by row label and column name. Faster than <code>loc</code> for a single value because it does no alignment or slicing — but it works only for exactly one cell.",
+    "tokens": [
+      [
+        "df.at[",
+        "Scalar label accessor (single cell only)."
+      ],
+      [
+        "label",
+        "The row's index label."
+      ],
+      [
+        "\"col\"",
+        "The column name."
+      ]
+    ],
+    "requires": [
+      "a unique row label and a column name",
+      "the target being a single cell, not a range"
+    ],
+    "important": [
+      "one specific cell must be read or updated in a tight loop or hot path"
+    ],
+    "avoid": [
+      "selecting more than one cell (use <code>loc</code>)",
+      "the label is not unique"
+    ],
+    "reach": "When exactly one cell must be read or set and performance of repeated single-cell access matters.",
+    "example": "<pre>df.at[<span class=\"s\">42</span>, <span class=\"s\">\"status\"</span>] = <span class=\"s\">\"closed\"</span></pre>",
+    "tags": [
+      "select",
+      "at",
+      "scalar",
+      "single cell",
+      "fast",
+      "zelle"
+    ]
+  },
+  {
+    "id": "boolean_indexing",
+    "code": "df[df[\"age\"] > 65]",
+    "stage": "select",
+    "short": "Select rows with a boolean mask.",
+    "what": "A comparison on a column produces a boolean Series (the mask); indexing the DataFrame with it returns the rows where the mask is True. Combine conditions with <code>&</code> (and), <code>|</code> (or), <code>~</code> (not), each operand wrapped in parentheses because these operators bind tighter than comparison.",
+    "tokens": [
+      [
+        "df[\"age\"] > 65",
+        "A comparison yielding a boolean Series — True where the row qualifies."
+      ],
+      [
+        "df[ ... ]",
+        "Selecting with that boolean Series keeps only the True rows."
+      ]
+    ],
+    "requires": [
+      "a condition that evaluates to a boolean Series aligned to the rows"
+    ],
+    "important": [
+      "rows must be restricted to a subpopulation defined by their values",
+      "combining conditions — parenthesise each: <code>(a) & (b)</code>"
+    ],
+    "avoid": [
+      "using Python <code>and</code> / <code>or</code> instead of <code>&</code> / <code>|</code> (raises on Series)",
+      "assigning into the result of <code>df[mask]</code> (chained assignment — use <code>df.loc[mask, col] = …</code>)"
+    ],
+    "reach": "Whenever the analysis concerns a subset of rows defined by a condition on the data — the most common filtering operation.",
+    "example": "<pre>icu_elderly = df[(df[<span class=\"s\">\"age\"</span>] &gt; <span class=\"s\">65</span>) &amp; (df[<span class=\"s\">\"ward\"</span>] == <span class=\"s\">\"ICU\"</span>)]</pre>",
+    "tags": [
+      "select",
+      "boolean",
+      "mask",
+      "filter",
+      "condition",
+      "maske",
+      "bedingung"
+    ]
+  },
+  {
+    "id": "copy_vs_view",
+    "code": "subset = df[df.a > 0].copy()",
+    "stage": "select",
+    "short": "Take an explicit copy to avoid SettingWithCopyWarning.",
+    "what": "An indexing expression may return either a view onto the original DataFrame or a fresh copy, and pandas does not promise which. Assigning into an object whose origin is ambiguous triggers <code>SettingWithCopyWarning</code> and may silently fail to write back. The remedy is to be explicit: take <code>.copy()</code> when an independent subset is intended, or assign through <code>df.loc[rows, col] = value</code> when the original must be modified.",
+    "tokens": [
+      [
+        "df[df.a > 0]",
+        "A filtered subset whose copy/view status is not guaranteed."
+      ],
+      [
+        ".copy()",
+        "Forces an independent copy, so later assignment is well-defined and warning-free."
+      ]
+    ],
+    "requires": [
+      "awareness of whether the original or an independent subset is intended"
+    ],
+    "important": [
+      "a filtered subset will be modified independently of the original — take <code>.copy()</code>",
+      "the original must be updated — assign via <code>df.loc[mask, col] = …</code> instead"
+    ],
+    "avoid": [
+      "chained assignment such as <code>df[df.a>0]['b'] = 1</code> — it writes into a temporary and is the classic cause of <code>SettingWithCopyWarning</code>"
+    ],
+    "reach": "Whenever a filtered or sliced subset is taken and then assigned into — the single most common source of confusing pandas warnings.",
+    "example": "<pre>elderly = df[df[<span class=\"s\">\"age\"</span>] &gt; <span class=\"s\">65</span>].copy()\nelderly[<span class=\"s\">\"flag\"</span>] = <span class=\"k\">True</span>   <span class=\"c\"># safe: independent copy</span></pre>",
+    "tags": [
+      "select",
+      "copy",
+      "view",
+      "SettingWithCopyWarning",
+      "chained assignment",
+      "kopie",
+      "ansicht"
+    ]
+  },
+  {
+    "id": "iat",
+    "code": "df.iat[row_pos, col_pos]",
+    "stage": "select",
+    "short": "Fast access to a single cell by position.",
+    "what": "The positional counterpart of <code>at</code>: reads or writes one scalar cell addressed by integer row and column positions. Fastest single-cell accessor when the position, not the label, is known.",
+    "tokens": [
+      [
+        "df.iat[",
+        "Scalar position accessor (single cell only)."
+      ],
+      [
+        "row_pos",
+        "Integer row position."
+      ],
+      [
+        "col_pos",
+        "Integer column position."
+      ]
+    ],
+    "requires": [
+      "the integer position of exactly one cell"
+    ],
+    "important": [
+      "a single cell at a known position must be read or written efficiently"
+    ],
+    "avoid": [
+      "selecting ranges (use <code>iloc</code>)",
+      "the position is not known but the label is (use <code>at</code>)"
+    ],
+    "reach": "When a single cell must be accessed by position, typically inside performance-sensitive code.",
+    "example": "<pre>v = df.iat[<span class=\"s\">0</span>, <span class=\"s\">3</span>]</pre>",
+    "tags": [
+      "select",
+      "iat",
+      "scalar",
+      "single cell",
+      "position",
+      "fast"
+    ]
+  },
+  {
+    "id": "iloc",
+    "code": "df.iloc[row_pos, col_pos]",
+    "stage": "select",
+    "short": "Select rows and columns by integer position.",
+    "what": "Position-based selection, independent of the index labels. Uses ordinary zero-based Python slicing, so the end of a slice is exclusive. Use it when the position matters (the first row, the last five) rather than the label.",
+    "tokens": [
+      [
+        "df.iloc[",
+        "Position-based indexer."
+      ],
+      [
+        "row_pos",
+        "Integer position(s) or a half-open slice selecting rows."
+      ],
+      [
+        "col_pos",
+        "Integer column position(s); omit to keep all columns."
+      ]
+    ],
+    "requires": [
+      "the positional location of the rows or columns of interest"
+    ],
+    "important": [
+      "the first/last n rows are wanted regardless of the index",
+      "the index labels are not meaningful or not unique"
+    ],
+    "avoid": [
+      "selecting by a meaningful key (use <code>loc</code>)",
+      "expecting an inclusive slice end — <code>iloc</code> is exclusive like Python"
+    ],
+    "reach": "When rows or columns must be taken by position, such as the first row of each group or the last five records.",
+    "example": "<pre>first_row = df.iloc[<span class=\"s\">0</span>]\nlast_five = df.iloc[<span class=\"s\">-5</span>:]</pre>",
+    "tags": [
+      "select",
+      "iloc",
+      "position",
+      "integer",
+      "slicing",
+      "auswahl",
+      "position"
+    ]
+  },
+  {
+    "id": "loc",
+    "code": "df.loc[row_labels, col_labels]",
+    "stage": "select",
+    "short": "Select rows and columns by label.",
+    "what": "Label-based selection. The first position selects rows by index label (or a boolean mask), the second selects columns by name. Both endpoints of a label slice are inclusive — unlike Python slicing. <code>loc</code> is also the correct left-hand side for writing values back into a DataFrame.",
+    "tokens": [
+      [
+        "df.loc[",
+        "Label-based indexer."
+      ],
+      [
+        "row_labels",
+        "Index labels, a label slice (inclusive), or a boolean mask selecting rows."
+      ],
+      [
+        "col_labels",
+        "Column name(s) to keep; omit to keep all columns."
+      ]
+    ],
+    "requires": [
+      "knowledge of the index labels and column names",
+      "for a label slice, a sorted or otherwise meaningful index"
+    ],
+    "important": [
+      "selecting by a meaningful index (date, identifier) rather than position",
+      "writing values into a subset — <code>df.loc[mask, 'col'] = value</code> is the safe assignment form"
+    ],
+    "avoid": [
+      "using integer positions here (that is <code>iloc</code>) unless the index itself is integer labels",
+      "expecting an exclusive end on a label slice — it is inclusive"
+    ],
+    "reach": "When rows or cells must be selected by their labels, or when assigning into a filtered subset without the chained-assignment trap.",
+    "example": "<pre>df.loc[df[<span class=\"s\">\"age\"</span>] &gt; <span class=\"s\">65</span>, <span class=\"s\">\"risk\"</span>] = <span class=\"s\">\"high\"</span></pre>",
+    "tags": [
+      "select",
+      "loc",
+      "label",
+      "indexing",
+      "assignment",
+      "auswahl",
+      "etikett"
+    ]
+  },
+  {
+    "id": "reset_index",
+    "code": "df.reset_index(drop=True)",
+    "stage": "select",
+    "short": "Restore a default 0…n−1 integer index.",
+    "what": "Returns a DataFrame whose index is renumbered to a clean RangeIndex. After filtering or dropping rows the index has gaps; <code>reset_index</code> renumbers them. <code>drop=True</code> discards the old index; the default <code>drop=False</code> keeps it as a new column — important after <code>groupby</code>, where the keys live in the index.",
+    "tokens": [
+      [
+        "df.reset_index(",
+        "Replaces the index with a fresh 0…n−1 RangeIndex."
+      ],
+      [
+        "drop=True",
+        "Discards the old index instead of keeping it as a column."
+      ]
+    ],
+    "requires": [
+      "a DataFrame whose index has gaps or carries grouping keys"
+    ],
+    "important": [
+      "after <code>dropna</code> / boolean filtering, to restore consecutive row numbers",
+      "after <code>groupby</code>, to turn the grouped keys back into ordinary columns (use the default <code>drop=False</code>)"
+    ],
+    "avoid": [
+      "<code>drop=True</code> after a groupby — it would discard the grouping keys you need"
+    ],
+    "reach": "After filtering, dropping rows, or grouping, when a clean integer index or the grouped keys as columns are required.",
+    "example": "<pre>clean = df.dropna(subset=[<span class=\"s\">\"los_days\"</span>]).reset_index(drop=<span class=\"k\">True</span>)</pre>",
+    "tags": [
+      "select",
+      "reset_index",
+      "index",
+      "renumber",
+      "groupby",
+      "zurücksetzen"
+    ]
+  },
+  {
+    "id": "set_index",
+    "code": "df.set_index(\"patient_id\")",
+    "stage": "select",
+    "short": "Promote a column to be the row index.",
+    "what": "Returns a DataFrame whose row index becomes the values of the named column, which is removed from the body. A meaningful index enables label-based selection with <code>loc</code> and aligns operations on that key. <code>append=True</code> adds it as a further index level instead of replacing.",
+    "tokens": [
+      [
+        "df.set_index(",
+        "Sets the row index from existing column(s)."
+      ],
+      [
+        "\"patient_id\"",
+        "The column to become the index."
+      ]
+    ],
+    "requires": [
+      "a column suitable as a key (often unique, e.g. an identifier or a date)"
+    ],
+    "important": [
+      "subsequent selection or alignment is naturally by this key",
+      "preparing for a join or a time-series operation keyed on the index"
+    ],
+    "avoid": [
+      "setting a non-unique index when uniqueness is later assumed",
+      "losing the column unintentionally — it leaves the body unless <code>drop=False</code>"
+    ],
+    "reach": "When a column is the natural key for selection, alignment, or joining and should become the index.",
+    "example": "<pre>indexed = df.set_index(<span class=\"s\">\"patient_id\"</span>)</pre>",
+    "tags": [
+      "select",
+      "set_index",
+      "index",
+      "key",
+      "schlüssel",
+      "promote"
+    ]
   }
 ]

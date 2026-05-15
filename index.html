@@ -151,6 +151,18 @@
     <div class="commands" data-stage="export"></div>
   </section>
 
+  <!-- =================== SELECT & INDEX (reference) =================== -->
+  <section class="card" id="s-select">
+    <h2><span class="num">⊡</span> Select &amp; Index — addressing rows, columns and cells</h2>
+    <div class="context">Every operation downstream of loading depends on being able to name the rows, columns, or cells it concerns. pandas separates selection by <em>label</em> from selection by <em>position</em>, and treats a boolean condition as a first-class way to address a subpopulation. Confusing these is the most frequent source of beginner errors and of the <code>SettingWithCopyWarning</code>.</div>
+
+    <div class="orient">
+      <strong>How to choose:</strong> Use <code>loc</code> for labels and <code>iloc</code> for positions; for a single cell, <code>at</code> / <code>iat</code>. To select a subpopulation, build a boolean mask. To write into a filtered subset, assign through <code>df.loc[mask, col] = value</code>; to work on an independent subset, take an explicit <code>.copy()</code>. Promote a key column with <code>set_index</code>; restore clean numbering — or recover groupby keys — with <code>reset_index</code>.
+    </div>
+
+    <div class="commands" data-stage="select"></div>
+  </section>
+
   <!-- =================== STATISTICS (reference) =================== -->
   <section class="card" id="s-stats">
     <h2><span class="num">Σ</span> Statistics — describing and summarising columns</h2>
@@ -188,7 +200,7 @@
 </aside>
 
 <footer>
-  Python Foundations for Data Science · M.Sc. Digital Health · Dr. Jenny Delekta · SuSe 2026
+  Python Foundations for Data Analytics · Dr. Jenny Delekta · V2.0 (c) 2026
 </footer>
 
 <script src="js/search.js"></script>
