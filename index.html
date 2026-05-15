@@ -175,6 +175,30 @@
     <div class="commands" data-stage="stats"></div>
   </section>
 
+  <!-- =================== STRINGS (reference) =================== -->
+  <section class="card" id="s-strings">
+    <h2><span class="num">Aa</span> Strings — operating on text columns</h2>
+    <div class="context">Text columns frequently carry structure — codes, compound fields, free-text notes — that must be tested, decomposed, or extracted before the data can be analysed. The <code>.str</code> accessor applies string operations element-wise across a Series; without it the methods would apply to the Series object itself, not to each value.</div>
+
+    <div class="orient">
+      <strong>How to choose:</strong> To select rows by text, build a mask with <code>str.contains</code> (pattern), <code>str.startswith</code> / <code>str.endswith</code> (fixed affix). To take a field apart, use <code>str.split</code>; to assemble one, <code>str.cat</code>. To lift a structured fragment out of free text, use <code>str.extract</code> for one match or <code>str.findall</code> for all. Always pass <code>na=False</code> when the result will index rows.
+    </div>
+
+    <div class="commands" data-stage="strings"></div>
+  </section>
+
+  <!-- =================== DATETIME (reference) =================== -->
+  <section class="card" id="s-datetime">
+    <h2><span class="num">⏱</span> Datetime — working with dates and times</h2>
+    <div class="context">Dates almost always arrive as strings and must first be parsed into <code>datetime64</code> with <code>pd.to_datetime</code>; only then do the <code>.dt</code> accessor, chronological sorting, and time arithmetic become available. Time-aware aggregation is a distinct operation from ordinary grouping.</div>
+
+    <div class="orient">
+      <strong>How to choose:</strong> Parse first with <code>pd.to_datetime</code> (in the Clean stage). Extract components with <code>.dt.year</code> / <code>.dt.month</code> / <code>.dt.weekday</code> / <code>.dt.hour</code>. For a grouping key that sorts correctly across years, prefer <code>.dt.to_period</code> over a formatted string. To summarise a time series at a regular frequency, use <code>resample</code> on a datetime index rather than grouping on a month number.
+    </div>
+
+    <div class="commands" data-stage="datetime"></div>
+  </section>
+
   <!-- =================== DECISIONS =================== -->
   <section class="card" id="decisions">
     <h2><span class="num">★</span> Decision boxes — the considered choices</h2>

@@ -3539,5 +3539,649 @@
       "schlüssel",
       "promote"
     ]
+  },
+  {
+    "id": "str_cat",
+    "code": "df[\"a\"].str.cat(df[\"b\"], sep=\"-\")",
+    "stage": "strings",
+    "short": "Concatenate strings element-wise.",
+    "what": "Joins the calling Series with another (or a list of others) element by element, optionally separated by <code>sep</code>. With <code>na_rep</code> a placeholder replaces missing values; otherwise a NaN on either side propagates to the result.",
+    "tokens": [
+      [
+        "df[\"a\"]",
+        "The first text column."
+      ],
+      [
+        ".str.cat(",
+        "Concatenates element-wise with the argument."
+      ],
+      [
+        "df[\"b\"], sep=\"-\"",
+        "The second column and the separator placed between values."
+      ]
+    ],
+    "requires": [
+      "aligned Series of strings",
+      "an <code>na_rep</code> if either side may be missing"
+    ],
+    "important": [
+      "a composite key or label must be built from several columns"
+    ],
+    "avoid": [
+      "NaN on either side without <code>na_rep</code> (the row becomes NaN silently)"
+    ],
+    "reach": "When a single string must be assembled from several columns, for instance a composite key.",
+    "example": "<pre>df[<span class=\"s\">\"key\"</span>] = df[<span class=\"s\">\"ward\"</span>].str.cat(df[<span class=\"s\">\"drg_code\"</span>], sep=<span class=\"s\">\"-\"</span>)</pre>",
+    "tags": [
+      "strings",
+      "str",
+      "cat",
+      "concatenate",
+      "join",
+      "verketten"
+    ]
+  },
+  {
+    "id": "str_contains",
+    "code": "df[\"col\"].str.contains(\"icu\", case=False, na=False)",
+    "stage": "strings",
+    "short": "Boolean mask: which strings contain a pattern.",
+    "what": "Returns a boolean Series, True where the string contains the pattern. The pattern is a regular expression by default; pass <code>regex=False</code> for a literal substring. <code>na=False</code> treats missing values as non-matches so the mask is safe for row selection.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the text column."
+      ],
+      [
+        ".str",
+        "The string accessor — applies string methods element-wise."
+      ],
+      [
+        ".contains(\"icu\", ...)",
+        "Tests each value for the pattern."
+      ],
+      [
+        "case=False",
+        "Case-insensitive match."
+      ],
+      [
+        "na=False",
+        "Missing values become False rather than NaN, so the mask is usable for indexing."
+      ]
+    ],
+    "requires": [
+      "a Series of strings (dtype object or string)",
+      "<code>na=False</code> if the result will index rows"
+    ],
+    "important": [
+      "rows must be filtered by a substring or pattern in a text column",
+      "matching must ignore case"
+    ],
+    "avoid": [
+      "leaving <code>na=False</code> off when the mask selects rows (NaN would raise)",
+      "a regex metacharacter is meant literally (set <code>regex=False</code>)"
+    ],
+    "reach": "When rows must be selected by the presence of a substring or pattern within a text column.",
+    "example": "<pre>icu = df[df[<span class=\"s\">\"ward\"</span>].str.contains(<span class=\"s\">\"icu\"</span>, case=<span class=\"k\">False</span>, na=<span class=\"k\">False</span>)]</pre>",
+    "tags": [
+      "strings",
+      "str",
+      "contains",
+      "substring",
+      "regex",
+      "filter",
+      "enthält"
+    ]
+  },
+  {
+    "id": "str_endswith",
+    "code": "df[\"col\"].str.endswith(\".csv\")",
+    "stage": "strings",
+    "short": "Boolean mask: which strings end with a suffix.",
+    "what": "Returns a boolean Series, True where the string ends with the given literal suffix. The counterpart of <code>startswith</code>; commonly used on filenames or coded identifiers.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the text column."
+      ],
+      [
+        ".str.endswith(",
+        "Tests each value for the literal suffix."
+      ],
+      [
+        "\".csv\"",
+        "The suffix to test for."
+      ]
+    ],
+    "requires": [
+      "a Series of strings"
+    ],
+    "important": [
+      "rows are identified by a trailing token, such as a file extension"
+    ],
+    "avoid": [
+      "pattern matching beyond a fixed suffix is required (use <code>str.contains</code>)"
+    ],
+    "reach": "When membership is defined by a fixed trailing token such as a file extension.",
+    "example": "<pre>csvs = df[df[<span class=\"s\">\"filename\"</span>].str.endswith(<span class=\"s\">\".csv\"</span>)]</pre>",
+    "tags": [
+      "strings",
+      "str",
+      "endswith",
+      "suffix",
+      "extension",
+      "endung"
+    ]
+  },
+  {
+    "id": "str_extract",
+    "code": "df[\"col\"].str.extract(r\"(\\d+)\")",
+    "stage": "strings",
+    "short": "Pull a regex capture group out of each string.",
+    "what": "Applies a regular expression containing capture groups and returns the captured text — a Series for one group, a DataFrame for several. The canonical way to lift a structured fragment (a number, a code) out of free text.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the text column."
+      ],
+      [
+        ".str.extract(",
+        "Applies a regex and returns its capture group(s)."
+      ],
+      [
+        "r\"(\\d+)\"",
+        "A raw-string regex; the parentheses capture one run of digits."
+      ]
+    ],
+    "requires": [
+      "a Series of strings",
+      "a regular expression with at least one capture group"
+    ],
+    "important": [
+      "a structured token (year, numeric id) must be lifted out of free text"
+    ],
+    "avoid": [
+      "a regex with no capture group (returns all NaN)",
+      "expecting multiple matches per string (use <code>str.findall</code>)"
+    ],
+    "reach": "When a specific structured fragment must be parsed out of an otherwise free-text column.",
+    "example": "<pre>df[<span class=\"s\">\"year\"</span>] = df[<span class=\"s\">\"label\"</span>].str.extract(r<span class=\"s\">\"(\\d{4})\"</span>)</pre>",
+    "tags": [
+      "strings",
+      "str",
+      "extract",
+      "regex",
+      "capture",
+      "parse",
+      "extrahieren"
+    ]
+  },
+  {
+    "id": "str_findall",
+    "code": "df[\"col\"].str.findall(r\"\\d+\")",
+    "stage": "strings",
+    "short": "All regex matches per string, as a list.",
+    "what": "Returns a Series whose every element is the list of all non-overlapping matches of the pattern in that string. Use it when a string may contain several occurrences; follow with <code>explode</code> to obtain one row per match.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the text column."
+      ],
+      [
+        ".str.findall(",
+        "Finds every match of the pattern in each value."
+      ],
+      [
+        "r\"\\d+\"",
+        "A raw-string regex matching runs of digits."
+      ]
+    ],
+    "requires": [
+      "a Series of strings",
+      "a regular expression"
+    ],
+    "important": [
+      "each string may contain several matches and all are needed"
+    ],
+    "avoid": [
+      "only one match is expected (use <code>str.extract</code>)"
+    ],
+    "reach": "When every occurrence of a pattern within each string is required, not just the first.",
+    "example": "<pre>nums = df[<span class=\"s\">\"note\"</span>].str.findall(r<span class=\"s\">\"\\d+\"</span>)</pre>",
+    "tags": [
+      "strings",
+      "str",
+      "findall",
+      "regex",
+      "all matches",
+      "list",
+      "alle"
+    ]
+  },
+  {
+    "id": "str_len",
+    "code": "df[\"col\"].str.len()",
+    "stage": "strings",
+    "short": "Character length of each string.",
+    "what": "Returns an integer Series giving the number of characters in each string. NaN remains NaN. Used to validate fixed-width codes or to flag suspiciously short or long entries.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the text column."
+      ],
+      [
+        ".str.len()",
+        "Returns the length of each string."
+      ]
+    ],
+    "requires": [
+      "a Series of strings"
+    ],
+    "important": [
+      "fixed-width codes must be validated, or unusually short/long values flagged"
+    ],
+    "avoid": [
+      "confusing it with <code>Series.size</code> / <code>len(df)</code>, which count rows, not characters"
+    ],
+    "reach": "When the length of text values carries information, such as validating identifier formats.",
+    "example": "<pre>bad = df[df[<span class=\"s\">\"code\"</span>].str.len() != <span class=\"s\">3</span>]</pre>",
+    "tags": [
+      "strings",
+      "str",
+      "len",
+      "length",
+      "validate",
+      "länge"
+    ]
+  },
+  {
+    "id": "str_split",
+    "code": "df[\"col\"].str.split(\"-\", expand=True)",
+    "stage": "strings",
+    "short": "Split each string on a delimiter.",
+    "what": "Splits every string at the delimiter. Without arguments the result is a Series of lists; with <code>expand=True</code> it becomes a DataFrame, one column per field — the usual way to break a compound code into its parts. <code>n=1</code> limits the number of splits.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the text column."
+      ],
+      [
+        ".str.split(\"-\", ...)",
+        "Splits each value at every '-'."
+      ],
+      [
+        "expand=True",
+        "Returns a DataFrame of columns instead of a Series of lists."
+      ]
+    ],
+    "requires": [
+      "a Series of strings with a consistent delimiter"
+    ],
+    "important": [
+      "a compound field must be decomposed into separate columns",
+      "only the first split is wanted (use <code>n=1</code>)"
+    ],
+    "avoid": [
+      "the delimiter is inconsistent across rows (the resulting columns misalign)"
+    ],
+    "reach": "When a single column encodes several fields joined by a delimiter that must be separated.",
+    "example": "<pre>parts = df[<span class=\"s\">\"code\"</span>].str.split(<span class=\"s\">\"-\"</span>, expand=<span class=\"k\">True</span>)</pre>",
+    "tags": [
+      "strings",
+      "str",
+      "split",
+      "delimiter",
+      "expand",
+      "trennen"
+    ]
+  },
+  {
+    "id": "str_startswith",
+    "code": "df[\"col\"].str.startswith(\"A\")",
+    "stage": "strings",
+    "short": "Boolean mask: which strings begin with a prefix.",
+    "what": "Returns a boolean Series, True where the string starts with the given literal prefix (not a regex). NaN yields NaN unless an <code>na</code> value is supplied.",
+    "tokens": [
+      [
+        "df[\"col\"]",
+        "Selects the text column."
+      ],
+      [
+        ".str.startswith(",
+        "Tests each value for the literal prefix."
+      ],
+      [
+        "\"A\"",
+        "The prefix to test for."
+      ]
+    ],
+    "requires": [
+      "a Series of strings",
+      "an <code>na=False</code> argument if the result indexes rows"
+    ],
+    "important": [
+      "rows are identified by a fixed leading code or prefix (e.g. DRG codes beginning 'A')"
+    ],
+    "avoid": [
+      "a regular expression is needed (use <code>str.contains</code> with an anchored pattern)"
+    ],
+    "reach": "When membership is defined by a fixed prefix, such as identifier codes sharing a leading letter.",
+    "example": "<pre>a_codes = df[df[<span class=\"s\">\"drg_code\"</span>].str.startswith(<span class=\"s\">\"A\"</span>)]</pre>",
+    "tags": [
+      "strings",
+      "str",
+      "startswith",
+      "prefix",
+      "präfix",
+      "code"
+    ]
+  },
+  {
+    "id": "date_range",
+    "code": "pd.date_range(\"2026-01-01\", periods=12, freq=\"MS\")",
+    "stage": "datetime",
+    "short": "Generate a regular sequence of dates.",
+    "what": "Creates a DatetimeIndex of evenly spaced dates. Specify a start with either <code>periods=</code> (a count) or <code>end=</code>, and a frequency (<code>'D'</code> day, <code>'MS'</code> month-start, <code>'W'</code> week). Used to build a complete calendar against which sparse data can be reindexed so missing periods become visible.",
+    "tokens": [
+      [
+        "pd.date_range(",
+        "Builds a regular sequence of dates."
+      ],
+      [
+        "\"2026-01-01\"",
+        "The start date."
+      ],
+      [
+        "periods=12",
+        "How many dates to generate."
+      ],
+      [
+        "freq=\"MS\"",
+        "The spacing — here the first day of each month."
+      ]
+    ],
+    "requires": [
+      "a start, and either a period count or an end",
+      "a frequency string"
+    ],
+    "important": [
+      "a complete date axis is needed so that gaps in the data become explicit (reindex onto it)"
+    ],
+    "avoid": [
+      "confusing <code>'M'</code> (month-end) with <code>'MS'</code> (month-start)"
+    ],
+    "reach": "When a complete, regular calendar is required, typically to reveal missing periods in a time series.",
+    "example": "<pre>cal = pd.date_range(<span class=\"s\">\"2026-01-01\"</span>, periods=<span class=\"s\">12</span>, freq=<span class=\"s\">\"MS\"</span>)</pre>",
+    "tags": [
+      "datetime",
+      "date_range",
+      "calendar",
+      "sequence",
+      "freq",
+      "kalender"
+    ]
+  },
+  {
+    "id": "dt_hour",
+    "code": "df[\"ts\"].dt.hour",
+    "stage": "datetime",
+    "short": "Extract the hour of day (0–23).",
+    "what": "Returns an integer Series of the hour component, 0 to 23. Used to study intraday patterns such as admissions by time of day.",
+    "tokens": [
+      [
+        "df[\"ts\"]",
+        "A datetime64 column including a time component."
+      ],
+      [
+        ".dt.hour",
+        "The hour of day, 0–23."
+      ]
+    ],
+    "requires": [
+      "a datetime64 column that carries a time, not only a date"
+    ],
+    "important": [
+      "intraday (hour-of-day) patterns are of interest"
+    ],
+    "avoid": [
+      "a date-only column, where the hour is always 0"
+    ],
+    "reach": "When the time of day matters, for instance staffing by hour.",
+    "example": "<pre>by_hour = df.groupby(df[<span class=\"s\">\"ts\"</span>].dt.hour).size()</pre>",
+    "tags": [
+      "datetime",
+      "dt",
+      "hour",
+      "stunde",
+      "intraday"
+    ]
+  },
+  {
+    "id": "dt_month",
+    "code": "df[\"date\"].dt.month",
+    "stage": "datetime",
+    "short": "Extract the month number (1–12).",
+    "what": "Returns an integer Series of month numbers, 1 for January through 12 for December. For a human-readable name use <code>.dt.month_name()</code>; for a sortable year-month period use <code>.dt.to_period('M')</code>.",
+    "tokens": [
+      [
+        "df[\"date\"]",
+        "A datetime64 column."
+      ],
+      [
+        ".dt.month",
+        "The month number, 1–12."
+      ]
+    ],
+    "requires": [
+      "a datetime64 column"
+    ],
+    "important": [
+      "seasonality by month is of interest"
+    ],
+    "avoid": [
+      "using the bare month number across multiple years (it conflates Januarys — use <code>to_period</code>)"
+    ],
+    "reach": "When monthly seasonality within a year is the question.",
+    "example": "<pre>by_month = df.groupby(df[<span class=\"s\">\"admitted\"</span>].dt.month).size()</pre>",
+    "tags": [
+      "datetime",
+      "dt",
+      "month",
+      "monat",
+      "season"
+    ]
+  },
+  {
+    "id": "dt_strftime",
+    "code": "df[\"date\"].dt.strftime(\"%Y-%m\")",
+    "stage": "datetime",
+    "short": "Format datetimes as strings.",
+    "what": "Formats each timestamp as a string according to the given pattern (<code>%Y</code> year, <code>%m</code> month, <code>%d</code> day, …). The result is text — convenient for labels and display, but no longer usable for date arithmetic or chronological sorting.",
+    "tokens": [
+      [
+        "df[\"date\"]",
+        "A datetime64 column."
+      ],
+      [
+        ".dt.strftime(\"%Y-%m\")",
+        "Formats each timestamp as a 'YYYY-MM' string."
+      ]
+    ],
+    "requires": [
+      "a datetime64 column",
+      "a valid strftime format string"
+    ],
+    "important": [
+      "a human-readable label is needed for a chart axis or a report"
+    ],
+    "avoid": [
+      "formatting before doing date arithmetic or sorting — the result is text and no longer chronological",
+      "for a sortable period prefer <code>to_period</code>"
+    ],
+    "reach": "When a date must be rendered as a label for display, after any date computation is finished.",
+    "example": "<pre>df[<span class=\"s\">\"label\"</span>] = df[<span class=\"s\">\"admitted\"</span>].dt.strftime(<span class=\"s\">\"%Y-%m\"</span>)</pre>",
+    "tags": [
+      "datetime",
+      "dt",
+      "strftime",
+      "format",
+      "label",
+      "formatieren"
+    ]
+  },
+  {
+    "id": "dt_to_period",
+    "code": "df[\"date\"].dt.to_period(\"M\")",
+    "stage": "datetime",
+    "short": "Collapse timestamps to a calendar period.",
+    "what": "Converts timestamps to Period objects at the chosen frequency ('M' month, 'Q' quarter, 'Y' year). Unlike a formatted string, a Period sorts chronologically and groups correctly across years — the right key for monthly or quarterly aggregation.",
+    "tokens": [
+      [
+        "df[\"date\"]",
+        "A datetime64 column."
+      ],
+      [
+        ".dt.to_period(\"M\")",
+        "Maps each timestamp to its calendar month, as a sortable Period."
+      ]
+    ],
+    "requires": [
+      "a datetime64 column"
+    ],
+    "important": [
+      "monthly or quarterly aggregation must remain correctly ordered across years"
+    ],
+    "avoid": [
+      "using <code>strftime</code> for a grouping key (string months sort lexically, not chronologically across years)"
+    ],
+    "reach": "When aggregating by month or quarter and the period must sort and group correctly across years.",
+    "example": "<pre>monthly = df.groupby(df[<span class=\"s\">\"admitted\"</span>].dt.to_period(<span class=\"s\">\"M\"</span>)).size()</pre>",
+    "tags": [
+      "datetime",
+      "dt",
+      "to_period",
+      "period",
+      "month",
+      "quarter",
+      "periode"
+    ]
+  },
+  {
+    "id": "dt_weekday",
+    "code": "df[\"date\"].dt.weekday",
+    "stage": "datetime",
+    "short": "Day of week as an integer (Monday=0).",
+    "what": "Returns an integer Series with Monday as 0 through Sunday as 6. <code>.dt.day_name()</code> gives the textual name. Typically used to contrast weekday and weekend behaviour.",
+    "tokens": [
+      [
+        "df[\"date\"]",
+        "A datetime64 column."
+      ],
+      [
+        ".dt.weekday",
+        "Day of week, Monday=0 … Sunday=6."
+      ]
+    ],
+    "requires": [
+      "a datetime64 column"
+    ],
+    "important": [
+      "weekday versus weekend patterns must be compared"
+    ],
+    "avoid": [
+      "assuming Sunday=0 (pandas uses Monday=0)"
+    ],
+    "reach": "When behaviour differs by day of week, such as weekday versus weekend admissions.",
+    "example": "<pre>df[<span class=\"s\">\"is_weekend\"</span>] = df[<span class=\"s\">\"admitted\"</span>].dt.weekday &gt;= <span class=\"s\">5</span></pre>",
+    "tags": [
+      "datetime",
+      "dt",
+      "weekday",
+      "dayofweek",
+      "wochentag",
+      "weekend"
+    ]
+  },
+  {
+    "id": "dt_year",
+    "code": "df[\"date\"].dt.year",
+    "stage": "datetime",
+    "short": "Extract the year from a datetime column.",
+    "what": "The <code>.dt</code> accessor exposes datetime components element-wise. <code>.dt.year</code> returns an integer Series of calendar years — the basis for grouping or filtering by year.",
+    "tokens": [
+      [
+        "df[\"date\"]",
+        "A datetime64 column."
+      ],
+      [
+        ".dt",
+        "The datetime accessor."
+      ],
+      [
+        ".year",
+        "The calendar year of each timestamp."
+      ]
+    ],
+    "requires": [
+      "a column already of dtype datetime64 (parse with <code>pd.to_datetime</code> first)"
+    ],
+    "important": [
+      "aggregating or filtering by year is required"
+    ],
+    "avoid": [
+      "calling <code>.dt</code> on an object/string column (parse it first)"
+    ],
+    "reach": "When the analysis must be broken down or filtered by calendar year.",
+    "example": "<pre>per_year = df.groupby(df[<span class=\"s\">\"admitted\"</span>].dt.year).size()</pre>",
+    "tags": [
+      "datetime",
+      "dt",
+      "year",
+      "jahr",
+      "extract"
+    ]
+  },
+  {
+    "id": "resample",
+    "code": "df.set_index(\"date\").resample(\"M\")[\"cost\"].sum()",
+    "stage": "datetime",
+    "short": "Group a time series into regular time buckets.",
+    "what": "The time-series analogue of <code>groupby</code>: with a datetime index, <code>resample</code> bins rows into regular intervals (<code>'D'</code>, <code>'W'</code>, <code>'M'</code>, …) and an aggregation summarises each bin. Downsampling reduces frequency (days → months); it produces a row for every interval, including empty ones.",
+    "tokens": [
+      [
+        "df.set_index(\"date\")",
+        "A datetime index is required for resampling."
+      ],
+      [
+        ".resample(\"M\")",
+        "Bins the rows into monthly intervals."
+      ],
+      [
+        "[\"cost\"].sum()",
+        "Aggregates the chosen column within each interval."
+      ]
+    ],
+    "requires": [
+      "a DatetimeIndex (set it with <code>set_index</code> on a datetime column)",
+      "an aggregation function"
+    ],
+    "important": [
+      "a time series must be summarised at a coarser, regular frequency",
+      "empty intervals must appear explicitly (resample emits them)"
+    ],
+    "avoid": [
+      "resampling without a datetime index (raises)",
+      "confusing it with plain <code>groupby</code> on <code>dt.month</code>, which omits empty months"
+    ],
+    "reach": "When a time series must be aggregated into regular calendar buckets, such as monthly totals from daily records.",
+    "example": "<pre>monthly = (df.set_index(<span class=\"s\">\"admitted\"</span>)\n             .resample(<span class=\"s\">\"M\"</span>)[<span class=\"s\">\"cost_eur\"</span>].sum())</pre>",
+    "tags": [
+      "datetime",
+      "resample",
+      "time series",
+      "downsample",
+      "frequency",
+      "zeitreihe"
+    ]
   }
 ]
