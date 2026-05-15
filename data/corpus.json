@@ -1400,6 +1400,205 @@
     ]
   },
   {
+    "id": "groupby_apply",
+    "code": "df.groupby(\"ward\").apply(lambda g: g.nlargest(3, \"los_days\"))",
+    "stage": "aggregate",
+    "short": "Apply an arbitrary function to each group.",
+    "what": "Passes each group as a sub-DataFrame to the function and combines the returned objects. The most general — and slowest — groupby operation; reach for it only when the task is not expressible with <code>agg</code>, <code>transform</code> or <code>filter</code>, such as a per-group top-N.",
+    "tokens": [
+      [
+        "df.groupby(\"ward\")",
+        "Partitions by ward."
+      ],
+      [
+        ".apply(",
+        "Calls the function once per group and recombines the results."
+      ],
+      [
+        "lambda g: g.nlargest(3, \"los_days\")",
+        "Per group: the three rows with the largest stay."
+      ]
+    ],
+    "requires": [
+      "a grouping key",
+      "a function accepting a sub-DataFrame"
+    ],
+    "important": [
+      "the per-group operation is not a simple reduction or broadcast (e.g. top-N per group)"
+    ],
+    "avoid": [
+      "a plain reduction (use <code>agg</code>) or a group-aligned statistic (use <code>transform</code>) — both are far faster and clearer"
+    ],
+    "reach": "When the per-group computation cannot be expressed by agg/transform/filter — used sparingly.",
+    "example": "<pre>top3 = (df.groupby(<span class=\"s\">\"ward\"</span>)\n          .apply(<span class=\"k\">lambda</span> g: g.nlargest(<span class=\"s\">3</span>, <span class=\"s\">\"los_days\"</span>))\n          .reset_index(drop=<span class=\"k\">True</span>))</pre>",
+    "tags": [
+      "aggregate",
+      "groupby",
+      "apply",
+      "per-group",
+      "top-n",
+      "anwenden"
+    ]
+  },
+  {
+    "id": "groupby_count",
+    "code": "df.groupby(\"ward\")[\"los_days\"].count()",
+    "stage": "aggregate",
+    "short": "Number of non-missing values per group.",
+    "what": "Counts, within each group, the rows whose value in the selected column is not NaN. This is the crucial distinction from <code>size</code>: <code>count</code> excludes missing values and is computed per column; <code>size</code> counts every row in the group regardless of missingness.",
+    "tokens": [
+      [
+        "df.groupby(\"ward\")",
+        "Partitions the rows by the distinct values of <code>ward</code>."
+      ],
+      [
+        "[\"los_days\"]",
+        "Selects the column whose non-missing entries are counted."
+      ],
+      [
+        ".count()",
+        "Counts non-missing values in that column per group."
+      ]
+    ],
+    "requires": [
+      "a grouping key",
+      "a column on which non-missing entries are meaningful"
+    ],
+    "important": [
+      "the number of valid observations per group is needed (e.g. a denominator)",
+      "missing values must be excluded from the tally"
+    ],
+    "avoid": [
+      "the total number of rows per group is wanted including missing ones (use <code>size</code>)"
+    ],
+    "reach": "When the count must reflect only valid observations per group, for instance as the denominator of a per-group rate.",
+    "example": "<pre>valid = df.groupby(<span class=\"s\">\"ward\"</span>)[<span class=\"s\">\"los_days\"</span>].count()</pre>",
+    "tags": [
+      "aggregate",
+      "groupby",
+      "count",
+      "size",
+      "non-missing",
+      "anzahl",
+      "denominator"
+    ]
+  },
+  {
+    "id": "groupby_cumcount",
+    "code": "df.groupby(\"patient_id\").cumcount()",
+    "stage": "aggregate",
+    "short": "Running 0-based index of each row within its group.",
+    "what": "Returns a Series, the same length as the DataFrame, numbering the rows within each group 0, 1, 2, … in current order. Useful for sequencing repeated events per entity — for instance numbering a patient's successive encounters.",
+    "tokens": [
+      [
+        "df.groupby(\"patient_id\")",
+        "Partitions by patient."
+      ],
+      [
+        ".cumcount()",
+        "Numbers the rows within each group 0,1,2,… in order."
+      ]
+    ],
+    "requires": [
+      "a grouping key",
+      "a meaningful row order (sort beforehand)"
+    ],
+    "important": [
+      "each repeated event per entity must be sequenced (visit number, attempt number)"
+    ],
+    "avoid": [
+      "the row order is arbitrary — the sequence is then meaningless"
+    ],
+    "reach": "When successive rows belonging to the same entity must be numbered, such as the n-th encounter of each patient.",
+    "example": "<pre>df[<span class=\"s\">\"visit_no\"</span>] = (df.sort_values(<span class=\"s\">\"date\"</span>)\n                  .groupby(<span class=\"s\">\"patient_id\"</span>).cumcount() + <span class=\"s\">1</span>)</pre>",
+    "tags": [
+      "aggregate",
+      "groupby",
+      "cumcount",
+      "sequence",
+      "visit number",
+      "laufende nummer"
+    ]
+  },
+  {
+    "id": "groupby_filter",
+    "code": "df.groupby(\"ward\").filter(lambda g: len(g) >= 10)",
+    "stage": "aggregate",
+    "short": "Keep only the rows of groups satisfying a condition.",
+    "what": "Returns the original rows, restricted to those belonging to groups for which the predicate is True. The predicate receives each group as a sub-DataFrame and must return a single boolean. Unlike <code>agg</code>, the result has the same columns as the input — it filters rows, it does not summarise.",
+    "tokens": [
+      [
+        "df.groupby(\"ward\")",
+        "Partitions by ward."
+      ],
+      [
+        ".filter(",
+        "Keeps or discards entire groups by a per-group test."
+      ],
+      [
+        "lambda g: len(g) >= 10",
+        "The test: keep groups with at least ten rows."
+      ]
+    ],
+    "requires": [
+      "a grouping key",
+      "a predicate returning one boolean per group"
+    ],
+    "important": [
+      "groups that are too small (or otherwise unqualified) should be removed before analysis"
+    ],
+    "avoid": [
+      "a per-row condition is intended — that is ordinary boolean indexing, not <code>groupby.filter</code>"
+    ],
+    "reach": "When whole groups must be excluded by a group-level criterion, such as dropping wards with too few cases.",
+    "example": "<pre>big = df.groupby(<span class=\"s\">\"ward\"</span>).filter(<span class=\"k\">lambda</span> g: <span class=\"k\">len</span>(g) &gt;= <span class=\"s\">10</span>)</pre>",
+    "tags": [
+      "aggregate",
+      "groupby",
+      "filter",
+      "small groups",
+      "predicate",
+      "gruppen filtern"
+    ]
+  },
+  {
+    "id": "groupby_head",
+    "code": "df.groupby(\"ward\").head(2)",
+    "stage": "aggregate",
+    "short": "First n rows of each group.",
+    "what": "Returns the first n rows from each group, in the DataFrame's current order. Sort the DataFrame meaningfully first (for example by date) so that \"first\" carries the intended meaning, such as the earliest encounters per ward.",
+    "tokens": [
+      [
+        "df.groupby(\"ward\")",
+        "Partitions by ward."
+      ],
+      [
+        ".head(2)",
+        "Takes the first two rows of each group, in current order."
+      ]
+    ],
+    "requires": [
+      "a grouping key",
+      "a meaningful row order (sort beforehand)"
+    ],
+    "important": [
+      "a sample of each group is wanted, or the earliest/first records per group after sorting"
+    ],
+    "avoid": [
+      "the row order is arbitrary — \"first\" is then undefined"
+    ],
+    "reach": "When the leading rows of every group are required, typically the earliest records per group after sorting by time.",
+    "example": "<pre>first2 = df.sort_values(<span class=\"s\">\"date\"</span>).groupby(<span class=\"s\">\"ward\"</span>).head(<span class=\"s\">2</span>)</pre>",
+    "tags": [
+      "aggregate",
+      "groupby",
+      "head",
+      "first",
+      "per-group",
+      "erste"
+    ]
+  },
+  {
     "id": "groupby_mean",
     "code": "df.groupby(\"ward\")[\"los_days\"].mean()",
     "stage": "aggregate",
@@ -1441,6 +1640,87 @@
     ]
   },
   {
+    "id": "groupby_multikey",
+    "code": "df.groupby([\"ward\", \"gender\"])[\"los_days\"].mean()",
+    "stage": "aggregate",
+    "short": "Group by more than one key.",
+    "what": "Passing a list of columns groups by their combination: one group per observed tuple of values. The result has a MultiIndex whose levels are the grouping columns; <code>reset_index()</code> flattens it back to ordinary columns for further use.",
+    "tokens": [
+      [
+        "df.groupby([...])",
+        "Partitions by the combination of the listed columns."
+      ],
+      [
+        "[\"ward\", \"gender\"]",
+        "The grouping keys; one group per (ward, gender) pair that occurs."
+      ],
+      [
+        "[\"los_days\"].mean()",
+        "Aggregates the chosen column within each combined group."
+      ]
+    ],
+    "requires": [
+      "two or more grouping columns",
+      "an aggregation appropriate to the selected column"
+    ],
+    "important": [
+      "the question concerns a cross-classification (per ward and per gender)",
+      "the result will be reshaped — follow with <code>reset_index</code> or <code>unstack</code>"
+    ],
+    "avoid": [
+      "grouping by many high-cardinality keys, which yields sparse, tiny groups"
+    ],
+    "reach": "When the summary must be broken down by a combination of categories rather than a single one.",
+    "example": "<pre>g = (df.groupby([<span class=\"s\">\"ward\"</span>, <span class=\"s\">\"gender\"</span>])[<span class=\"s\">\"los_days\"</span>]\n       .mean().reset_index())</pre>",
+    "tags": [
+      "aggregate",
+      "groupby",
+      "multiple keys",
+      "multiindex",
+      "cross",
+      "gruppieren"
+    ]
+  },
+  {
+    "id": "groupby_nth",
+    "code": "df.groupby(\"ward\").nth(0)",
+    "stage": "aggregate",
+    "short": "The n-th row of each group by position.",
+    "what": "Selects the row at the given positional index within each group (0 is the first, -1 the last). Order-dependent like <code>head</code>. Commonly used after sorting by time to pick the first or most recent record per entity.",
+    "tokens": [
+      [
+        "df.groupby(\"ward\")",
+        "Partitions by ward."
+      ],
+      [
+        ".nth(0)",
+        "Selects the first row (position 0) of each group; -1 would be the last."
+      ]
+    ],
+    "requires": [
+      "a grouping key",
+      "a meaningful row order"
+    ],
+    "important": [
+      "exactly one positional record per group is wanted (the first or the last)"
+    ],
+    "avoid": [
+      "the row order is arbitrary",
+      "several rows per group are needed (use <code>head</code>)"
+    ],
+    "reach": "When a single positional record per group is required, such as each patient's first or latest encounter.",
+    "example": "<pre>latest = df.sort_values(<span class=\"s\">\"date\"</span>).groupby(<span class=\"s\">\"patient_id\"</span>).nth(<span class=\"s\">-1</span>)</pre>",
+    "tags": [
+      "aggregate",
+      "groupby",
+      "nth",
+      "first",
+      "last",
+      "position",
+      "n-te"
+    ]
+  },
+  {
     "id": "groupby_size",
     "code": "df.groupby(\"ward\").size()",
     "stage": "aggregate",
@@ -1470,6 +1750,52 @@
       "groupby",
       "frequency",
       "anzahl"
+    ]
+  },
+  {
+    "id": "named_aggregation",
+    "code": "df.groupby(\"ward\").agg(avg_los=(\"los_days\", \"mean\"), n=(\"id\", \"count\"))",
+    "stage": "aggregate",
+    "short": "Named aggregation: control the output column names.",
+    "what": "The keyword form of <code>agg</code> maps each desired output column name to a (source column, function) pair. It produces flat, explicitly named columns, avoiding the awkward MultiIndex that the list form of <code>agg</code> creates, and is the recommended modern style.",
+    "tokens": [
+      [
+        "df.groupby(\"ward\")",
+        "Partitions by ward."
+      ],
+      [
+        ".agg(",
+        "Aggregates each group, naming the outputs explicitly."
+      ],
+      [
+        "avg_los=(\"los_days\", \"mean\")",
+        "Output column <code>avg_los</code> = mean of <code>los_days</code>."
+      ],
+      [
+        "n=(\"id\", \"count\")",
+        "Output column <code>n</code> = count of <code>id</code> per group."
+      ]
+    ],
+    "requires": [
+      "a grouping key",
+      "for each output: a source column and an aggregation function"
+    ],
+    "important": [
+      "several statistics of possibly different columns are needed with clear names",
+      "the result feeds a report or a further merge"
+    ],
+    "avoid": [
+      "the list form <code>agg(['mean','sum'])</code> when flat named columns are preferable"
+    ],
+    "reach": "When a per-group summary needs several explicitly named statistics, ready for reporting or joining.",
+    "example": "<pre>summary = df.groupby(<span class=\"s\">\"ward\"</span>).agg(\n    avg_los=(<span class=\"s\">\"los_days\"</span>, <span class=\"s\">\"mean\"</span>),\n    n=(<span class=\"s\">\"id\"</span>, <span class=\"s\">\"count\"</span>))</pre>",
+    "tags": [
+      "aggregate",
+      "groupby",
+      "agg",
+      "named aggregation",
+      "summary",
+      "benannt"
     ]
   },
   {
