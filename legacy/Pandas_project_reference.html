@@ -1,0 +1,2878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>From Question to Report — A Pandas Workflow Reference</title>
+<style>
+  :root {
+    --orange: #E97211;
+    --orange-soft: #FCE9D8;
+    --ink: #1B1B1B;
+    --grey: #5B5B5B;
+    --grey-light: #8A8A8A;
+    --grey-soft: #F3F2EE;
+    --line: #DCDCDC;
+    --green: #2E7D32;
+    --red: #C62828;
+    --blue: #1565C0;
+    --blue-soft: #E8F1FA;
+    --yellow: #FFF7E8;
+    --yellow-border: #F0C674;
+    --code-bg: #1E1E1E;
+    --code-fg: #E8E8E8;
+    --code-comment: #7B7B7B;
+    --code-key: #FFB86C;
+    --code-str: #A6E22E;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    margin: 0;
+    line-height: 1.6;
+    background: #FAFAF8;
+  }
+
+  /* ============== HEADER ============== */
+  header.top {
+    background: var(--ink);
+    color: #fff;
+    padding: 28px 40px 22px;
+  }
+  header.top h1 {
+    margin: 0 0 4px;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    font-weight: 600;
+  }
+  header.top .sub {
+    color: #BABABA;
+    font-size: 14px;
+  }
+  header.top .meta {
+    color: #888;
+    font-size: 12px;
+    margin-top: 6px;
+  }
+
+  /* ============== QUESTION BAR ============== */
+  .question-bar {
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    padding: 12px 40px;
+  }
+  .question-bar .row {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .question-bar input {
+    flex: 1;
+    font-size: 15px;
+    padding: 10px 14px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    font-family: inherit;
+  }
+  .question-bar input:focus {
+    outline: none;
+    border-color: var(--orange);
+  }
+  .question-bar button {
+    background: var(--orange);
+    color: #fff;
+    border: 0;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .question-bar button:hover { background: #C45F08; }
+  .question-bar .hint {
+    max-width: 1200px;
+    margin: 8px auto 0;
+    font-size: 12px;
+    color: var(--grey-light);
+  }
+  .question-bar .hint span {
+    background: var(--grey-soft);
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-right: 6px;
+    cursor: pointer;
+  }
+  .question-bar .hint span:hover { background: var(--orange-soft); }
+  #suggestions {
+    max-width: 1200px;
+    margin: 14px auto 0;
+  }
+  #suggestions:empty { margin: 0; }
+  #suggestions .hit {
+    background: var(--orange-soft);
+    border: 1px solid var(--orange);
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin-bottom: 6px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  #suggestions .hit:hover { background: #F8D9BC; }
+  #suggestions .hit code {
+    background: rgba(255,255,255,0.7);
+    padding: 1px 6px;
+    border-radius: 3px;
+    color: #1B1B1B;
+  }
+  #suggestions .hit .why {
+    color: var(--grey);
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  #suggestions .empty {
+    color: var(--grey-light);
+    font-size: 13px;
+    font-style: italic;
+  }
+  #suggestions .sg-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--grey);
+    margin: 4px 2px 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+  #suggestions .sg-close {
+    background: #fff;
+    border: 1px solid var(--line);
+    color: var(--grey);
+    padding: 3px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-family: inherit;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  #suggestions .sg-close:hover { background: var(--grey-soft); color: var(--ink); border-color: var(--orange); }
+
+  /* ============== WORKED EXAMPLE ============== */
+  section.example .quick-stages {
+    background: var(--grey-soft);
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin: 10px 0 16px;
+    font-size: 13.5px;
+    line-height: 1.65;
+  }
+  section.example .copy-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 14px 0 4px;
+  }
+  section.example .copy-row .label {
+    font-size: 13px;
+    color: var(--grey);
+    flex: 1;
+  }
+  section.example .copy-btn {
+    background: var(--orange);
+    color: #fff;
+    border: 0;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  section.example .copy-btn:hover { background: #C45F08; }
+  section.example .copy-btn.done { background: var(--green); }
+  section.example pre.full {
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 18px 20px;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.55;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    margin: 6px 0 4px;
+  }
+  section.example pre.full .c { color: var(--code-comment); font-style: italic; }
+  section.example pre.full .h { color: #8AD7FF; font-style: italic; }
+  section.example pre.full .k { color: var(--code-key); }
+  section.example pre.full .s { color: var(--code-str); }
+  section.example .footer-note {
+    font-size: 12.5px;
+    color: var(--grey);
+    margin-top: 8px;
+    font-style: italic;
+  }
+
+  /* ============== NAV TOC ============== */
+  nav.toc {
+    position: sticky;
+    top: 0;
+    background: rgba(250,250,248,0.96);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--line);
+    padding: 10px 24px;
+    font-size: 13px;
+    z-index: 9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  nav.toc .links a {
+    color: var(--grey);
+    text-decoration: none;
+    margin-right: 12px;
+  }
+  nav.toc .links a:hover { color: var(--orange); }
+  nav.toc .glossary-btn {
+    background: #fff;
+    border: 1px solid var(--line);
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  nav.toc .glossary-btn:hover { border-color: var(--orange); color: var(--orange); }
+
+  /* ============== CONTAINER ============== */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ============== INTRO ============== */
+  section.intro {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--orange);
+    border-radius: 4px;
+    padding: 24px 28px;
+    margin: 24px 0;
+  }
+  section.intro h2 { margin: 0 0 8px; font-size: 20px; }
+  section.intro p { margin: 10px 0; font-size: 14.5px; }
+
+  /* ============== PIPELINE ============== */
+  .pipeline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 22px 0 18px;
+  }
+  .stage {
+    flex: 1 1 130px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--orange);
+    padding: 12px 14px;
+    text-decoration: none;
+    color: var(--ink);
+    transition: background 0.15s;
+  }
+  .stage:hover { background: var(--orange-soft); }
+  .stage .num {
+    font-size: 11px;
+    color: var(--grey);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .stage .name { font-weight: 600; font-size: 14.5px; margin-top: 2px; }
+  .stage .desc { font-size: 12px; color: var(--grey); margin-top: 4px; line-height: 1.4; }
+
+  /* ============== SECTIONS ============== */
+  section.card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    margin: 18px 0;
+    padding: 22px 26px 18px;
+    scroll-margin-top: 60px;
+  }
+  section.card h2 {
+    margin: 0 0 6px;
+    font-size: 21px;
+    font-weight: 600;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  section.card h2 .num {
+    background: var(--orange);
+    color: #fff;
+    padding: 2px 10px;
+    border-radius: 3px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  section.card .context {
+    font-style: italic;
+    color: var(--blue);
+    background: var(--blue-soft);
+    padding: 12px 16px;
+    border-left: 3px solid var(--blue);
+    margin: 14px 0 18px;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  section.card h3 {
+    font-size: 14px;
+    margin: 22px 0 10px;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+  section.card p { font-size: 14.5px; }
+
+  /* ============== COMMAND CARD (collapsible) ============== */
+  .cmd {
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    margin: 8px 0;
+    background: #FDFCFA;
+    overflow: hidden;
+  }
+  .cmd[open] { background: #fff; border-color: var(--orange); }
+  .cmd > summary {
+    cursor: pointer;
+    padding: 10px 14px;
+    list-style: none;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .cmd > summary::-webkit-details-marker { display: none; }
+  .cmd > summary::before {
+    content: "▶";
+    color: var(--orange);
+    font-size: 10px;
+    transition: transform 0.15s;
+  }
+  .cmd[open] > summary::before { transform: rotate(90deg); }
+  .cmd > summary code {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    background: var(--grey-soft);
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 13px;
+    color: #1B1B1B;
+  }
+  .cmd[open] > summary code { background: var(--orange-soft); }
+  .cmd > summary .short {
+    color: var(--grey);
+    font-size: 13.5px;
+    flex: 1;
+  }
+  .cmd .body { padding: 4px 18px 16px 32px; font-size: 14px; }
+  .cmd .body h4 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--grey-light);
+    margin: 14px 0 6px;
+    font-weight: 600;
+  }
+  .cmd .body .what    { color: var(--ink); }
+  .cmd .body .tokens  {
+    background: var(--grey-soft);
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-size: 13px;
+    margin: 4px 0;
+  }
+  .cmd .body .tokens .row {
+    display: grid;
+    grid-template-columns: minmax(120px, 200px) 1fr;
+    gap: 12px;
+    padding: 3px 0;
+    border-bottom: 1px dashed #D8D6D0;
+  }
+  .cmd .body .tokens .row:last-child { border-bottom: 0; }
+  .cmd .body .tokens .row code {
+    background: #fff;
+    padding: 1px 6px;
+    border-radius: 3px;
+    color: #C7254E;
+    font-size: 12.5px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    align-self: start;
+  }
+  .cmd .body .cond {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+    margin: 4px 0 6px;
+  }
+  .cmd .body .cond > div {
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    border-left: 3px solid;
+  }
+  .cmd .body .cond .req      { background: #F3F8F3; border-color: var(--green); }
+  .cmd .body .cond .imp      { background: #FFF7E8; border-color: var(--yellow-border); }
+  .cmd .body .cond .avoid    { background: #FBEAEA; border-color: var(--red); }
+  .cmd .body .cond .label    {
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .cmd .body .cond .req .label   { color: var(--green); }
+  .cmd .body .cond .imp .label   { color: #8A5A00; }
+  .cmd .body .cond .avoid .label { color: var(--red); }
+  .cmd .body .reach {
+    background: var(--blue-soft);
+    border-left: 3px solid var(--blue);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13.5px;
+    margin: 4px 0;
+  }
+  .cmd .body pre {
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 10px 14px;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-size: 12.5px;
+    margin: 6px 0;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    line-height: 1.45;
+  }
+  .cmd .body pre .c { color: var(--code-comment); font-style: italic; }
+  .cmd .body pre .k { color: var(--code-key); }
+  .cmd .body pre .s { color: var(--code-str); }
+  .cmd .body .glossary-link {
+    color: var(--blue);
+    text-decoration: underline dotted;
+    cursor: pointer;
+  }
+
+  /* ============== ORIENTATION BLOCK ============== */
+  .orient {
+    background: #FAFAF8;
+    border: 1px dashed var(--grey-light);
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin: 4px 0 14px;
+    font-size: 13.5px;
+    color: var(--grey);
+  }
+  .orient strong { color: var(--ink); }
+
+  /* ============== DECISION BOX ============== */
+  .decision {
+    background: #FFF7E8;
+    border: 1px solid var(--yellow-border);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin: 14px 0;
+  }
+  .decision h4 { margin: 0 0 8px; color: #8A5A00; font-size: 15px; }
+  .decision .options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .decision .opt {
+    background: #fff;
+    border-left: 3px solid;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  .opt.kill   { border-color: var(--red); }
+  .opt.fill   { border-color: var(--green); }
+  .opt.ignore { border-color: var(--blue); }
+  .opt .label {
+    font-weight: 600;
+    font-size: 13px;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .opt.kill .label   { color: var(--red); }
+  .opt.fill .label   { color: var(--green); }
+  .opt.ignore .label { color: var(--blue); }
+  .opt code {
+    background: var(--grey-soft);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+    color: #C7254E;
+  }
+
+  /* ============== GLOSSARY DRAWER ============== */
+  aside.drawer {
+    position: fixed;
+    top: 0; right: -480px;
+    width: 460px; max-width: 90vw;
+    height: 100vh;
+    background: #fff;
+    border-left: 1px solid var(--line);
+    box-shadow: -8px 0 24px rgba(0,0,0,0.06);
+    transition: right 0.22s;
+    z-index: 50;
+    overflow-y: auto;
+    padding: 22px 22px 60px;
+  }
+  aside.drawer.open { right: 0; }
+  aside.drawer h2 { margin: 0 0 4px; font-size: 18px; }
+  aside.drawer .close-x {
+    position: absolute;
+    top: 14px; right: 18px;
+    background: none; border: 0;
+    cursor: pointer; font-size: 20px; color: var(--grey);
+  }
+  aside.drawer input {
+    width: 100%;
+    font-size: 14px;
+    padding: 8px 12px;
+    margin: 12px 0;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    font-family: inherit;
+  }
+  aside.drawer input:focus { outline: none; border-color: var(--orange); }
+  aside.drawer .entry {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  aside.drawer .entry .term {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--orange);
+  }
+  aside.drawer .entry .term .syn {
+    font-weight: 400;
+    color: var(--grey-light);
+    font-size: 12px;
+    margin-left: 6px;
+  }
+  aside.drawer .entry .def {
+    font-size: 13.5px;
+    margin-top: 4px;
+    color: var(--ink);
+  }
+  aside.drawer .empty {
+    color: var(--grey-light);
+    font-style: italic;
+    font-size: 13px;
+  }
+  .scrim {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.2);
+    z-index: 40; opacity: 0; pointer-events: none;
+    transition: opacity 0.22s;
+  }
+  .scrim.open { opacity: 1; pointer-events: auto; }
+
+  footer {
+    text-align: center;
+    color: var(--grey-light);
+    font-size: 12px;
+    margin-top: 60px;
+  }
+
+  /* ============== HERO + ENTRY CARDS ============== */
+  section.hero {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 24px 28px 20px;
+    margin: 22px 0 18px;
+  }
+  section.hero h2 {
+    margin: 0 0 4px;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  section.hero .lede {
+    font-size: 15px;
+    color: var(--grey);
+    margin: 0 0 18px;
+    line-height: 1.5;
+  }
+  section.hero .entry-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 6px 0 16px;
+  }
+  section.hero .entry-card {
+    background: #FAFAF8;
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--orange);
+    padding: 14px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: var(--ink);
+    display: block;
+    transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  }
+  section.hero .entry-card:hover {
+    background: var(--orange-soft);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(233, 114, 17, 0.12);
+  }
+  section.hero .ec-step {
+    font-size: 11px;
+    color: var(--grey);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  section.hero .ec-head {
+    font-weight: 600;
+    font-size: 15px;
+    margin-top: 4px;
+  }
+  section.hero .ec-body {
+    font-size: 13px;
+    color: var(--grey);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+  section.hero details.about {
+    margin-top: 6px;
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+  }
+  section.hero details.about > summary {
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--grey);
+    font-weight: 600;
+    list-style: none;
+  }
+  section.hero details.about > summary::-webkit-details-marker { display: none; }
+  section.hero details.about > summary::before {
+    content: "▶";
+    color: var(--orange);
+    font-size: 10px;
+    margin-right: 8px;
+    transition: transform 0.15s;
+    display: inline-block;
+  }
+  section.hero details.about[open] > summary::before {
+    transform: rotate(90deg);
+  }
+  section.hero details.about p {
+    font-size: 14px;
+    margin: 12px 0;
+    line-height: 1.6;
+  }
+
+  /* ============== SECTION MARKER ============== */
+  .section-marker {
+    font-size: 11px;
+    color: var(--grey-light);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 24px 0 6px 4px;
+    font-weight: 600;
+  }
+
+  /* ============== FLOATING GLOSSARY ============== */
+  .floating-glossary-btn {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    z-index: 30;
+    background: var(--orange);
+    color: white;
+    border: 0;
+    padding: 9px 18px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    font-family: inherit;
+  }
+  .floating-glossary-btn:hover { background: #C45F08; }
+
+  /* ============== BACK TO TOP ============== */
+  .back-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 25;
+    background: #fff;
+    border: 1px solid var(--line);
+    color: var(--grey);
+    padding: 8px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    font-family: inherit;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .back-top.visible { opacity: 1; pointer-events: auto; }
+  .back-top:hover { color: var(--orange); border-color: var(--orange); }
+
+  /* ============== ASK FAB + OVERLAY ============== */
+  .ask-fab {
+    position: fixed;
+    top: 14px;
+    right: 134px;
+    z-index: 30;
+    background: #fff;
+    color: var(--orange);
+    border: 2px solid var(--orange);
+    padding: 7px 16px 7px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ask-fab:hover { background: var(--orange); color: #fff; }
+  .ask-fab .ask-icon {
+    background: var(--orange);
+    color: #fff;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    transition: background 0.15s, color 0.15s;
+  }
+  .ask-fab:hover .ask-icon { background: #fff; color: var(--orange); }
+
+  .ask-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 60;
+    display: none;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 80px;
+  }
+  .ask-overlay.open { display: flex; }
+  .ask-panel {
+    background: #fff;
+    border-radius: 8px;
+    max-width: 700px;
+    width: 92%;
+    max-height: 80vh;
+    padding: 22px 26px 26px;
+    position: relative;
+    box-shadow: 0 12px 50px rgba(0,0,0,0.3);
+    overflow-y: auto;
+  }
+  .ask-panel .ask-close {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    background: none;
+    border: 0;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--grey);
+    line-height: 1;
+    padding: 4px 8px;
+  }
+  .ask-panel .ask-close:hover { color: var(--ink); }
+  .ask-panel h3 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  .ask-panel .ask-sub { margin: 0 0 16px; color: var(--grey); font-size: 13px; }
+  .ask-panel .ask-row { display: flex; gap: 8px; }
+  .ask-panel input {
+    flex: 1;
+    padding: 10px 14px;
+    font-size: 15px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    font-family: inherit;
+  }
+  .ask-panel input:focus { outline: none; border-color: var(--orange); }
+  .ask-panel button#ask {
+    background: var(--orange);
+    color: #fff;
+    border: 0;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .ask-panel button#ask:hover { background: #C45F08; }
+  .ask-panel .hint {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--grey-light);
+  }
+  .ask-panel .hint span {
+    background: var(--grey-soft);
+    padding: 3px 8px;
+    border-radius: 3px;
+    margin-right: 6px;
+    cursor: pointer;
+    display: inline-block;
+    margin-top: 4px;
+  }
+  .ask-panel .hint span:hover { background: var(--orange-soft); }
+  .ask-panel #suggestions { margin-top: 14px; }
+
+  /* ============== STAGE BARS (accordion) ============== */
+  details.stage-bar {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    margin: 6px 0;
+    overflow: hidden;
+    scroll-margin-top: 16px;
+  }
+  details.stage-bar[open] {
+    border-color: var(--orange);
+    box-shadow: 0 2px 14px rgba(233, 114, 17, 0.08);
+  }
+  details.stage-bar > summary {
+    cursor: pointer;
+    padding: 14px 22px;
+    list-style: none;
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    background: #FDFCFA;
+    transition: background 0.1s;
+  }
+  details.stage-bar > summary:hover { background: var(--orange-soft); }
+  details.stage-bar[open] > summary {
+    background: #FFF8F0;
+    border-bottom: 1px solid var(--line);
+  }
+  details.stage-bar > summary::-webkit-details-marker { display: none; }
+  details.stage-bar > summary::before {
+    content: "▶";
+    color: var(--orange);
+    font-size: 11px;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  details.stage-bar[open] > summary::before { transform: rotate(90deg); }
+  details.stage-bar .bar-num {
+    font-size: 11px;
+    color: var(--grey);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    min-width: 70px;
+    font-weight: 700;
+  }
+  details.stage-bar .bar-title {
+    font-weight: 600;
+    font-size: 15.5px;
+    color: var(--ink);
+    flex-shrink: 0;
+  }
+  details.stage-bar .bar-desc {
+    font-size: 13px;
+    color: var(--grey);
+    flex: 1;
+    font-weight: 400;
+  }
+  details.stage-bar .bar-body {
+    padding: 18px 22px 18px;
+  }
+  details.stage-bar .bar-body > h3:first-child { margin-top: 6px; }
+
+  @media (max-width: 720px) {
+    .ask-fab { right: auto; left: 14px; top: 14px; }
+    .floating-glossary-btn { top: 14px; right: 14px; }
+    section.hero { padding: 18px 20px; }
+    details.stage-bar > summary { flex-wrap: wrap; gap: 6px 12px; }
+    details.stage-bar .bar-desc { flex-basis: 100%; margin-top: 2px; }
+    .ask-overlay { padding-top: 60px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>From Question to Report — A Pandas Workflow Reference</h1>
+  <div class="sub">Python Foundations for Data Science · M.Sc. Digital Health</div>
+  <div class="meta">Dr. Jenny Delekta · SuSe 2026 · Saint Mary's Hospital case material</div>
+</header>
+
+<button class="ask-fab" id="ask-fab" aria-label="Ask a question">
+  <span class="ask-icon">?</span> Ask
+</button>
+<button class="floating-glossary-btn" id="open-glossary" aria-label="Open glossary">Glossary ▸</button>
+<button class="back-top" id="back-top" aria-label="Back to top">↑ Top</button>
+
+<div class="ask-overlay" id="ask-overlay">
+  <div class="ask-panel">
+    <button class="ask-close" id="ask-close" aria-label="Close">×</button>
+    <h3>What are you trying to do?</h3>
+    <p class="ask-sub">Type a question. The reference will suggest matching commands.</p>
+    <div class="ask-row">
+      <input id="q" placeholder="How do I remove rows where age is missing?" />
+      <button id="ask">Suggest</button>
+    </div>
+    <div class="hint">
+      Examples:
+      <span data-q="remove rows with missing age">remove rows with missing age</span>
+      <span data-q="average length of stay per ward">average length of stay per ward</span>
+      <span data-q="merge two dataframes to complement values">merge two dataframes</span>
+      <span data-q="combine two 1D arrays">combine 1D arrays</span>
+      <span data-q="bar chart with title and labels">bar chart with labels</span>
+    </div>
+    <div id="suggestions"></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- =================== HERO =================== -->
+  <section class="hero" id="s0">
+    <h2>Every number has a story.</h2>
+    <p class="lede">A reference for the commands that turn data into a report. Click any stage below to expand it; use the <strong>Ask</strong> button (top right) to search by question.</p>
+    <details class="about">
+      <summary>About this reference — how it is structured and why</summary>
+      <p>An analysis does not begin with a file. It begins with a question for which numbers might form part of the answer — and a file is one of many intermediate states between that question and the eventual response. The «messy CSV» is not the starting point; it is the point at which the data first becomes visible and uncomfortable.</p>
+      <p>Before reaching for any command, the analyst should be able to state three things in plain language: (i) what question is being asked, (ii) which population or unit the answer concerns, and (iii) what an answer would look like if one were given the result in finished form. Only then is it productive to ask which tools are required.</p>
+      <p>The remainder of this reference is organised around the typical journey from such a question to a delivered result. Each stage lists the commands one is likely to encounter, with — for each command — a description of <em>what it does</em>, a token-by-token reading of <em>what the code itself means</em>, the <em>conditions</em> under which it applies, and the situations in which one would <em>reach for it</em>.</p>
+    </details>
+  </section>
+
+  <!-- =================== STAGE 1 LOAD =================== -->
+  <section class="card" id="s1">
+    <h2><span class="num">1</span> Locate &amp; Load — bringing the data into Python</h2>
+    <div class="context">Loading is the operation by which a file on disk is read into a Python object that can be queried, transformed and summarised. The choice of loader depends on the file format; the choice of parameters depends on what the file's author did with characters, separators, and missing markers.</div>
+
+    <div class="orient">
+      <strong>How to choose:</strong> The file extension is a useful first signal, but not authoritative. Open the file in a plain-text editor first and read the first ten lines. Establish: which character separates fields, whether the first row contains column names, how the file encodes special characters (German umlauts are a frequent indicator), and how missing values are written. Only then call a loader.
+    </div>
+
+    <div class="commands" data-stage="load"></div>
+  </section>
+
+  <!-- =================== STAGE 2 INSPECT =================== -->
+  <section class="card" id="s2">
+    <h2><span class="num">2</span> Inspect — understanding what was loaded</h2>
+    <div class="context">Before any analytical operation, the analyst should be able to describe the loaded object in four respects: its size, the type of each column, the prevalence of missing values, and the presence of duplicate records. These four checks correspond to questions a careful reader would ask before trusting any subsequent claim.</div>
+
+    <div class="orient">
+      <strong>How to choose:</strong> Begin with <code>shape</code> and <code>head()</code>; these confirm that the loader produced what was expected. Follow with <code>info()</code> and <code>isna().sum()</code>; these reveal the structural integrity of the table. Use <code>value_counts()</code> and <code>describe()</code> when interest shifts to the distribution of a single column.
+    </div>
+
+    <div class="commands" data-stage="inspect"></div>
+  </section>
+
+  <!-- =================== STAGE 3 CLEAN =================== -->
+  <section class="card" id="s3">
+    <h2><span class="num">3</span> Clean — addressing irregularities</h2>
+    <div class="context">Cleaning denotes the corrections applied so that the data can be analysed without introducing systematic error. The most common irregularities are inconsistent types, missing values, duplicate records, and inconsistent string representations of the same underlying category. Each requires a deliberate decision; defaults rarely capture clinical intent.</div>
+
+    <div class="orient">
+      <strong>How to choose:</strong> Cleaning proceeds in a fixed order: types are corrected first (so that subsequent comparisons work), then missing values (so that they do not propagate silently), then duplicates (so that aggregations are not inflated), then string normalisation (so that categories collapse correctly). Decisions about <em>how</em> to treat missingness are addressed in the Decision Boxes at the end of this document.
+    </div>
+
+    <div class="commands" data-stage="clean"></div>
+  </section>
+
+  <!-- =================== STAGE 4 TRANSFORM =================== -->
+  <section class="card" id="s4">
+    <h2><span class="num">4</span> Transform — deriving variables, filtering, sorting</h2>
+    <div class="context">Transformation reshapes the cleaned table toward the question. New variables are computed from existing ones; rows are filtered to the subpopulation of interest; the order of the table is chosen so that a reader can locate the relevant rows quickly.</div>
+
+    <div class="orient">
+      <strong>How to choose:</strong> If a new value is to be computed for every row, use a vectorised expression (column arithmetic, <code>np.where</code>, <code>np.select</code>). If only a subset of rows is of interest, build a boolean mask. If a top-N or bottom-N is required, prefer <code>nlargest</code> / <code>nsmallest</code> over a full sort.
+    </div>
+
+    <div class="commands" data-stage="transform"></div>
+  </section>
+
+  <!-- =================== STAGE 5 AGGREGATE =================== -->
+  <section class="card" id="s5">
+    <h2><span class="num">5</span> Aggregate — summarising by group</h2>
+    <div class="context">Aggregation reduces a long table to a short one by computing a summary statistic within each group. The mental model is <em>split–apply–combine</em>: split the table by one or more key columns, apply a function to each group, combine the results into a single summary.</div>
+
+    <div class="orient">
+      <strong>How to choose:</strong> <code>groupby</code> followed by an aggregation produces a long-format summary suitable for further analysis. <code>pivot_table</code> produces a wide-format summary suitable for display. <code>transform</code> is appropriate when the group-level statistic must be aligned back to every original row (for instance, to compute a deviation from group mean).
+    </div>
+
+    <div class="commands" data-stage="aggregate"></div>
+  </section>
+
+  <!-- =================== STAGE 6 MERGE =================== -->
+  <section class="card" id="s6">
+    <h2><span class="num">6</span> Merge — combining tables and arrays</h2>
+    <div class="context">Most analyses require information from more than one source. Combining sources may take three forms: <em>joining</em> tables by a shared key, <em>stacking</em> tables that share structure, or <em>complementing</em> one source with another to fill in missing values. NumPy arrays are combined in analogous, but simpler, ways.</div>
+
+    <div class="orient">
+      <strong>How to choose:</strong> If the two tables share a key column and each row of the first should pick up additional columns from the second, the operation is a merge. If the two tables have the same columns and represent different periods or sources, the operation is a concatenation. If the two tables describe the same entities but each contains gaps the other can fill, the operation is a complement (<code>combine_first</code>).
+    </div>
+
+    <div class="commands" data-stage="merge"></div>
+  </section>
+
+  <!-- =================== STAGE 7 VISUALIZE =================== -->
+  <section class="card" id="s7">
+    <h2><span class="num">7</span> Visualize — graphical summaries</h2>
+    <div class="context">A graphical summary supports the reader in seeing a pattern that a tabular summary cannot. The choice of plot type follows from the question: comparison across categories (bar), evolution over time (line), distribution of a single variable (histogram), relation between two variables (scatter), distribution by group (boxplot).</div>
+
+    <div class="orient">
+      <strong>How to choose:</strong> Matplotlib's object-oriented interface (<code>fig, ax = plt.subplots()</code> followed by methods on <code>ax</code>) is the recommended foundation. Seaborn provides briefer syntax for common statistical plots and is appropriate once the foundations are familiar. Every plot intended for an external reader requires, at minimum, a descriptive title, axis labels with units, and — if multiple series are present — a legend.
+    </div>
+
+    <div class="commands" data-stage="visualize"></div>
+  </section>
+
+  <!-- =================== STAGE 8 EXPORT =================== -->
+  <section class="card" id="s8">
+    <h2><span class="num">8</span> Export — delivering the result</h2>
+    <div class="context">A result that remains in a notebook is not yet delivered. Delivery takes the form of data files for downstream use, image files for inclusion in reports, and the notebook itself rendered for an external reader.</div>
+
+    <div class="orient">
+      <strong>How to choose:</strong> Tabular data intended for re-use by humans should be exported as CSV or Excel. Tabular data intended for re-use by other Python programs is better stored as Parquet. Figures intended for slides should be exported as PNG at high resolution; figures intended for printed reports as PDF or SVG.
+    </div>
+
+    <div class="commands" data-stage="export"></div>
+  </section>
+
+  <!-- =================== DECISIONS =================== -->
+  <section class="card" id="decisions">
+    <h2><span class="num">★</span> Decision boxes — the considered choices</h2>
+
+    <p style="font-size:14.5px;">Three decisions recur in any non-trivial analysis. Each admits several defensible answers; the correct answer depends on the question and on the structure of the missingness or the join.</p>
+
+    <div class="decision">
+      <h4>Missing values — drop rows, drop columns, fill, or allow to propagate?</h4>
+      <p style="font-size:14px;margin:6px 0 10px;">A column contains <code>NaN</code>. The decision is determined by two considerations: <em>why</em> the value is missing, and <em>how essential</em> the column is to the question.</p>
+      <div class="options">
+        <div class="opt kill">
+          <span class="label">Drop the row — <code>dropna(subset=[col])</code></span>
+          Indicated when the column is essential to the analysis (e.g. <code>patient_id</code>, <code>admission_date</code>) and no substitute is defensible. Acceptable if fewer than approximately five per cent of rows are lost.
+        </div>
+        <div class="opt kill">
+          <span class="label">Drop the column — <code>drop(columns=[col])</code></span>
+          Indicated when the column is more than approximately half missing and not load-bearing for the question, or is redundant with another column. The decision should be recorded explicitly in the notebook.
+        </div>
+        <div class="opt fill">
+          <span class="label">Impute — <code>fillna(median)</code> / <code>ffill</code></span>
+          Indicated when missingness is plausibly random, the column is numeric, and a substitute is defensible. The median is robust to skew; the mean only for symmetric distributions; forward-fill for time series whose state changes infrequently.
+        </div>
+        <div class="opt ignore">
+          <span class="label">Allow to propagate</span>
+          Indicated when the downstream aggregation is itself robust to <code>NaN</code> (pandas's <code>mean</code>, <code>sum</code>, and <code>groupby</code> skip <code>NaN</code> by default). Only when a <code>NaN</code>-propagating result is required does one specify <code>skipna=False</code>.
+        </div>
+      </div>
+      <p style="font-size:13px;margin-top:10px;color:#666;">The decision should be made <em>per column</em>, not per DataFrame. <code>dropna()</code> applied to the whole DataFrame, with default arguments, is almost always the wrong choice on real data.</p>
+    </div>
+
+    <div class="decision">
+      <h4>Merging two DataFrames — which join, which method?</h4>
+      <div class="options">
+        <div class="opt fill"><span class="label">Enrich table A with columns from B</span><code>a.merge(b, on=key, how="left")</code>. Retains every row of A; adds matching columns from B, with <code>NaN</code> where no match exists.</div>
+        <div class="opt fill"><span class="label">Restrict to rows present in both</span><code>a.merge(b, on=key, how="inner")</code>. Smaller result; no missing values introduced by the merge.</div>
+        <div class="opt fill"><span class="label">Union of all keys</span><code>a.merge(b, on=key, how="outer", indicator=True)</code>. Permits auditing of which keys are present in only one source.</div>
+        <div class="opt fill"><span class="label">A is the reference; B fills the gaps</span><code>a.combine_first(b)</code>. Applied cell by cell: where A has a value, A is retained; where A is <code>NaN</code>, B is used.</div>
+        <div class="opt fill"><span class="label">Stack vertically (same columns)</span><code>pd.concat([a, b], ignore_index=True)</code>.</div>
+        <div class="opt fill"><span class="label">Glue side by side (same rows)</span><code>pd.concat([a, b], axis=1)</code>.</div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <h4>NumPy — which array-combination function?</h4>
+      <div class="options">
+        <div class="opt fill"><span class="label">1D + 1D, end to end</span><code>np.concatenate([a,b])</code> or <code>np.hstack([a,b])</code>. Produces <code>[a₀…aₙ, b₀…bₘ]</code>.</div>
+        <div class="opt fill"><span class="label">2D + 2D, stack as further rows</span><code>np.concatenate([A,B], axis=0)</code> or <code>np.vstack([A,B])</code>.</div>
+        <div class="opt fill"><span class="label">2D + 2D, glue as further columns</span><code>np.concatenate([A,B], axis=1)</code> or <code>np.hstack([A,B])</code>.</div>
+        <div class="opt fill"><span class="label">Two 1D arrays → 2D with each as a column</span><code>np.column_stack([a,b])</code>. Shape <code>(n, 2)</code>.</div>
+        <div class="opt fill"><span class="label">Two 1D arrays → 2D with each as a row</span><code>np.vstack([a,b])</code>. Shape <code>(2, n)</code>.</div>
+        <div class="opt fill"><span class="label">Introduce a new axis</span><code>np.stack([a,b])</code>. Used for batching.</div>
+      </div>
+      <p style="font-size:13px;margin-top:10px;color:#666;"><strong>Mnemonic:</strong> the argument <code>axis</code> denotes the dimension along which the result <em>grows</em>. <code>axis=0</code> produces additional rows; <code>axis=1</code> produces additional columns.</p>
+    </div>
+  </section>
+
+  <!-- =================== WORKED EXAMPLE =================== -->
+  <section class="card example" id="example">
+    <h2><span class="num">▣</span> A complete worked example</h2>
+    <div class="context">A short, self-contained analysis that traces all eight stages on synthetic data — generated inline so the script runs in any notebook without an external file. Two questions are addressed of the Saint Mary's data: <em>which wards have the longest length of stay</em>, and <em>which DRGs are loss-making</em>.</div>
+
+    <div class="quick-stages">
+      <strong>What the script does, by stage:</strong><br>
+      (1) generates a small Saint Mary's dataset with deliberate irregularities;
+      (2) inspects shape, types, and missingness;
+      (3) cleans gender labels, sentinel values, and missing length of stay;
+      (4) derives margin and a loss indicator;
+      (5) aggregates length of stay by ward and margin by DRG;
+      (6) merges encounters with the DRG catalogue and the patient register;
+      (7) produces a two-panel figure;
+      (8) writes the summaries and the enriched table to disk.
+    </div>
+
+    <div class="copy-row">
+      <div class="label">The script may be copied into a Jupyter notebook and executed top to bottom. It requires <code>pandas</code>, <code>numpy</code>, and <code>matplotlib</code> — already part of a standard scientific Python installation.</div>
+      <button class="copy-btn" id="copy-example">Copy code</button>
+    </div>
+
+<pre class="full" id="example-code"><span class="c"># ============================================================</span>
+<span class="c"># Saint Mary's — a complete, runnable example</span>
+<span class="c"># Question: Which wards have the longest length of stay,</span>
+<span class="c">#           and which DRGs are loss-making?</span>
+<span class="c"># ============================================================</span>
+
+<span class="k">import</span> numpy <span class="k">as</span> np
+<span class="k">import</span> pandas <span class="k">as</span> pd
+<span class="k">import</span> matplotlib.pyplot <span class="k">as</span> plt
+<span class="k">from</span> pathlib <span class="k">import</span> Path
+
+<span class="h"># --- Step 1: data ----------------------------------------------</span>
+<span class="c"># In production one would load files:</span>
+<span class="c">#   patients   = pd.read_csv("data/patients.csv")</span>
+<span class="c">#   encounters = pd.read_csv("data/encounters.csv")</span>
+<span class="c"># Here the tables are generated so the script is self-contained.</span>
+
+<span class="c"># np.random.default_rng creates a *pseudo-random number generator* — an</span>
+<span class="c"># object from which subsequent calls draw random values. The 'seed'</span>
+<span class="c"># argument fixes its starting state, so that every run produces the same</span>
+<span class="c"># sequence of values. This is essential for reproducibility: a colleague</span>
+<span class="c"># running the same script obtains the same example data.</span>
+rng = np.random.default_rng(seed=<span class="s">42</span>)
+
+patients = pd.DataFrame({
+    <span class="s">"patient_id"</span>: [<span class="s">f"P{i:03d}"</span> <span class="k">for</span> i <span class="k">in</span> range(<span class="s">60</span>)],
+    <span class="s">"age"</span>: rng.integers(<span class="s">18</span>, <span class="s">90</span>, size=<span class="s">60</span>),
+    <span class="s">"gender"</span>: rng.choice(
+        np.array([<span class="s">"M"</span>, <span class="s">"F"</span>, <span class="s">"m"</span>, <span class="s">"female"</span>, <span class="s">"männlich"</span>, <span class="s">" male  "</span>, <span class="k">None</span>], dtype=object),
+        size=<span class="s">60</span>),
+})
+
+encounters = pd.DataFrame({
+    <span class="s">"encounter_id"</span>: [<span class="s">f"E{i:04d}"</span> <span class="k">for</span> i <span class="k">in</span> range(<span class="s">100</span>)],
+    <span class="s">"patient_id"</span>: rng.choice(patients[<span class="s">"patient_id"</span>], size=<span class="s">100</span>),
+    <span class="s">"ward"</span>: rng.choice(
+        np.array([<span class="s">"ICU"</span>, <span class="s">"Cardiology"</span>, <span class="s">"Orthopaedics"</span>, <span class="s">"General"</span>, <span class="k">None</span>], dtype=object),
+        size=<span class="s">100</span>),
+    <span class="s">"drg_code"</span>: rng.choice([<span class="s">"A01"</span>, <span class="s">"A02"</span>, <span class="s">"B05"</span>, <span class="s">"C10"</span>, <span class="s">"D12"</span>], size=<span class="s">100</span>),
+    <span class="s">"los_days"</span>: rng.integers(<span class="s">1</span>, <span class="s">21</span>, size=<span class="s">100</span>).astype(float),
+    <span class="s">"cost_eur"</span>: rng.normal(<span class="s">2500</span>, <span class="s">800</span>, size=<span class="s">100</span>).round(<span class="s">2</span>),
+})
+<span class="c"># Inject realistic irregularities</span>
+encounters.loc[rng.choice(<span class="s">100</span>, <span class="s">5</span>, replace=<span class="k">False</span>), <span class="s">"los_days"</span>] = np.nan
+encounters.loc[rng.choice(<span class="s">100</span>, <span class="s">3</span>, replace=<span class="k">False</span>), <span class="s">"cost_eur"</span>] = <span class="s">-1</span>   <span class="c"># sentinel for "invalid"</span>
+
+drg_catalog = pd.DataFrame({
+    <span class="s">"drg_code"</span>:          [<span class="s">"A01"</span>, <span class="s">"A02"</span>, <span class="s">"B05"</span>, <span class="s">"C10"</span>, <span class="s">"D12"</span>],
+    <span class="s">"reimbursement_eur"</span>: [<span class="s">3200</span>, <span class="s">2100</span>, <span class="s">1800</span>, <span class="s">4500</span>, <span class="s">1500</span>],
+})
+
+<span class="h"># --- Step 2: inspect -------------------------------------------</span>
+print(<span class="s">"Shape:"</span>, encounters.shape)
+print(encounters.dtypes)
+print(<span class="s">"Missing values per column:"</span>)
+print(encounters.isna().sum())
+
+<span class="h"># --- Step 3: clean ---------------------------------------------</span>
+<span class="c"># 3a — *normalise* the gender labels.</span>
+<span class="c"># To normalise a column means to bring its values into a single, agreed</span>
+<span class="c"># form. A single underlying category may appear in several spellings</span>
+<span class="c"># ("M", "m", "Male", "männlich", with stray whitespace). Before any</span>
+<span class="c"># grouping or comparison on 'gender' can be trusted, the strings must be</span>
+<span class="c"># collapsed to a canonical form. The .str *accessor* applies string</span>
+<span class="c"># methods element-wise to a Series:</span>
+<span class="c">#   .strip()    removes leading and trailing whitespace;</span>
+<span class="c">#   .lower()    converts every character to lowercase;</span>
+<span class="c">#   .replace()  then maps the remaining variants onto two canonical labels.</span>
+patients[<span class="s">"gender"</span>] = (patients[<span class="s">"gender"</span>]
+                      .str.strip()
+                      .str.lower()
+                      .replace({<span class="s">"m"</span>: <span class="s">"male"</span>, <span class="s">"männlich"</span>: <span class="s">"male"</span>, <span class="s">"f"</span>: <span class="s">"female"</span>}))
+
+<span class="c"># 3b — translate the *sentinel value* into NaN, then impute.</span>
+<span class="c"># A sentinel value is a special, agreed-upon number that a source system</span>
+<span class="c"># uses to signal "no valid value here" — most often because the export</span>
+<span class="c"># file format cannot store NaN directly. Hospital information systems</span>
+<span class="c"># frequently use -1, -99, or 9999 for this purpose. In the present data,</span>
+<span class="c"># the cost export uses -1 for invalid entries.</span>
+<span class="c">#</span>
+<span class="c"># Until -1 is converted to NaN, the affected rows look like genuine costs</span>
+<span class="c"># of minus one euro. Any subsequent statistic — the mean, the sum, the</span>
+<span class="c"># distribution of margins — would be distorted by these pseudo-values.</span>
+<span class="c">#</span>
+<span class="c"># The two-step operation handles this:</span>
+<span class="c">#   .replace({-1: np.nan}) substitutes the sentinel with np.nan, which is</span>
+<span class="c">#                          pandas's proper marker for a missing value;</span>
+<span class="c">#   .fillna(median)        then *imputes* (i.e. estimates and fills in)</span>
+<span class="c">#                          those NaN cells using the column's median —</span>
+<span class="c">#                          a robust central value that is unaffected by</span>
+<span class="c">#                          outliers (the mean would be pulled by extremes).</span>
+encounters[<span class="s">"cost_eur"</span>] = (encounters[<span class="s">"cost_eur"</span>]
+                          .replace({<span class="s">-1</span>: np.nan})
+                          .fillna(encounters[<span class="s">"cost_eur"</span>].median()))
+
+<span class="c"># 3c — length of stay is essential to the analysis, so rows that lack it</span>
+<span class="c"># are dropped. After rows are dropped, the row labels (the *index*) have</span>
+<span class="c"># gaps — 0, 1, 3, 4, 7, ... — because the dropped numbers are simply</span>
+<span class="c"># absent. .reset_index(drop=True) renumbers the rows to a clean 0...n-1</span>
+<span class="c"># sequence; 'drop=True' discards the old index instead of retaining it</span>
+<span class="c"># as an additional column.</span>
+encounters = encounters.dropna(subset=[<span class="s">"los_days"</span>]).reset_index(drop=<span class="k">True</span>)
+
+<span class="c"># 3d — a missing ward is informative in itself: it indicates that the</span>
+<span class="c"># source system failed to record where the patient was treated. Rather</span>
+<span class="c"># than discarding the row or imputing a fictitious ward, the absence is</span>
+<span class="c"># *recoded* as the explicit category "Unknown". The downstream groupby</span>
+<span class="c"># will then produce an "Unknown" group, making the volume of incomplete</span>
+<span class="c"># records visible rather than hidden behind a NaN.</span>
+encounters[<span class="s">"ward"</span>] = encounters[<span class="s">"ward"</span>].fillna(<span class="s">"Unknown"</span>)
+
+<span class="h"># --- Step 4: transform -----------------------------------------</span>
+<span class="c"># The margin requires the reimbursement, which lives in the DRG catalogue.</span>
+<span class="c"># It is therefore computed after the merge in Step 6.</span>
+
+<span class="h"># --- Step 5: aggregate (preview, before merge) -----------------</span>
+<span class="c"># Average length of stay per ward — answers the first question.</span>
+los_by_ward = (encounters
+               .groupby(<span class="s">"ward"</span>)[<span class="s">"los_days"</span>]
+               .agg([<span class="s">"mean"</span>, <span class="s">"median"</span>, <span class="s">"count"</span>])
+               .round(<span class="s">2</span>)
+               .sort_values(<span class="s">"mean"</span>, ascending=<span class="k">False</span>))
+print(<span class="s">"\nLength of stay by ward:\n"</span>, los_by_ward)
+
+<span class="h"># --- Step 6: merge ---------------------------------------------</span>
+<span class="c"># Two consecutive *left joins* enrich the encounter table with information</span>
+<span class="c"># from the DRG catalogue and the patient register.</span>
+<span class="c">#   how="left"      retains every row of the left-hand table (the encounters)</span>
+<span class="c">#                   and adds the matching columns from the right-hand table;</span>
+<span class="c">#                   rows of the right table without a matching key are not</span>
+<span class="c">#                   added (no row is duplicated, no row is lost on the left).</span>
+<span class="c">#   validate="m:1"  asserts the expected *cardinality* of the join — that</span>
+<span class="c">#                   is, how many rows on one side correspond to how many on</span>
+<span class="c">#                   the other. "m:1" reads as "many-to-one": many encounters</span>
+<span class="c">#                   share one DRG catalogue entry; many encounters share one</span>
+<span class="c">#                   patient record. If the assumption is violated (for</span>
+<span class="c">#                   example a duplicate patient_id in 'patients'), pandas</span>
+<span class="c">#                   raises an exception immediately, catching errors that</span>
+<span class="c">#                   would otherwise silently inflate the result by joining</span>
+<span class="c">#                   each encounter to multiple rows.</span>
+enriched = (encounters
+            .merge(drg_catalog, on=<span class="s">"drg_code"</span>,   how=<span class="s">"left"</span>, validate=<span class="s">"m:1"</span>)
+            .merge(patients,    on=<span class="s">"patient_id"</span>, how=<span class="s">"left"</span>, validate=<span class="s">"m:1"</span>))
+
+<span class="c"># Column arithmetic in pandas is *vectorised*: the subtraction is applied</span>
+<span class="c"># to every row in a single operation dispatched to compiled code, not by</span>
+<span class="c"># a Python loop. This is markedly faster and more concise than iterating.</span>
+<span class="c"># The comparison ' &lt; 0 ' similarly produces a boolean Series — True where</span>
+<span class="c"># the margin is negative, False otherwise.</span>
+enriched[<span class="s">"margin_eur"</span>] = enriched[<span class="s">"reimbursement_eur"</span>] - enriched[<span class="s">"cost_eur"</span>]
+enriched[<span class="s">"is_loss"</span>]    = enriched[<span class="s">"margin_eur"</span>] &lt; <span class="s">0</span>
+
+margin_by_drg = (enriched
+                 .groupby(<span class="s">"drg_code"</span>)
+                 .agg(total_margin=(<span class="s">"margin_eur"</span>, <span class="s">"sum"</span>),
+                      n_cases    =(<span class="s">"encounter_id"</span>, <span class="s">"count"</span>))
+                 .round(<span class="s">2</span>)
+                 .sort_values(<span class="s">"total_margin"</span>))
+print(<span class="s">"\nMargin by DRG:\n"</span>, margin_by_drg)
+
+<span class="h"># --- Step 7: visualise -----------------------------------------</span>
+fig, axes = plt.subplots(<span class="s">1</span>, <span class="s">2</span>, figsize=(<span class="s">12</span>, <span class="s">5</span>))
+
+axes[<span class="s">0</span>].bar(los_by_ward.index, los_by_ward[<span class="s">"mean"</span>], color=<span class="s">"#1565C0"</span>)
+axes[<span class="s">0</span>].set_title(<span class="s">"Average length of stay by ward"</span>)
+axes[<span class="s">0</span>].set_xlabel(<span class="s">"Ward"</span>)
+axes[<span class="s">0</span>].set_ylabel(<span class="s">"Mean length of stay (days)"</span>)
+axes[<span class="s">0</span>].tick_params(axis=<span class="s">"x"</span>, rotation=<span class="s">20</span>)
+
+<span class="c"># A *list comprehension* produces one colour per DRG: red where the total</span>
+<span class="c"># margin is negative, green where it is positive. Visual encoding of the</span>
+<span class="c"># sign communicates the result more directly than the bar length alone.</span>
+colors = [<span class="s">"#C62828"</span> <span class="k">if</span> v &lt; <span class="s">0</span> <span class="k">else</span> <span class="s">"#2E7D32"</span>
+          <span class="k">for</span> v <span class="k">in</span> margin_by_drg[<span class="s">"total_margin"</span>]]
+axes[<span class="s">1</span>].barh(margin_by_drg.index, margin_by_drg[<span class="s">"total_margin"</span>], color=colors)
+<span class="c"># axvline draws a vertical reference line on the second axes; here at x=0,</span>
+<span class="c"># marking the boundary between loss-making and profitable DRGs.</span>
+axes[<span class="s">1</span>].axvline(<span class="s">0</span>, color=<span class="s">"black"</span>, linewidth=<span class="s">0.8</span>)
+axes[<span class="s">1</span>].set_title(<span class="s">"Total margin by DRG"</span>)
+axes[<span class="s">1</span>].set_xlabel(<span class="s">"Margin (EUR)"</span>)
+
+<span class="c"># tight_layout reconciles overlapping labels by recomputing the spacing</span>
+<span class="c"># between axes. savefig then writes the figure to disk:</span>
+<span class="c">#   dpi=200             sets a high raster resolution (dots per inch);</span>
+<span class="c">#   bbox_inches="tight" crops away surrounding whitespace, ensuring that</span>
+<span class="c">#                       rotated tick labels and titles are not cut off.</span>
+<span class="c"># savefig must be called *before* plt.show(), since plt.show may clear</span>
+<span class="c"># the figure on some backends, leaving savefig to write an empty canvas.</span>
+plt.tight_layout()
+plt.savefig(<span class="s">"saint_marys_summary.png"</span>, dpi=<span class="s">200</span>, bbox_inches=<span class="s">"tight"</span>)
+plt.show()
+
+<span class="h"># --- Step 8: export --------------------------------------------</span>
+Path(<span class="s">"output"</span>).mkdir(exist_ok=<span class="k">True</span>)
+los_by_ward.to_csv(<span class="s">"output/los_by_ward.csv"</span>)
+margin_by_drg.to_csv(<span class="s">"output/margin_by_drg.csv"</span>)
+enriched.to_csv(<span class="s">"output/encounters_enriched.csv"</span>, index=<span class="k">False</span>)
+
+print(<span class="s">"\nDone. Summaries and the enriched table are in ./output/"</span>)</pre>
+
+    <p class="footer-note">The synthetic data is regenerated with a fixed random seed, so the numerical results are reproducible. To work with the actual Saint Mary's files, replace Step 1 with <code>pd.read_csv(...)</code> calls against <code>data/patients.csv</code>, <code>data/encounters.csv</code>, and <code>data/drg_catalog.csv</code>.</p>
+  </section>
+
+</div>
+
+<!-- =================== GLOSSARY DRAWER =================== -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="glossary">
+  <button class="close-x" id="close-glossary" aria-label="Close">×</button>
+  <h2>Glossary</h2>
+  <p style="font-size:13px;color:var(--grey);margin:4px 0 0;">Search by term or concept. Synonyms (English/German) are supported.</p>
+  <input id="g-search" placeholder="e.g. axis, NaN, vectorisation, Spalte" />
+  <div id="g-results"></div>
+</aside>
+
+<footer>
+  Python Foundations for Data Science · M.Sc. Digital Health · Dr. Jenny Delekta · SuSe 2026
+</footer>
+
+<!-- =================== DATA + LOGIC =================== -->
+<script>
+/* ============================================================
+   COMMAND CORPUS
+   Each entry: id, code, stage, short, what, tokens, requires,
+   important, avoid, reach, example, tags
+   ============================================================ */
+const CORPUS = [
+  /* ---------------- LOAD ---------------- */
+  {
+    id:"read_csv", code:'pd.read_csv("file.csv")', stage:"load",
+    short:"Read a comma-separated file into a DataFrame.",
+    what:"Reads a delimited text file from disk and returns a pandas <span class='glossary-link' data-term='DataFrame'>DataFrame</span> in memory. The default delimiter is a comma and the default encoding is UTF-8.",
+    tokens:[
+      ["pd","The conventional alias for the pandas library after <code>import pandas as pd</code>."],
+      [".read_csv(...)","A pandas function that parses a text file containing delimited records."],
+      ['"file.csv"',"A path to the file. May be absolute or relative to the working directory of the notebook."]
+    ],
+    requires:["pandas imported (<code>import pandas as pd</code>)","a file path that resolves to a readable file"],
+    important:["the delimiter is not a comma (set <code>sep=';'</code>)","the file uses non-UTF-8 encoding (set <code>encoding='latin-1'</code> or <code>'cp1252'</code>)","date columns should be parsed at load time (<code>parse_dates=[...]</code>)"],
+    avoid:["loading a file larger than available memory without <code>nrows=</code> or <code>chunksize=</code>","ignoring encoding errors silently"],
+    reach:"When the input is a delimited text file and the entire table is intended to be present in memory.",
+    example:`<pre>df = pd.read_csv(<span class="s">"data/encounters.csv"</span>,
+                 encoding=<span class="s">"utf-8"</span>,
+                 sep=<span class="s">","</span>,
+                 parse_dates=[<span class="s">"admission_date"</span>])</pre>`,
+    tags:["load","read","import","csv","file","delimited","comma","datei","laden","einlesen"]
+  },
+  {
+    id:"read_excel", code:'pd.read_excel("file.xlsx", sheet_name="Q1")', stage:"load",
+    short:"Read an Excel sheet into a DataFrame.",
+    what:"Reads a single sheet of an Excel workbook into a DataFrame. Requires the auxiliary package <code>openpyxl</code> for <code>.xlsx</code> files.",
+    tokens:[
+      [".read_excel(...)","Pandas function that parses an Excel workbook."],
+      ['"file.xlsx"',"The path to the workbook."],
+      ['sheet_name="Q1"',"Which sheet to read. May also be an integer index or <code>None</code> to obtain a dictionary of all sheets."]
+    ],
+    requires:["<code>openpyxl</code> installed","a workbook with at least one readable sheet"],
+    important:["the workbook contains formulas (values are read, not formulas)","multiple sheets are required (use <code>sheet_name=None</code>)"],
+    avoid:["relying on cell formatting (colour, font) as data — it is not preserved"],
+    reach:"When the source data is an Excel workbook, particularly when the file already contains tabular structure rather than complex layout.",
+    example:`<pre>df = pd.read_excel(<span class="s">"data/staffing_2026Q1.xlsx"</span>,
+                   sheet_name=<span class="s">"Q1"</span>)</pre>`,
+    tags:["load","excel","xlsx","sheet","workbook","arbeitsblatt"]
+  },
+  {
+    id:"read_json", code:'pd.read_json("file.json")', stage:"load",
+    short:"Read a JSON document into a DataFrame.",
+    what:"Parses a JSON file or JSON string into a DataFrame. The structure of the JSON determines how rows and columns are inferred.",
+    tokens:[
+      [".read_json(...)","Pandas function for JSON input."],
+      ['"file.json"',"The path or URL of the JSON resource."]
+    ],
+    requires:["a JSON document whose structure is convertible to tabular form"],
+    important:["the JSON is deeply nested (consider <code>pd.json_normalize</code> instead)","records are stored under a key (<code>orient='records'</code> or extracting first)"],
+    avoid:["reading very large JSON streams without preprocessing"],
+    reach:"When data is delivered by an API or stored in a JSON file with a tabular structure.",
+    example:`<pre>df = pd.read_json(<span class="s">"data/triage.json"</span>)</pre>`,
+    tags:["load","json","api","read","import"]
+  },
+  {
+    id:"read_parquet", code:'pd.read_parquet("file.parquet")', stage:"load",
+    short:"Read a Parquet file into a DataFrame.",
+    what:"Reads a columnar binary format optimised for analytical workloads. Considerably faster and smaller than CSV for the same data.",
+    tokens:[
+      [".read_parquet(...)","Pandas function for Parquet input."],
+      ['"file.parquet"',"The path to the Parquet file or directory."]
+    ],
+    requires:["<code>pyarrow</code> or <code>fastparquet</code> installed"],
+    important:["working with intermediate files between Python steps","data exceeds approximately 10⁶ rows"],
+    avoid:["sharing data with non-technical recipients (Parquet is not human-readable)"],
+    reach:"For intermediate storage between analysis steps, or when working with files generated by data engineering pipelines.",
+    example:`<pre>df = pd.read_parquet(<span class="s">"data/encounters.parquet"</span>)</pre>`,
+    tags:["load","parquet","columnar","binary","fast"]
+  },
+  {
+    id:"open_with", code:'with open("file.txt", encoding="utf-8") as f: ...', stage:"load",
+    short:"Open a file in a context that guarantees closure.",
+    what:"Python's built-in mechanism for working with a file. The <code>with</code> block ensures the file is closed automatically when the block ends, even if an exception is raised.",
+    tokens:[
+      ["open(...)","Built-in function returning a file object."],
+      ['"file.txt"',"The path to the file."],
+      ['encoding="utf-8"',"The character encoding used to interpret the bytes."],
+      ["as f","A binding of the file object to the name <code>f</code> for the duration of the block."]
+    ],
+    requires:["a path to a text file"],
+    important:["the file is not tabular and pandas loaders do not apply","line-by-line iteration is desired"],
+    avoid:["calling <code>open</code> without <code>with</code> in interactive work (forgetting to close)"],
+    reach:"When the file is plain text without a tabular structure, or when one needs streaming access.",
+    example:`<pre><span class="k">with</span> open(<span class="s">"notes.txt"</span>, encoding=<span class="s">"utf-8"</span>) <span class="k">as</span> f:
+    <span class="k">for</span> line <span class="k">in</span> f:
+        <span class="k">print</span>(line.strip())</pre>`,
+    tags:["load","file","open","text","context","stream","datei"]
+  },
+  {
+    id:"Path", code:'Path("data") / "encounters.csv"', stage:"load",
+    short:"Construct a file path in an OS-independent manner.",
+    what:"Builds a path object using the <code>pathlib</code> module. The <code>/</code> operator joins path components irrespective of the operating system's separator.",
+    tokens:[
+      ["Path(...)","A class from <code>pathlib</code> representing a filesystem path."],
+      ['"data"',"The first component of the path."],
+      ["/","Operator that joins path components."]
+    ],
+    requires:["<code>from pathlib import Path</code>"],
+    important:["the code may run on multiple operating systems","paths are built from several components"],
+    avoid:["hard-coding paths with backslashes or forward slashes in string form"],
+    reach:"Whenever a path is constructed; preferable to string concatenation in all cases.",
+    example:`<pre><span class="k">from</span> pathlib <span class="k">import</span> Path
+p = Path(<span class="s">"data"</span>) / <span class="s">"encounters.csv"</span>
+df = pd.read_csv(p)</pre>`,
+    tags:["load","path","pathlib","file","windows","os"]
+  },
+
+  /* ---------------- INSPECT ---------------- */
+  {
+    id:"shape", code:"df.shape", stage:"inspect",
+    short:"Return the dimensions of the DataFrame.",
+    what:"Returns a two-tuple containing the number of rows and the number of columns. An attribute, not a method — therefore no parentheses.",
+    tokens:[
+      ["df","The DataFrame under inspection."],
+      [".shape","Attribute returning <code>(n_rows, n_columns)</code>."]
+    ],
+    requires:["a DataFrame or Series object"],
+    important:["the first check after loading; confirms the loader produced the expected size"],
+    avoid:["confusing with <code>.size</code>, which returns the total number of cells"],
+    reach:"Immediately after loading, and after any operation that may change the number of rows.",
+    example:`<pre>df.shape   <span class="c"># e.g. (320, 8)</span></pre>`,
+    tags:["inspect","shape","size","rows","columns","dim","dimension","groesse"]
+  },
+  {
+    id:"info", code:"df.info()", stage:"inspect",
+    short:"Print a concise summary of the DataFrame.",
+    what:"Prints, for each column, its name, the count of non-null values, and the <span class='glossary-link' data-term='dtype'>dtype</span>. Also reports total memory use. The output is printed, not returned.",
+    tokens:[
+      ["df","The DataFrame under inspection."],
+      [".info()","A method that prints structural information."]
+    ],
+    requires:["a DataFrame object"],
+    important:["one wishes to see, in a single view, types and missingness across all columns"],
+    avoid:["expecting a return value to assign — the method prints rather than returns"],
+    reach:"As the second check after loading, when one wishes a single view of types and non-null counts.",
+    example:`<pre>df.info()</pre>`,
+    tags:["inspect","info","types","dtypes","summary","strukturuebersicht"]
+  },
+  {
+    id:"head", code:"df.head(10)", stage:"inspect",
+    short:"Return the first n rows.",
+    what:"Returns the first <em>n</em> rows of the DataFrame as a smaller DataFrame. The default is five.",
+    tokens:[
+      ["df","The DataFrame."],
+      [".head(...)","Method returning the leading rows."],
+      ["10","The number of rows to return; optional."]
+    ],
+    requires:["a DataFrame"],
+    important:["one wishes to inspect the structure of the data without printing the entire table"],
+    avoid:["relying on <code>head</code> to identify anomalies — the leading rows are not a random sample"],
+    reach:"To verify that the loader produced the expected columns, and to read example values.",
+    example:`<pre>df.head()</pre>`,
+    tags:["inspect","head","preview","first","top","anfang","vorschau"]
+  },
+  {
+    id:"sample", code:"df.sample(5)", stage:"inspect",
+    short:"Return a random sample of n rows.",
+    what:"Returns a random sample of <em>n</em> rows. Unlike <code>head</code>, the sample is not biased toward the start of the file.",
+    tokens:[
+      [".sample(...)","Method returning a random subset of rows."],
+      ["5","The sample size."]
+    ],
+    requires:["a DataFrame"],
+    important:["the data is sorted or grouped at load time and <code>head</code> would not be representative"],
+    avoid:["sampling without <code>random_state</code> when reproducibility is needed"],
+    reach:"When inspecting a file whose order is not random, particularly large export files.",
+    example:`<pre>df.sample(<span class="s">5</span>, random_state=<span class="s">42</span>)</pre>`,
+    tags:["inspect","sample","random","preview","stichprobe"]
+  },
+  {
+    id:"describe", code:"df.describe()", stage:"inspect",
+    short:"Return descriptive statistics for numeric columns.",
+    what:"Returns count, mean, standard deviation, minimum, the three quartiles, and maximum for each numeric column. With <code>include='all'</code>, non-numeric columns are also summarised.",
+    tokens:[
+      [".describe()","Method returning a summary table."]
+    ],
+    requires:["a DataFrame containing at least one numeric column"],
+    important:["one wishes to see the central tendency, spread, and range of every numeric variable in a single view"],
+    avoid:["interpreting <code>describe</code> on categorical columns without <code>include='all'</code>"],
+    reach:"For an initial impression of the distribution of every numeric variable.",
+    example:`<pre>df.describe()
+df.describe(include=<span class="s">"all"</span>)</pre>`,
+    tags:["inspect","describe","stats","statistics","summary","mean","median","quartile"]
+  },
+  {
+    id:"dtypes", code:"df.dtypes", stage:"inspect",
+    short:"Return the data type of each column.",
+    what:"Returns a Series mapping column names to their <span class='glossary-link' data-term='dtype'>dtype</span>. An attribute, not a method.",
+    tokens:[
+      [".dtypes","Attribute returning a Series of dtypes per column."]
+    ],
+    requires:["a DataFrame"],
+    important:["one suspects a column was loaded as <code>object</code> when a numeric type was expected"],
+    avoid:[],
+    reach:"To verify that types were inferred correctly, particularly after loading from CSV.",
+    example:`<pre>df.dtypes</pre>`,
+    tags:["inspect","types","dtypes","datentyp"]
+  },
+  {
+    id:"value_counts", code:'df["col"].value_counts()', stage:"inspect",
+    short:"Count occurrences of each unique value in a column.",
+    what:"Returns a Series whose index is the unique values of the column and whose values are the counts, sorted descending.",
+    tokens:[
+      ['df["col"]',"Selects the column named <code>col</code> from the DataFrame, returning a Series."],
+      [".value_counts()","Method counting the frequency of each unique value."]
+    ],
+    requires:["a column (Series), typically categorical or of low cardinality"],
+    important:["one wishes to inspect the categories present in a column, and their balance","missing values should be counted explicitly (use <code>dropna=False</code>)"],
+    avoid:["calling on a continuous numeric column with many distinct values (produces a long, unhelpful list)"],
+    reach:"For any categorical or low-cardinality column, to inspect the categories present and their balance.",
+    example:`<pre>df[<span class="s">"ward"</span>].value_counts()
+df[<span class="s">"gender"</span>].value_counts(dropna=<span class="k">False</span>)</pre>`,
+    tags:["inspect","count","frequency","categorical","values","value_counts","haeufigkeit"]
+  },
+  {
+    id:"isna_sum", code:"df.isna().sum()", stage:"inspect",
+    short:"Count missing values per column.",
+    what:"Composes two methods: <code>isna()</code> returns a boolean DataFrame in which <code>True</code> marks missing cells; <code>sum()</code> then totals the <code>True</code> values along each column.",
+    tokens:[
+      [".isna()","Returns a boolean DataFrame with <code>True</code> where the value is <code>NaN</code>."],
+      [".sum()","Sums the boolean values along columns (treating <code>True</code> as 1)."]
+    ],
+    requires:["a DataFrame"],
+    important:["one wishes to know, for every column, how many values are missing","precedes any decision about imputation or dropping"],
+    avoid:[],
+    reach:"Routinely after loading, to determine the prevalence of missingness in each column.",
+    example:`<pre>df.isna().sum()
+df.isna().mean()   <span class="c"># proportion missing</span></pre>`,
+    tags:["inspect","missing","nan","null","isna","isnull","fehlend","leer"]
+  },
+  {
+    id:"duplicated", code:"df.duplicated().sum()", stage:"inspect",
+    short:"Count duplicate rows.",
+    what:"<code>duplicated()</code> returns a boolean Series marking rows that repeat a previous row; <code>sum()</code> counts the marked rows.",
+    tokens:[
+      [".duplicated()","Returns <code>True</code> for rows that are exact repetitions of an earlier row."],
+      [".sum()","Counts the <code>True</code> values."]
+    ],
+    requires:["a DataFrame"],
+    important:["the data is an export from another system that may have produced repeated rows"],
+    avoid:["assuming uniqueness without checking <code>duplicated(subset=[key])</code> for the key column"],
+    reach:"Routinely after loading from an external system.",
+    example:`<pre>df.duplicated().sum()
+df.duplicated(subset=[<span class="s">"patient_id"</span>]).sum()</pre>`,
+    tags:["inspect","duplicates","duplicated","unique","duplikat"]
+  },
+
+  /* ---------------- CLEAN ---------------- */
+  {
+    id:"dropna", code:'df.dropna(subset=["col"])', stage:"clean",
+    short:"Remove rows that contain missing values.",
+    what:"Returns a DataFrame from which rows containing <code>NaN</code> in the specified columns have been removed. Without <code>subset</code>, any <code>NaN</code> in any column causes the row to be removed.",
+    tokens:[
+      [".dropna(...)","Method removing rows with missing values."],
+      ['subset=["col"]',"Restricts the check to specified columns; only <code>NaN</code> in these columns triggers removal."]
+    ],
+    requires:["a DataFrame containing at least one <code>NaN</code>"],
+    important:["the column listed in <code>subset</code> is essential to the analysis","the loss of rows is acceptable (typically below five per cent)"],
+    avoid:["calling <code>dropna()</code> with no arguments on real data — it removes any row with any missing value, often discarding most of the table"],
+    reach:"When a value in an essential column is missing and no defensible substitute exists.",
+    example:`<pre>df_clean = df.dropna(subset=[<span class="s">"patient_id"</span>, <span class="s">"admission_date"</span>])</pre>`,
+    tags:["clean","drop","remove","missing","nan","dropna","zeile loeschen","entfernen"]
+  },
+  {
+    id:"fillna", code:'df["col"].fillna(value)', stage:"clean",
+    short:"Replace missing values with a specified substitute.",
+    what:"Returns a Series (or DataFrame) in which <code>NaN</code> is replaced by the value supplied. The substitute may be a scalar, a dictionary mapping columns to values, or another Series aligned on the index.",
+    tokens:[
+      ['df["col"]',"Selects the column to operate on."],
+      [".fillna(...)","Method replacing missing values."],
+      ["value","The substitute. For numeric columns, frequently <code>df['col'].median()</code>; for categorical, a sentinel such as <code>'unknown'</code>."]
+    ],
+    requires:["a Series or DataFrame containing <code>NaN</code>","a defensible substitute value"],
+    important:["the missingness is plausibly random rather than informative","the column is numeric and a central tendency provides a sensible default"],
+    avoid:["filling with zero unless zero is a meaningful default in the domain","filling more than approximately a third of a column without acknowledging the assumption"],
+    reach:"When a missing value can be defensibly replaced rather than dropped or allowed to propagate.",
+    example:`<pre>df[<span class="s">"age"</span>] = df[<span class="s">"age"</span>].fillna(df[<span class="s">"age"</span>].median())
+df = df.fillna({<span class="s">"gender"</span>: <span class="s">"unknown"</span>, <span class="s">"age"</span>: df[<span class="s">"age"</span>].median()})</pre>`,
+    tags:["clean","fill","fillna","impute","missing","nan","replace","auffuellen","ersetzen"]
+  },
+  {
+    id:"interpolate", code:'df["x"].interpolate()', stage:"clean",
+    short:"Estimate missing values by interpolation between known values.",
+    what:"Replaces <code>NaN</code> with values estimated from neighbouring known values. The default is linear interpolation.",
+    tokens:[
+      [".interpolate()","Method computing interpolated replacements."]
+    ],
+    requires:["a numeric Series with known values on both sides of the missing cells"],
+    important:["the data are ordered (typically time-indexed)","the underlying process is plausibly continuous"],
+    avoid:["interpolating across long stretches of missing data","using on categorical columns"],
+    reach:"For time series with isolated missing values within an otherwise continuous record.",
+    example:`<pre>df[<span class="s">"temperature"</span>] = df[<span class="s">"temperature"</span>].interpolate()</pre>`,
+    tags:["clean","interpolate","missing","nan","time series","zeitreihe"]
+  },
+  {
+    id:"ffill", code:"df.ffill()", stage:"clean",
+    short:"Propagate the most recent known value forward.",
+    what:"Replaces each <code>NaN</code> with the most recent non-missing value preceding it. <code>bfill</code> propagates backward.",
+    tokens:[
+      [".ffill()","Forward fill."]
+    ],
+    requires:["data with a meaningful order (typically time)"],
+    important:["the underlying state changes infrequently and the last observation is a reasonable proxy"],
+    avoid:["filling across long gaps where the state is likely to have changed"],
+    reach:"For sparse measurements where the most recent reading is the best available estimate.",
+    example:`<pre>df = df.sort_values(<span class="s">"timestamp"</span>).ffill()</pre>`,
+    tags:["clean","ffill","forward fill","bfill","missing","time"]
+  },
+  {
+    id:"drop_duplicates", code:'df.drop_duplicates(subset=["patient_id"], keep="last")', stage:"clean",
+    short:"Remove duplicate rows.",
+    what:"Returns a DataFrame in which rows whose values in the <code>subset</code> columns repeat earlier rows are removed. <code>keep</code> selects which occurrence to retain.",
+    tokens:[
+      [".drop_duplicates(...)","Method removing duplicate rows."],
+      ['subset=["patient_id"]',"Restricts the duplicate check to specified columns."],
+      ['keep="last"',"Retains the last occurrence rather than the first."]
+    ],
+    requires:["a DataFrame"],
+    important:["the data are exported from a system whose updates produce successive rows for the same entity"],
+    avoid:["applying without <code>subset</code> when only certain columns define identity"],
+    reach:"After loading, when the source system may produce repeated records.",
+    example:`<pre>df = df.drop_duplicates(subset=[<span class="s">"patient_id"</span>], keep=<span class="s">"last"</span>)</pre>`,
+    tags:["clean","duplicates","drop","unique","duplikat","entfernen"]
+  },
+  {
+    id:"astype", code:'df["age"].astype(int)', stage:"clean",
+    short:"Cast a column to a specified type.",
+    what:"Returns a Series whose values have been converted to the requested type. Fails on values that cannot be converted (including <code>NaN</code> for integer types).",
+    tokens:[
+      [".astype(...)","Method casting to a new dtype."],
+      ["int","The target type. May also be <code>float</code>, <code>str</code>, <code>'category'</code>, or a numpy dtype."]
+    ],
+    requires:["a column whose values are convertible to the target type","no <code>NaN</code> when casting to <code>int</code>"],
+    important:["a column was loaded as <code>object</code> when a numeric type was expected","memory savings are desired (cast to <code>'category'</code>)"],
+    avoid:["casting a column with <code>NaN</code> to <code>int</code> (use <code>'Int64'</code> instead, which supports missing values)"],
+    reach:"When a column's inferred type does not match its intended use.",
+    example:`<pre>df[<span class="s">"age"</span>] = df[<span class="s">"age"</span>].astype(<span class="s">"Int64"</span>)
+df[<span class="s">"ward"</span>] = df[<span class="s">"ward"</span>].astype(<span class="s">"category"</span>)</pre>`,
+    tags:["clean","astype","cast","convert","type","umwandeln"]
+  },
+  {
+    id:"to_numeric", code:'pd.to_numeric(df["x"], errors="coerce")', stage:"clean",
+    short:"Convert a column to numeric, coercing failures to NaN.",
+    what:"Converts strings to numbers. With <code>errors='coerce'</code>, values that cannot be parsed become <code>NaN</code> rather than raising an exception.",
+    tokens:[
+      ["pd.to_numeric(...)","Function converting to a numeric type."],
+      ['errors="coerce"',"Values that fail conversion are replaced by <code>NaN</code>."]
+    ],
+    requires:["a column whose values are mostly numeric in string form"],
+    important:["the column was loaded as string (<code>object</code>) due to stray non-numeric values"],
+    avoid:["coercing silently in production data without auditing the resulting <code>NaN</code> count"],
+    reach:"When numeric data have been polluted by stray text (e.g. a currency sign, a footnote marker).",
+    example:`<pre>df[<span class="s">"cost"</span>] = pd.to_numeric(df[<span class="s">"cost"</span>], errors=<span class="s">"coerce"</span>)</pre>`,
+    tags:["clean","numeric","convert","coerce","to_numeric"]
+  },
+  {
+    id:"to_datetime", code:'pd.to_datetime(df["date"], errors="coerce")', stage:"clean",
+    short:"Parse a column of date strings into datetime objects.",
+    what:"Converts strings to <code>datetime64</code>. With <code>errors='coerce'</code>, unparseable values become <code>NaT</code> (not-a-time).",
+    tokens:[
+      ["pd.to_datetime(...)","Function parsing dates."],
+      ['errors="coerce"',"Failures become <code>NaT</code> rather than raising."]
+    ],
+    requires:["a column whose values represent dates"],
+    important:["date arithmetic, sorting, or time-based aggregation is required"],
+    avoid:["relying on auto-inference for ambiguous formats (provide <code>format=</code> explicitly)"],
+    reach:"Whenever a column representing dates was loaded as text.",
+    example:`<pre>df[<span class="s">"admission_date"</span>] = pd.to_datetime(
+    df[<span class="s">"admission_date"</span>], format=<span class="s">"%Y-%m-%d"</span>, errors=<span class="s">"coerce"</span>)</pre>`,
+    tags:["clean","datetime","date","parse","convert","datum"]
+  },
+  {
+    id:"str_strip", code:'df["x"].str.strip().str.lower()', stage:"clean",
+    short:"Normalise string values.",
+    what:"The <code>.str</code> accessor exposes string methods that operate element-wise. <code>.strip()</code> removes leading/trailing whitespace; <code>.lower()</code> converts to lowercase.",
+    tokens:[
+      [".str","Accessor for vectorised string operations on a Series of strings."],
+      [".strip()","Removes leading and trailing whitespace."],
+      [".lower()","Converts to lowercase."]
+    ],
+    requires:["a Series of strings"],
+    important:["the same category appears in several spellings","whitespace from an export distorts grouping"],
+    avoid:["chaining many string operations without intermediate inspection"],
+    reach:"Before any operation that depends on string equality (grouping, joining, filtering by value).",
+    example:`<pre>df[<span class="s">"gender"</span>] = (df[<span class="s">"gender"</span>]
+                  .str.strip()
+                  .str.lower()
+                  .replace({<span class="s">"m"</span>: <span class="s">"male"</span>, <span class="s">"w"</span>: <span class="s">"female"</span>}))</pre>`,
+    tags:["clean","string","str","strip","lower","normalize","whitespace","kategorie"]
+  },
+  {
+    id:"replace", code:'df["x"].replace({"M": "male", "F": "female"})', stage:"clean",
+    short:"Map specific values to replacements.",
+    what:"Returns a Series in which exact-match values are replaced by their counterparts in the mapping dictionary.",
+    tokens:[
+      [".replace(...)","Method substituting values."],
+      ['{"M": "male", "F": "female"}',"A mapping from old values to new values."]
+    ],
+    requires:["a Series and a mapping"],
+    important:["categorical encoding must be made consistent","sentinel codes (-99, 999) should be mapped to <code>NaN</code>"],
+    avoid:["using <code>replace</code> for partial-string substitution — use <code>str.replace</code>"],
+    reach:"When category labels must be standardised to a canonical form.",
+    example:`<pre><span class="k">import</span> numpy <span class="k">as</span> np
+df[<span class="s">"score"</span>] = df[<span class="s">"score"</span>].replace({<span class="s">-99</span>: np.nan})</pre>`,
+    tags:["clean","replace","map","recode","mapping","ersetzen"]
+  },
+  {
+    id:"clip", code:'df["x"].clip(lower=0, upper=120)', stage:"clean",
+    short:"Constrain values to a specified range.",
+    what:"Returns a Series in which values below <code>lower</code> are set to <code>lower</code> and values above <code>upper</code> are set to <code>upper</code>.",
+    tokens:[
+      [".clip(...)","Method bounding values to a range."],
+      ["lower=0","The lower bound."],
+      ["upper=120","The upper bound."]
+    ],
+    requires:["a numeric Series"],
+    important:["the domain has known physical bounds (age, percentages)","outliers are known to be input errors"],
+    avoid:["clipping silently — values at the bound become indistinguishable, which may bias subsequent statistics"],
+    reach:"When values outside a plausible range are best treated as the bound rather than dropped.",
+    example:`<pre>df[<span class="s">"age"</span>] = df[<span class="s">"age"</span>].clip(lower=<span class="s">0</span>, upper=<span class="s">120</span>)</pre>`,
+    tags:["clean","clip","outlier","bound","range","ausreisser"]
+  },
+
+  /* ---------------- TRANSFORM ---------------- */
+  {
+    id:"new_col", code:'df["new"] = df["a"] - df["b"]', stage:"transform",
+    short:"Create a new column by vectorised arithmetic.",
+    what:"Assigns a new column to the DataFrame, computed element-wise from existing columns. The arithmetic is applied to every row in a single operation.",
+    tokens:[
+      ['df["new"] = ...',"Creates (or overwrites) the column named <code>new</code>."],
+      ['df["a"] - df["b"]',"Element-wise difference of two columns."]
+    ],
+    requires:["the columns referenced exist and contain compatible types"],
+    important:["the computation is the same for every row","performance matters (vectorised arithmetic is markedly faster than a loop)"],
+    avoid:["writing a Python loop to compute a column that could be expressed as vector arithmetic"],
+    reach:"For any derived numeric column where the formula is the same for every row.",
+    example:`<pre>df[<span class="s">"margin"</span>] = df[<span class="s">"reimbursement"</span>] - df[<span class="s">"cost"</span>]</pre>`,
+    tags:["transform","new","column","compute","derive","vectorize","spalte"]
+  },
+  {
+    id:"np_where", code:'np.where(cond, a, b)', stage:"transform",
+    short:"Two-way conditional assignment.",
+    what:"Returns an array (or Series) containing <code>a</code> where <code>cond</code> is true and <code>b</code> where it is false. Vectorised, applies element by element.",
+    tokens:[
+      ["np.where(...)","Function for element-wise conditional selection."],
+      ["cond","A boolean array or Series (typically derived from a comparison)."],
+      ["a","Value (or array) used where <code>cond</code> is true."],
+      ["b","Value (or array) used where <code>cond</code> is false."]
+    ],
+    requires:["NumPy imported (<code>import numpy as np</code>)","a boolean mask and two alternatives"],
+    important:["the new value depends on a binary distinction (above/below a threshold, in/not in a list)"],
+    avoid:["nesting <code>np.where</code> more than twice — use <code>np.select</code> for multi-way logic"],
+    reach:"For a two-way conditional assignment.",
+    example:`<pre><span class="k">import</span> numpy <span class="k">as</span> np
+df[<span class="s">"band"</span>] = np.where(df[<span class="s">"age"</span>] &gt;= <span class="s">65</span>, <span class="s">"senior"</span>, <span class="s">"adult"</span>)</pre>`,
+    tags:["transform","where","conditional","if","binary","np.where","bedingt"]
+  },
+  {
+    id:"np_select", code:"np.select(conditions, choices, default=...)", stage:"transform",
+    short:"Multi-way conditional assignment.",
+    what:"Returns an array containing the choice corresponding to the first true condition for each element. A default value is used where no condition is true.",
+    tokens:[
+      ["np.select(...)","Function for multi-way conditional selection."],
+      ["conditions","A list of boolean arrays, evaluated in order."],
+      ["choices","A list of values corresponding to the conditions."],
+      ["default=...","Value used where no condition is true."]
+    ],
+    requires:["NumPy imported","matched lists of conditions and choices"],
+    important:["several mutually exclusive cases must be expressed"],
+    avoid:["overlapping conditions where the order accidentally determines the result"],
+    reach:"For multi-way conditional logic that would otherwise nest <code>np.where</code>.",
+    example:`<pre>conds = [df[<span class="s">"age"</span>] &lt; <span class="s">18</span>,
+         df[<span class="s">"age"</span>] &lt; <span class="s">65</span>,
+         df[<span class="s">"age"</span>] &gt;= <span class="s">65</span>]
+labels = [<span class="s">"child"</span>, <span class="s">"adult"</span>, <span class="s">"senior"</span>]
+df[<span class="s">"band"</span>] = np.select(conds, labels, default=<span class="s">"unknown"</span>)</pre>`,
+    tags:["transform","select","conditional","multi","if","np.select","mehrwertig"]
+  },
+  {
+    id:"cut", code:'pd.cut(df["age"], bins=[0,18,65,120], labels=["child","adult","senior"])', stage:"transform",
+    short:"Bin a continuous variable into named ranges.",
+    what:"Returns a categorical Series in which each value is assigned to the bin whose range contains it.",
+    tokens:[
+      ["pd.cut(...)","Function binning continuous values."],
+      ["bins=[...]","The bin edges."],
+      ["labels=[...]","Names assigned to the resulting categories."]
+    ],
+    requires:["a numeric Series","bin edges that cover the range of values"],
+    important:["a continuous variable must be summarised by category for plotting or grouping"],
+    avoid:["forgetting that bins are right-inclusive by default"],
+    reach:"When age, time, or any continuous variable should be discretised for analysis.",
+    example:`<pre>df[<span class="s">"age_group"</span>] = pd.cut(df[<span class="s">"age"</span>],
+                          bins=[<span class="s">0</span>,<span class="s">18</span>,<span class="s">65</span>,<span class="s">120</span>],
+                          labels=[<span class="s">"child"</span>,<span class="s">"adult"</span>,<span class="s">"senior"</span>])</pre>`,
+    tags:["transform","cut","bin","discretize","categories","klassieren"]
+  },
+  {
+    id:"filter_mask", code:'df[df["age"] > 65]', stage:"transform",
+    short:"Filter rows by a boolean condition.",
+    what:"Returns a DataFrame containing only those rows for which the boolean expression evaluates to true. The expression is evaluated element-wise across the column.",
+    tokens:[
+      ['df["age"] > 65',"A boolean Series — <code>True</code> where age exceeds 65."],
+      ["df[ ... ]","Selects rows where the supplied mask is <code>True</code>."]
+    ],
+    requires:["a column suitable for comparison"],
+    important:["combining multiple conditions: each must be parenthesised, and the operators are <code>&amp;</code> (and) and <code>|</code> (or)"],
+    avoid:["using Python's <code>and</code> / <code>or</code> instead of <code>&amp;</code> / <code>|</code>","writing back into a filtered view (use <code>.loc</code> for assignment)"],
+    reach:"For any row-level filter on a single or compound condition.",
+    example:`<pre>df[(df[<span class="s">"age"</span>] &gt; <span class="s">65</span>) &amp; (df[<span class="s">"ward"</span>] == <span class="s">"ICU"</span>)]</pre>`,
+    tags:["transform","filter","mask","subset","where","boolean","zeile filtern"]
+  },
+  {
+    id:"isin", code:'df[df["drg"].isin(["A01","A02"])]', stage:"transform",
+    short:"Filter rows by membership in a set.",
+    what:"<code>isin(values)</code> returns a boolean Series, true where the column's value appears in the supplied collection.",
+    tokens:[
+      [".isin([...])","Returns <code>True</code> where the value is in the list."]
+    ],
+    requires:["a column and a list (or set) of acceptable values"],
+    important:["one wishes to keep rows matching any of several categories"],
+    avoid:["using a generator expression — <code>isin</code> requires a concrete collection"],
+    reach:"For a set-membership filter — preferable to chained <code>|</code> comparisons.",
+    example:`<pre>df[df[<span class="s">"drg_code"</span>].isin([<span class="s">"A01"</span>,<span class="s">"A02"</span>,<span class="s">"B05"</span>])]</pre>`,
+    tags:["transform","filter","isin","set","membership","in"]
+  },
+  {
+    id:"query", code:'df.query("age > 65 and ward == \'ICU\'")', stage:"transform",
+    short:"Filter rows using a string expression.",
+    what:"Returns a DataFrame filtered by the supplied expression, written as if it were ordinary Python syntax but evaluated within the DataFrame's column namespace.",
+    tokens:[
+      [".query('...')","Method filtering by a string expression."]
+    ],
+    requires:["column names that are valid Python identifiers (no spaces)"],
+    important:["the filter is long enough that a string expression is more readable than a boolean mask"],
+    avoid:["interpolating untrusted user input into the query string"],
+    reach:"For longer or more complex filters, where the readability of a string expression exceeds that of a chain of <code>&amp;</code> and <code>|</code>.",
+    example:`<pre>df.query(<span class="s">"age &gt; 65 and ward == 'ICU'"</span>)</pre>`,
+    tags:["transform","query","filter","string","subset","expression"]
+  },
+  {
+    id:"sort_values", code:'df.sort_values("los_days", ascending=False)', stage:"transform",
+    short:"Sort the DataFrame by one or more columns.",
+    what:"Returns a DataFrame whose rows are ordered according to the values of the supplied column(s).",
+    tokens:[
+      [".sort_values(...)","Method ordering rows."],
+      ['"los_days"',"The column on which to sort."],
+      ["ascending=False","Reverses the default ascending order."]
+    ],
+    requires:["the column(s) supplied exist and are orderable"],
+    important:["the table is to be presented to a reader who locates rows by magnitude"],
+    avoid:["sorting the whole table when only the top-N is required (use <code>nlargest</code>)"],
+    reach:"To prepare a table for display or for selection by rank.",
+    example:`<pre>df.sort_values([<span class="s">"ward"</span>, <span class="s">"los_days"</span>], ascending=[<span class="k">True</span>, <span class="k">False</span>])</pre>`,
+    tags:["transform","sort","order","values","rank","sortieren"]
+  },
+  {
+    id:"nlargest", code:'df.nlargest(10, "cost")', stage:"transform",
+    short:"Return the n rows with the largest values in a column.",
+    what:"Returns the top <em>n</em> rows ordered by the specified column. Faster than a full sort followed by <code>head</code>.",
+    tokens:[
+      [".nlargest(...)","Method returning top-n rows by a column."]
+    ],
+    requires:["a numeric column"],
+    important:["only the extremes are of interest"],
+    avoid:["calling on a categorical column"],
+    reach:"For top-N selection without sorting the entire table.",
+    example:`<pre>df.nlargest(<span class="s">10</span>, <span class="s">"cost"</span>)
+df.nsmallest(<span class="s">5</span>, <span class="s">"margin"</span>)</pre>`,
+    tags:["transform","top","largest","smallest","nlargest","nsmallest","rank"]
+  },
+  {
+    id:"rename", code:'df.rename(columns={"pid":"patient_id"})', stage:"transform",
+    short:"Rename columns or index labels.",
+    what:"Returns a DataFrame with the specified columns renamed according to the mapping.",
+    tokens:[
+      [".rename(...)","Method renaming axis labels."],
+      ['columns={"old":"new"}',"Mapping from current names to replacements."]
+    ],
+    requires:["a DataFrame with the named columns"],
+    important:["column names from an export are not consistent with conventions used elsewhere in the analysis"],
+    avoid:[],
+    reach:"To standardise column names across sources, particularly before a merge.",
+    example:`<pre>df = df.rename(columns={<span class="s">"pid"</span>: <span class="s">"patient_id"</span>,
+                        <span class="s">"adm_dt"</span>: <span class="s">"admission_date"</span>})</pre>`,
+    tags:["transform","rename","columns","umbenennen"]
+  },
+
+  /* ---------------- AGGREGATE ---------------- */
+  {
+    id:"groupby_mean", code:'df.groupby("ward")["los_days"].mean()', stage:"aggregate",
+    short:"Compute the mean of a column within each group.",
+    what:"Splits the DataFrame by the values in <code>ward</code>, takes the column <code>los_days</code> within each group, and computes its mean.",
+    tokens:[
+      ['.groupby("ward")',"Partitions the DataFrame by unique values of <code>ward</code>."],
+      ['["los_days"]',"Selects a single column within each partition."],
+      [".mean()","Computes the mean per group."]
+    ],
+    requires:["a column to group by and a numeric column to aggregate"],
+    important:["a summary statistic is required for each level of a categorical variable"],
+    avoid:["forgetting <code>.reset_index()</code> when a flat DataFrame is needed for downstream use"],
+    reach:"For any per-group summary of a single statistic.",
+    example:`<pre>df.groupby(<span class="s">"ward"</span>)[<span class="s">"los_days"</span>].mean()</pre>`,
+    tags:["aggregate","groupby","group","mean","average","summary","durchschnitt"]
+  },
+  {
+    id:"groupby_agg", code:'df.groupby("ward").agg({"los_days":"mean", "cost":"sum"})', stage:"aggregate",
+    short:"Compute different statistics for different columns.",
+    what:"<code>agg</code> accepts a dictionary mapping each column to the statistic (or list of statistics) to compute. Returns a DataFrame of summaries.",
+    tokens:[
+      [".agg({...})","Method applying named aggregations per column."]
+    ],
+    requires:["a column to group by; columns and statistics for aggregation"],
+    important:["several different statistics are required in a single summary"],
+    avoid:[],
+    reach:"When the per-group summary involves more than one column or more than one statistic.",
+    example:`<pre>summary = df.groupby(<span class="s">"ward"</span>).agg(
+    avg_los = (<span class="s">"los_days"</span>, <span class="s">"mean"</span>),
+    total_cost = (<span class="s">"cost"</span>, <span class="s">"sum"</span>),
+    n_cases = (<span class="s">"patient_id"</span>, <span class="s">"nunique"</span>)
+)</pre>`,
+    tags:["aggregate","groupby","agg","multiple","summary","statistik"]
+  },
+  {
+    id:"groupby_size", code:'df.groupby("ward").size()', stage:"aggregate",
+    short:"Count the number of rows in each group.",
+    what:"Returns a Series mapping each group to its number of rows.",
+    tokens:[
+      [".size()","Method returning row counts per group."]
+    ],
+    requires:["a column to group by"],
+    important:["one wishes to know how many observations underlie each group's summary"],
+    avoid:["confusing <code>size</code> with <code>count</code>: <code>count</code> ignores <code>NaN</code> per column; <code>size</code> counts all rows in the group"],
+    reach:"To accompany any per-group summary with an explicit count.",
+    example:`<pre>df.groupby(<span class="s">"ward"</span>).size()</pre>`,
+    tags:["aggregate","size","count","groupby","frequency","anzahl"]
+  },
+  {
+    id:"transform", code:'df.groupby("ward")["los_days"].transform("mean")', stage:"aggregate",
+    short:"Broadcast a group-level statistic back to every row.",
+    what:"Returns a Series of the same length as the original DataFrame, in which each row carries the statistic computed for its group.",
+    tokens:[
+      [".transform('mean')","Computes the group mean and assigns it to every row of the group."]
+    ],
+    requires:["a column to group by"],
+    important:["a deviation from the group mean (or other per-group reference) is required"],
+    avoid:["confusing <code>transform</code> with <code>agg</code>: <code>agg</code> reduces; <code>transform</code> broadcasts"],
+    reach:"When a per-row variable depends on a per-group statistic (e.g. <em>deviation from ward mean</em>).",
+    example:`<pre>df[<span class="s">"ward_avg_los"</span>] = df.groupby(<span class="s">"ward"</span>)[<span class="s">"los_days"</span>].transform(<span class="s">"mean"</span>)
+df[<span class="s">"los_above_ward_avg"</span>] = df[<span class="s">"los_days"</span>] - df[<span class="s">"ward_avg_los"</span>]</pre>`,
+    tags:["aggregate","transform","broadcast","groupby","per-row"]
+  },
+  {
+    id:"pivot_table", code:'pd.pivot_table(df, index="ward", columns="month", values="los_days", aggfunc="mean")', stage:"aggregate",
+    short:"Produce a wide-format summary indexed by two variables.",
+    what:"Creates a table whose rows are the values of <code>index</code>, columns are the values of <code>columns</code>, and cells contain the chosen aggregation of <code>values</code>.",
+    tokens:[
+      ["pd.pivot_table(...)","Function producing a wide summary."],
+      ['index="ward"',"Variable forming the rows."],
+      ['columns="month"',"Variable forming the columns."],
+      ['values="los_days"',"Variable to aggregate."],
+      ['aggfunc="mean"',"Aggregation function."]
+    ],
+    requires:["a DataFrame with the named columns"],
+    important:["the summary is to be presented to a reader rather than processed further"],
+    avoid:["pivoting on a high-cardinality column (produces an unmanageably wide table)"],
+    reach:"For a presentation-ready summary indexed by two categorical variables.",
+    example:`<pre>pd.pivot_table(df, index=<span class="s">"ward"</span>, columns=<span class="s">"month"</span>,
+               values=<span class="s">"los_days"</span>, aggfunc=<span class="s">"mean"</span>)</pre>`,
+    tags:["aggregate","pivot","pivot_table","wide","crosstab","summary"]
+  },
+
+  /* ---------------- MERGE ---------------- */
+  {
+    id:"merge", code:'a.merge(b, on="patient_id", how="left")', stage:"merge",
+    short:"Join two DataFrames on a shared key.",
+    what:"Combines two DataFrames row-by-row by matching values in a key column. <code>how</code> determines which rows are retained when a key is missing on one side.",
+    tokens:[
+      [".merge(b, ...)","Method joining the calling DataFrame with another."],
+      ['on="patient_id"',"The column present in both tables, used as the join key."],
+      ['how="left"',"Retains all rows of the calling DataFrame; rows of <code>b</code> without a match are dropped."]
+    ],
+    requires:["two DataFrames sharing a key column"],
+    important:["the cardinality of the key is asserted (<code>validate='1:m'</code>) to catch unintended fan-out","an <code>indicator</code> column is added during debugging to audit the match outcome"],
+    avoid:["merging on a column whose name differs between tables without <code>left_on</code> / <code>right_on</code>","merging with duplicate keys on both sides — the result grows multiplicatively"],
+    reach:"Whenever information from two tables must be combined along a shared identifier.",
+    example:`<pre>full = encounters.merge(patients, on=<span class="s">"patient_id"</span>, how=<span class="s">"left"</span>,
+                        validate=<span class="s">"m:1"</span>, indicator=<span class="k">True</span>)
+full[<span class="s">"_merge"</span>].value_counts()</pre>`,
+    tags:["merge","join","key","inner","left","right","outer","verknuepfen"]
+  },
+  {
+    id:"concat", code:"pd.concat([a, b], ignore_index=True)", stage:"merge",
+    short:"Stack two DataFrames vertically or side by side.",
+    what:"Combines DataFrames along an axis. <code>axis=0</code> stacks rows (default); <code>axis=1</code> stacks columns. <code>ignore_index=True</code> renumbers the rows of the result.",
+    tokens:[
+      ["pd.concat([...], ...)","Function concatenating DataFrames."],
+      ["[a, b]","The DataFrames to combine."],
+      ["ignore_index=True","Discards original indices and renumbers."]
+    ],
+    requires:["DataFrames whose columns align (for <code>axis=0</code>) or whose indices align (for <code>axis=1</code>)"],
+    important:["the two sources represent the same kind of records (e.g. successive months)"],
+    avoid:["concatenating without checking that the columns match"],
+    reach:"For combining records of the same shape from different periods or sources.",
+    example:`<pre>full_year = pd.concat([q1, q2, q3, q4], ignore_index=<span class="k">True</span>)</pre>`,
+    tags:["merge","concat","stack","append","union","stapeln"]
+  },
+  {
+    id:"combine_first", code:"a.combine_first(b)", stage:"merge",
+    short:"Use one DataFrame to fill in the gaps of another.",
+    what:"Cell by cell: where <code>a</code> has a value, that value is retained; where <code>a</code> is <code>NaN</code>, the corresponding value from <code>b</code> is used. The two DataFrames are aligned on index and columns.",
+    tokens:[
+      [".combine_first(b)","Method using <code>b</code> as a fallback source for missing cells in <code>a</code>."]
+    ],
+    requires:["two DataFrames describing the same entities, aligned on index"],
+    important:["<code>a</code> is the primary source but contains gaps that <code>b</code> can supply"],
+    avoid:["confusing with <code>merge</code> — <code>combine_first</code> operates cell-by-cell on aligned tables, not key-by-key"],
+    reach:"When two sources describe the same entities and one is to be used as a fallback for the other.",
+    example:`<pre>combined = primary.combine_first(fallback)
+combined.isna().sum()   <span class="c"># compare before and after</span></pre>`,
+    tags:["merge","combine_first","complement","fill","fallback","luecke fuellen"]
+  },
+  {
+    id:"np_concatenate", code:"np.concatenate([a, b], axis=0)", stage:"merge",
+    short:"Concatenate NumPy arrays along an existing axis.",
+    what:"Joins arrays end-to-end along the specified axis. For 1D arrays, the result is the two arrays placed in sequence; for 2D, <code>axis=0</code> stacks rows, <code>axis=1</code> stacks columns.",
+    tokens:[
+      ["np.concatenate([...], axis=...)","Function joining arrays along an existing dimension."],
+      ["axis=0","Concatenate along rows."],
+      ["axis=1","Concatenate along columns."]
+    ],
+    requires:["arrays whose shapes match on all axes other than the concatenation axis"],
+    important:["combining batches of data with the same number of features"],
+    avoid:["concatenating arrays of incompatible shape — the error message is sometimes terse"],
+    reach:"For combining NumPy arrays where pandas would be unnecessary overhead.",
+    example:`<pre><span class="k">import</span> numpy <span class="k">as</span> np
+np.concatenate([a, b])             <span class="c"># 1D: end to end</span>
+np.concatenate([A, B], axis=<span class="s">0</span>)   <span class="c"># 2D: more rows</span>
+np.concatenate([A, B], axis=<span class="s">1</span>)   <span class="c"># 2D: more columns</span></pre>`,
+    tags:["merge","numpy","concatenate","array","1d","2d","axis","verbinden"]
+  },
+  {
+    id:"np_vstack", code:"np.vstack([a, b])", stage:"merge",
+    short:"Stack arrays vertically (as further rows).",
+    what:"Places the inputs one above the other. For 1D inputs, each becomes a row of the resulting 2D array.",
+    tokens:[
+      ["np.vstack([...])","Function stacking arrays vertically."]
+    ],
+    requires:["arrays with the same number of columns (or 1D arrays of the same length)"],
+    important:["one wishes to produce a 2D result from 1D inputs"],
+    avoid:[],
+    reach:"For vertical stacking of NumPy arrays; works uniformly for 1D and 2D inputs.",
+    example:`<pre>np.vstack([a, b])   <span class="c"># 1D + 1D → 2D shape (2, n)</span></pre>`,
+    tags:["merge","numpy","vstack","stack","vertical","rows"]
+  },
+  {
+    id:"np_hstack", code:"np.hstack([a, b])", stage:"merge",
+    short:"Stack arrays horizontally (side by side).",
+    what:"Places the inputs side by side. For 1D inputs, the result is end-to-end (equivalent to <code>concatenate</code>); for 2D inputs, the arrays are joined column-wise.",
+    tokens:[
+      ["np.hstack([...])","Function stacking arrays horizontally."]
+    ],
+    requires:["arrays with the same number of rows (or 1D arrays)"],
+    important:["one wishes to extend a 2D array with additional columns"],
+    avoid:[],
+    reach:"For horizontal stacking — additional columns onto a 2D array, or end-to-end for 1D.",
+    example:`<pre>np.hstack([A, B])</pre>`,
+    tags:["merge","numpy","hstack","stack","horizontal","columns"]
+  },
+  {
+    id:"np_column_stack", code:"np.column_stack([a, b])", stage:"merge",
+    short:"Treat several 1D arrays as columns of a 2D result.",
+    what:"Combines 1D arrays into a 2D array, with each input becoming one column.",
+    tokens:[
+      ["np.column_stack([...])","Function forming a 2D array from 1D columns."]
+    ],
+    requires:["1D arrays of the same length"],
+    important:["one wishes to build a table column by column from separate vectors"],
+    avoid:[],
+    reach:"When several 1D arrays of equal length should become the columns of a 2D table.",
+    example:`<pre>ages   = np.array([<span class="s">34</span>, <span class="s">58</span>, <span class="s">72</span>])
+costs  = np.array([<span class="s">450</span>, <span class="s">1200</span>, <span class="s">2300</span>])
+np.column_stack([ages, costs])   <span class="c"># shape (3, 2)</span></pre>`,
+    tags:["merge","numpy","column_stack","columns","1d","2d","table"]
+  },
+
+  /* ---------------- VISUALIZE ---------------- */
+  {
+    id:"subplots", code:"fig, ax = plt.subplots(figsize=(10,6))", stage:"visualize",
+    short:"Create a figure and a set of axes.",
+    what:"Initialises a Matplotlib figure (the canvas) and one or more axes (the coordinate systems on which to draw). The figure is the object eventually saved; the axes carry the drawing commands.",
+    tokens:[
+      ["plt.subplots(...)","Function returning a figure and axes."],
+      ["figsize=(10,6)","Width and height of the figure in inches."],
+      ["fig, ax","Unpacks the two returned objects."]
+    ],
+    requires:["<code>import matplotlib.pyplot as plt</code>"],
+    important:["every plot intended for external use should begin with this call (object-oriented interface)"],
+    avoid:["mixing <code>plt.</code>-style and <code>ax.</code>-style calls in the same plot"],
+    reach:"As the first line of any plot beyond a quick exploratory view.",
+    example:`<pre><span class="k">import</span> matplotlib.pyplot <span class="k">as</span> plt
+fig, ax = plt.subplots(figsize=(<span class="s">10</span>, <span class="s">6</span>))</pre>`,
+    tags:["visualize","matplotlib","figure","axes","subplots","plot"]
+  },
+  {
+    id:"ax_bar", code:"ax.bar(x, y)", stage:"visualize",
+    short:"Draw a bar chart.",
+    what:"Draws bars whose heights are the values <code>y</code> at positions <code>x</code>. For categorical <code>x</code>, the positions are the categories themselves.",
+    tokens:[
+      ["ax.bar(...)","Method drawing bars on the axes <code>ax</code>."],
+      ["x","Positions or category labels."],
+      ["y","Heights."]
+    ],
+    requires:["an axes object and matching <code>x</code> and <code>y</code> arrays"],
+    important:["the question concerns comparison of a single number across categories"],
+    avoid:["using bars for continuous time series — prefer a line plot"],
+    reach:"For comparison of a single quantity across a small number of categories.",
+    example:`<pre>ax.bar(df[<span class="s">"ward"</span>], df[<span class="s">"occupancy"</span>])
+ax.set_title(<span class="s">"Bed occupancy by ward"</span>)</pre>`,
+    tags:["visualize","bar","barchart","matplotlib","ax.bar","balkendiagramm"]
+  },
+  {
+    id:"ax_hist", code:"ax.hist(values, bins=30)", stage:"visualize",
+    short:"Draw a histogram.",
+    what:"Bins the values and draws a bar for each bin whose height is the count of values in the bin.",
+    tokens:[
+      ["ax.hist(...)","Method drawing a histogram."],
+      ["values","The data."],
+      ["bins=30","Number of bins (or explicit bin edges)."]
+    ],
+    requires:["a numeric array or Series"],
+    important:["the question concerns the distribution of a single continuous variable"],
+    avoid:["accepting the default bin count without inspecting the result"],
+    reach:"For the distribution of a single continuous variable.",
+    example:`<pre>ax.hist(df[<span class="s">"los_days"</span>], bins=<span class="s">30</span>)
+ax.set_xlabel(<span class="s">"Length of stay (days)"</span>)</pre>`,
+    tags:["visualize","hist","histogram","distribution","matplotlib","verteilung"]
+  },
+  {
+    id:"ax_plot", code:"ax.plot(x, y)", stage:"visualize",
+    short:"Draw a line plot.",
+    what:"Connects successive (x, y) points with line segments.",
+    tokens:[
+      ["ax.plot(...)","Method drawing a line plot."]
+    ],
+    requires:["paired arrays of equal length"],
+    important:["the question concerns evolution over an ordered variable, typically time"],
+    avoid:["using line plots for unordered categories"],
+    reach:"For trends over an ordered or continuous variable.",
+    example:`<pre>ax.plot(monthly.index, monthly[<span class="s">"admissions"</span>])
+ax.set_xlabel(<span class="s">"Month"</span>); ax.set_ylabel(<span class="s">"Admissions"</span>)</pre>`,
+    tags:["visualize","line","plot","trend","time","matplotlib","liniendiagramm"]
+  },
+  {
+    id:"ax_set", code:'ax.set_title("..."); ax.set_xlabel("..."); ax.set_ylabel("...")', stage:"visualize",
+    short:"Label the axes and the plot.",
+    what:"Three methods setting the title and axis labels. A plot intended for any external reader requires all three.",
+    tokens:[
+      ["ax.set_title('...')","Sets the plot title."],
+      ["ax.set_xlabel('...')","Sets the label of the x-axis."],
+      ["ax.set_ylabel('...')","Sets the label of the y-axis."]
+    ],
+    requires:["an axes object"],
+    important:["always, on any plot intended to be read by anyone other than the author at the moment of writing"],
+    avoid:["omitting axis units — they are part of the label"],
+    reach:"After every plotting call, before saving or showing.",
+    example:`<pre>ax.set_title(<span class="s">"Bed occupancy by ward — Q1 2026"</span>)
+ax.set_xlabel(<span class="s">"Ward"</span>)
+ax.set_ylabel(<span class="s">"Occupancy rate (%)"</span>)</pre>`,
+    tags:["visualize","title","label","axis","matplotlib","beschriftung"]
+  },
+  {
+    id:"savefig", code:'plt.savefig("fig.png", dpi=200, bbox_inches="tight")', stage:"visualize",
+    short:"Save the current figure to a file.",
+    what:"Writes the figure to disk in the format implied by the file extension. <code>dpi</code> controls raster resolution; <code>bbox_inches='tight'</code> trims excess whitespace.",
+    tokens:[
+      ["plt.savefig(...)","Function saving the current figure."],
+      ['"fig.png"',"File path; extension determines format."],
+      ["dpi=200","Resolution in dots per inch."],
+      ['bbox_inches="tight"',"Crops surrounding whitespace."]
+    ],
+    requires:["a figure produced by previous plotting calls"],
+    important:["called <em>before</em> <code>plt.show()</code> — calling after may save an empty canvas"],
+    avoid:["saving without <code>bbox_inches='tight'</code> for figures with rotated tick labels"],
+    reach:"Whenever a figure is to leave the notebook.",
+    example:`<pre>plt.tight_layout()
+plt.savefig(<span class="s">"figures/occupancy.png"</span>, dpi=<span class="s">200</span>, bbox_inches=<span class="s">"tight"</span>)
+plt.show()</pre>`,
+    tags:["visualize","save","savefig","export","figure","png","pdf"]
+  },
+
+  /* ---------------- EXPORT ---------------- */
+  {
+    id:"to_csv", code:'df.to_csv("out.csv", index=False)', stage:"export",
+    short:"Write the DataFrame to a CSV file.",
+    what:"Writes the DataFrame as comma-separated text. <code>index=False</code> suppresses writing the row index as an additional column.",
+    tokens:[
+      [".to_csv(...)","Method writing to CSV."],
+      ['"out.csv"',"Destination path."],
+      ["index=False","Omits the row index from the output."]
+    ],
+    requires:["a DataFrame"],
+    important:["recipient is a human or a tool that reads CSV","UTF-8 encoding suffices, or a specific encoding is given"],
+    avoid:["writing the index when the default <code>RangeIndex</code> is uninformative","using comma as separator when the data themselves contain commas (use a different <code>sep=</code>)"],
+    reach:"For data delivery to a human reader or to a downstream non-Python tool.",
+    example:`<pre>df.to_csv(<span class="s">"output/summary.csv"</span>, index=<span class="k">False</span>, encoding=<span class="s">"utf-8"</span>)</pre>`,
+    tags:["export","csv","write","save","output","schreiben"]
+  },
+  {
+    id:"to_excel", code:'df.to_excel("out.xlsx", sheet_name="Q1", index=False)', stage:"export",
+    short:"Write the DataFrame to an Excel sheet.",
+    what:"Writes the DataFrame to an Excel workbook. Requires <code>openpyxl</code>.",
+    tokens:[
+      [".to_excel(...)","Method writing to Excel."],
+      ['"out.xlsx"',"Destination path."],
+      ['sheet_name="Q1"',"Name of the sheet to create."]
+    ],
+    requires:["<code>openpyxl</code> installed"],
+    important:["recipient expects an Excel file"],
+    avoid:["using Excel as an intermediate format between two Python steps (Parquet is faster and lossless)"],
+    reach:"For deliverables intended to be opened in Excel.",
+    example:`<pre>df.to_excel(<span class="s">"output/q1.xlsx"</span>, sheet_name=<span class="s">"Q1"</span>, index=<span class="k">False</span>)</pre>`,
+    tags:["export","excel","xlsx","write","save"]
+  },
+  {
+    id:"to_parquet", code:'df.to_parquet("out.parquet")', stage:"export",
+    short:"Write the DataFrame to a Parquet file.",
+    what:"Saves the DataFrame in a columnar binary format that preserves types and is substantially faster to read than CSV.",
+    tokens:[
+      [".to_parquet(...)","Method writing to Parquet."]
+    ],
+    requires:["<code>pyarrow</code> or <code>fastparquet</code> installed"],
+    important:["the data are to be re-read by another Python step","types must be preserved exactly"],
+    avoid:["choosing Parquet when the recipient cannot read it"],
+    reach:"For intermediate storage in a Python pipeline.",
+    example:`<pre>df.to_parquet(<span class="s">"intermediates/cleaned_encounters.parquet"</span>)</pre>`,
+    tags:["export","parquet","write","save","fast","binary"]
+  }
+];
+
+/* ============================================================
+   GLOSSARY
+   ============================================================ */
+const GLOSSARY = [
+  {term:"DataFrame", syn:["df","tabelle","table"], def:"A two-dimensional, labelled table — the central pandas object. Conceptually a dictionary of columns, each column a Series sharing a common index."},
+  {term:"Series", syn:["spalte","vector","column"], def:"A one-dimensional, labelled array — a single column of a DataFrame, or a standalone 1D structure. Carries both values and an index."},
+  {term:"Index", syn:["row labels","zeilenindex"], def:"The labels assigned to the rows (or, for columns, to the columns) of a DataFrame. By default a <code>RangeIndex</code> 0…n−1, but may be set to any meaningful key (date, identifier)."},
+  {term:"dtype", syn:["data type","datentyp","type"], def:"The data type of a column or Series — for example <code>int64</code>, <code>float64</code>, <code>object</code> (typically strings), <code>category</code>, <code>datetime64</code>. The dtype determines which operations are permitted."},
+  {term:"NaN", syn:["null","na","missing","fehlend","lücke","leer"], def:"«Not a Number» — the marker pandas uses for missing values. NaN is never equal to anything, including itself; missingness is tested with <code>isna()</code>, not <code>== NaN</code>."},
+  {term:"axis", syn:["achse","dimension"], def:"The dimension along which an operation is performed. <code>axis=0</code> moves down rows (column-wise reduction); <code>axis=1</code> moves across columns (row-wise reduction). For concatenation, the axis is the dimension that grows."},
+  {term:"column", syn:["col","spalte","feature","variable"], def:"A vertical slice of a DataFrame — one variable, one type. Accessed as <code>df['col']</code>."},
+  {term:"row", syn:["zeile","observation","record","case"], def:"A horizontal slice of a DataFrame — one observation across all variables. Accessed by position with <code>df.iloc[i]</code> or by label with <code>df.loc[label]</code>."},
+  {term:"vectorisation", syn:["vectorization","vektorisierung"], def:"The application of an operation to a whole array or column in a single step, dispatched to compiled code. Markedly faster than the equivalent Python loop."},
+  {term:"broadcasting", syn:["alignment"], def:"The rule by which NumPy and pandas perform arithmetic between arrays of different but compatible shapes. A scalar combines with every element; a shorter array is virtually repeated to match a longer one."},
+  {term:"mask", syn:["boolean mask","filter"], def:"A boolean array (or Series) used to select rows. <code>df[mask]</code> returns the rows where <code>mask</code> is <code>True</code>."},
+  {term:"groupby", syn:["aggregation","gruppieren"], def:"The operation of partitioning a DataFrame by the values of one or more key columns and applying a function within each partition. The split–apply–combine model."},
+  {term:"key", syn:["join key","schluessel"], def:"The column whose values determine which row of one table corresponds to which row of another in a merge."},
+  {term:"inner join", syn:["inner","schnittmenge"], def:"A join that retains only rows whose key is present in both tables."},
+  {term:"left join", syn:["left","links"], def:"A join that retains every row of the left (calling) table, filling missing matches from the right table with <code>NaN</code>."},
+  {term:"outer join", syn:["outer","union","vereinigung"], def:"A join that retains every row from both tables, filling missing matches with <code>NaN</code>. Useful for auditing which keys are present in only one source."},
+  {term:"pivot", syn:["wide","crosstab"], def:"A reshaping that turns long-format data into wide format: distinct values of one variable become the column labels of the result."},
+  {term:"copy vs view", syn:["copy","view","SettingWithCopyWarning"], def:"Indexing operations sometimes return a view (a window into the original) and sometimes a copy. Assigning to a view modifies the original; assigning to a copy does not. The safe pattern for writing back is <code>df.loc[rows, col] = value</code>."},
+  {term:"mutable", syn:["mutable","immutable","mutability"], def:"A mutable object can be changed in place (lists, dictionaries, DataFrames). An immutable object cannot (tuples, strings, integers). Mutability matters because mutable defaults in function definitions are shared across calls."},
+  {term:"pip", syn:["package","paket"], def:"Python's package installer. <code>pip install pandas</code> installs the pandas library into the active Python environment."},
+  {term:"import", syn:["importieren"], def:"The statement that loads a module into the current namespace. <code>import pandas as pd</code> binds the pandas library to the alias <code>pd</code>."},
+  {term:"function", syn:["funktion"], def:"A named, reusable block of code. Functions take inputs (arguments), perform a computation, and may return an output. Defined with <code>def name(args): ...</code>."},
+  {term:"parameter", syn:["argument","kwarg","keyword argument"], def:"A named input to a function. <em>Positional</em> arguments are matched by position; <em>keyword</em> arguments by name (<code>sep=','</code>)."},
+  {term:"method", syn:["methode"], def:"A function attached to an object, called with dot notation: <code>df.head()</code>. The object on which it is called provides part of the input."},
+  {term:"attribute", syn:["attribut","property"], def:"A value attached to an object, accessed without parentheses: <code>df.shape</code>. Attributes describe state; methods perform actions."},
+  {term:"encoding", syn:["zeichensatz","kodierung","utf-8","latin-1"], def:"The mapping between bytes on disk and characters in memory. UTF-8 covers most modern text; older Windows exports often use <code>cp1252</code> or <code>latin-1</code>."},
+  {term:"path", syn:["pfad","filepath"], def:"The location of a file in the filesystem. Constructed with <code>pathlib.Path</code> for portability across operating systems."},
+  {term:"split-apply-combine", syn:["groupby model"], def:"The conceptual model of groupby: <em>split</em> the table by a key, <em>apply</em> a function to each group, <em>combine</em> the results into a single summary."},
+  {term:"tidy data", syn:["long format"], def:"A convention in which each variable forms a column, each observation forms a row, and each type of observational unit forms a table. Pandas operations are most natural on tidy data."},
+  {term:"NaT", syn:["not a time"], def:"The missing-value marker for datetime columns — the temporal analogue of <code>NaN</code>."},
+
+  /* --- additional entries (a sweep through the whole document) --- */
+  {term:"accessor", syn:[".str",".dt",".cat","str accessor"], def:"A namespace attached to a Series that exposes operations specific to its content type. <code>.str</code> exposes string methods (<code>strip</code>, <code>lower</code>); <code>.dt</code> exposes datetime methods (<code>year</code>, <code>month</code>); <code>.cat</code> exposes categorical operations. Methods called through an accessor are applied element-wise across the Series."},
+  {term:"alias", syn:["import as","abbreviation","abkuerzung"], def:"A short name bound to a module by the <code>as</code> clause of an import. The conventions <code>import pandas as pd</code>, <code>import numpy as np</code>, <code>import matplotlib.pyplot as plt</code> are followed almost universally and should be retained."},
+  {term:"API", syn:["application programming interface","rest api"], def:"An application programming interface — a defined contract by which one piece of software requests data or actions from another. In data work, frequently used to describe an HTTP-based service that returns JSON in response to a query."},
+  {term:"argument", syn:["argumente"], def:"A value passed into a function call. <em>Positional</em> arguments are matched by position (the file path in <code>pd.read_csv(\"file.csv\")</code>); <em>keyword</em> arguments are matched by name (<code>sep=','</code>). The function's signature determines which positional arguments are required and which keyword arguments accept defaults."},
+  {term:"assertion", syn:["assert","check","pruefung","überprüfung"], def:"A statement that raises an exception if a stated condition is false. Used as a self-check at the boundary between steps — for instance <code>assert df.shape[0] == 320</code> both documents and enforces the expected row count."},
+  {term:"axes", syn:["matplotlib axes","plot axes"], def:"In Matplotlib, the coordinate system on which a single plot is drawn. A figure may contain one axes (single plot) or several (subplots). Plotting calls (<code>ax.bar</code>, <code>ax.plot</code>, …) are issued on an axes object rather than on the figure itself."},
+  {term:"bbox_inches", syn:["bounding box","savefig crop"], def:"An argument to <code>plt.savefig</code> controlling the bounding box of the saved figure. <code>bbox_inches='tight'</code> crops surrounding whitespace so that axis labels, titles, and legends are not clipped at the image edge."},
+  {term:"boolean", syn:["bool","wahrheitswert","true false"], def:"A value that is either <code>True</code> or <code>False</code>. Comparison operators (<code>==</code>, <code>&lt;</code>, <code>&gt;=</code>) produce booleans; pandas operations on whole columns produce boolean Series, which can in turn be used to filter rows."},
+  {term:"cardinality", syn:["m:1","1:m","1:1","kardinalitaet","kardinalität"], def:"In a join, the number of rows on one side that correspond to a row on the other. Common cardinalities: <em>one-to-one</em> (each key appears at most once on either side), <em>one-to-many</em> (one row on the left corresponds to several on the right), <em>many-to-one</em> (several rows on the left share one row on the right). <code>validate=\"m:1\"</code> asserts the expected cardinality."},
+  {term:"chaining", syn:["method chaining","verkettung"], def:"A sequence of method calls applied to successive results: <code>df.dropna().sort_values('x').head(10)</code>. Chaining keeps an intermediate-free style; each pandas method returns a new DataFrame, which is the next method's input."},
+  {term:"comprehension", syn:["list comprehension","listenkomprehension"], def:"A concise expression that builds a list (or other collection) by iterating over an iterable: <code>[x**2 for x in range(10)]</code>. May include a condition: <code>[x for x in xs if x &gt; 0]</code>. Equivalent to a for-loop that appends, but more readable and slightly faster."},
+  {term:"crosstab", syn:["pd.crosstab","kreuztabelle","frequency table"], def:"A frequency table of two categorical variables. <code>pd.crosstab(df['ward'], df['gender'])</code> returns a table whose rows are wards, columns are genders, and cells are counts."},
+  {term:"delimiter", syn:["separator","sep","trennzeichen"], def:"The character that separates fields in a delimited text file. Comma in classical CSV, semicolon in many European exports, tab in TSV. Set explicitly via <code>sep=</code> when not the default comma."},
+  {term:"dictionary", syn:["dict","mapping","key-value"], def:"A Python collection storing values under named keys: <code>{\"M\": \"male\", \"F\": \"female\"}</code>. Used as the mapping argument to <code>replace</code>, <code>rename</code>, <code>agg</code>, and many other pandas methods."},
+  {term:"DPI", syn:["dots per inch","resolution","aufloesung","auflösung"], def:"Dots per inch — the resolution of a raster image. <code>dpi=200</code> in <code>plt.savefig</code> produces a sufficiently sharp image for slides; <code>dpi=300</code> is the typical print standard."},
+  {term:"exception", syn:["error","fehler","raise"], def:"A signal that something went wrong during execution. Pandas and NumPy raise specific exceptions (<code>KeyError</code>, <code>ValueError</code>, <code>MergeError</code>) that name the cause. Handled with <code>try / except</code> blocks where appropriate; otherwise read the message and the traceback for the source line."},
+  {term:"figure", syn:["fig","matplotlib figure","abbildung","canvas"], def:"In Matplotlib, the outermost container — the canvas on which one or more axes are drawn. The figure is the object that <code>plt.savefig</code> writes; the axes are what individual plot calls draw on."},
+  {term:"figsize", syn:["plot size","figure size","abbildungsgroesse"], def:"The width and height of a Matplotlib figure in inches, passed as a tuple to <code>plt.subplots(figsize=(10, 6))</code>. Determines aspect ratio and reading comfort; <code>(10, 6)</code> is a sensible default for slide-ready figures."},
+  {term:"header", syn:["column names","kopfzeile"], def:"The first row of a CSV file when it contains the column names. <code>pd.read_csv</code> treats row 0 as the header by default; <code>header=None</code> indicates that no header row is present, in which case columns may be named via <code>names=[...]</code>."},
+  {term:"imputation", syn:["impute","imputed","fillna value","auffuellen","auffüllen"], def:"The replacement of a missing value (<code>NaN</code>) by an estimated substitute — most often a central value of the column (median, mean) or a domain default. Imputation makes the decision visible; allowing <code>NaN</code> to propagate hides it inside downstream calculations."},
+  {term:"in-place", syn:["inplace","modify in place"], def:"An operation that modifies an object directly rather than returning a new one. Many pandas methods accept an <code>inplace=True</code> argument, though the idiomatic style is to reassign the return value: <code>df = df.dropna()</code>."},
+  {term:"JSON", syn:["javascript object notation"], def:"A widely used text format for structured data: nested combinations of objects (key-value pairs), arrays, strings, numbers, booleans, and <code>null</code>. The default response format of most HTTP APIs. Read with <code>pd.read_json</code> or parsed with Python's built-in <code>json</code> module."},
+  {term:"keyword argument", syn:["kwarg","named argument","schluesselwortargument"], def:"An argument passed to a function by name: <code>encoding='utf-8'</code>. Keyword arguments may appear in any order after the positional arguments and typically have defaults that may be omitted."},
+  {term:"lambda", syn:["anonymous function","anonyme funktion","inline function"], def:"A small, unnamed function defined inline: <code>lambda x: x.upper()</code>. Used where a one-line function is needed for a single call, as in <code>df['x'].apply(lambda v: v.strip())</code>."},
+  {term:"mean", syn:["average","durchschnitt","mittelwert","arithmetic mean"], def:"The arithmetic average — the sum of values divided by the count. Sensitive to outliers: a single extreme value can shift the mean substantially. Compare with the median, which is robust."},
+  {term:"median", syn:["zentralwert","middle value"], def:"The middle value when the column is sorted — half the values lie below it, half above. Robust to outliers: unlike the mean, it is not pulled by extreme values. Preferred over the mean for skewed distributions."},
+  {term:"normalise", syn:["normalize","standardise","normalisieren"], def:"To bring values into a single, consistent form. In data cleaning: collapsing alternate spellings of a category to a canonical label. In statistics: rescaling values to a common range, such as 0–1 or zero-mean unit-variance."},
+  {term:"outlier", syn:["ausreisser","ausreißer","extreme value","extremwert"], def:"A value that lies far from the bulk of the data. May indicate a measurement error, an input error, or a genuine rare event. Outliers disproportionately influence the mean, the range, and least-squares fits; the median and the quantiles are robust to them."},
+  {term:"propagate", syn:["propagation","fortpflanzen","nan propagation"], def:"To let a value travel through subsequent computations unchanged. With respect to <code>NaN</code>: a propagating operation returns <code>NaN</code> wherever an input was <code>NaN</code>. Pandas's <code>mean</code>, <code>sum</code>, and <code>groupby</code> do <em>not</em> propagate <code>NaN</code> by default — they skip it. The option <code>skipna=False</code> forces propagation, useful when the presence of any missingness should make the result itself missing."},
+  {term:"pseudo-random", syn:["random","seed","reproducibility","reproduzierbar","random seed"], def:"Produced by a deterministic algorithm that, given a starting state (the <em>seed</em>), generates a sequence resembling randomness. Reproducible: the same seed yields the same sequence. Necessary for teaching examples, statistical simulations, and any analysis whose results must be verifiable."},
+  {term:"quartile", syn:["IQR","percentile","quantile","quantil","interquartile range"], def:"Quartiles divide an ordered distribution into four equal parts: Q1 (25th percentile), Q2 (median), Q3 (75th percentile). The interquartile range (IQR) is Q3 − Q1, a robust measure of spread."},
+  {term:"raster", syn:["png","jpg","bitmap","pixel image"], def:"An image stored as a grid of pixels; quality depends on resolution. PNG and JPG are raster formats. In contrast, vector formats (PDF, SVG) store geometric instructions and remain sharp at any size."},
+  {term:"recode", syn:["recoding","umkodieren","relabel"], def:"To replace a value or category with another that better serves the analysis — for instance, mapping <code>NaN</code> to the explicit category <code>\"Unknown\"</code>, or collapsing several specific diagnoses into a broader class."},
+  {term:"reset_index", syn:["reindex","index zurücksetzen"], def:"A pandas method that renumbers the rows to a clean <code>0…n-1</code> sequence. After filtering or dropping rows, the index has gaps; <code>reset_index(drop=True)</code> restores consecutive numbering and discards the old index instead of retaining it as an additional column."},
+  {term:"scalar", syn:["single value","skalar"], def:"A single value, as opposed to an array or Series. A number, a string, a boolean — anything that is not a collection. Most NumPy and pandas operations broadcast scalars across the whole array or column."},
+  {term:"sentinel value", syn:["sentinel","platzhalter","-1","9999","-99","placeholder value"], def:"A special, agreed-upon value used by a source system to signal \"no valid value here\" — typically because the export format cannot store <code>NaN</code> directly. Common conventions: <code>-1</code>, <code>-99</code>, <code>9999</code>, the string <code>\"N/A\"</code>. Sentinel values must be translated to <code>NaN</code> before analysis; otherwise they are treated as genuine measurements and distort every subsequent statistic."},
+  {term:"shape", syn:["form","dimensions","groesse","größe"], def:"The dimensions of an array or DataFrame as a tuple: <code>(rows, columns)</code> for a 2D structure, <code>(n,)</code> for a 1D Series or array. Accessed as the <code>.shape</code> attribute, without parentheses."},
+  {term:"skipna", syn:["skip na","skip nan"], def:"An argument to many pandas aggregations controlling whether <code>NaN</code> values are excluded from the calculation. Default is <code>True</code> — <code>NaN</code> is ignored. <code>skipna=False</code> forces <code>NaN</code> to propagate, so the result is <code>NaN</code> whenever any input was <code>NaN</code>."},
+  {term:"slicing", syn:["slice","ausschnitt","subrange"], def:"A selection of a subrange of a sequence or array using <code>start:stop:step</code> notation. <code>arr[2:7]</code> takes elements 2 through 6; <code>df.iloc[:, 1:4]</code> takes columns 1 through 3 of every row."},
+  {term:"subplot", syn:["axes grid","multiple plots","mehrere plots"], def:"One of several axes arranged in a grid within a single figure. Created with <code>fig, axes = plt.subplots(2, 3)</code> for a 2×3 grid; each cell is then drawn on with <code>axes[i, j]</code>."},
+  {term:"subset", syn:["teilmenge","selection","portion"], def:"A portion of a DataFrame — a selection of certain rows, columns, or both. Used as an argument name in pandas (e.g. <code>dropna(subset=['col'])</code> restricts the operation to specified columns)."},
+  {term:"tight_layout", syn:["matplotlib spacing","auto layout"], def:"A Matplotlib function that recomputes the spacing between axes elements so that titles, labels, and tick marks do not overlap. Called immediately before <code>savefig</code> or <code>show</code>."},
+  {term:"traceback", syn:["stack trace","fehlerstapel"], def:"The chain of function calls that led to an exception, printed when an error occurs. Read from bottom upward: the last line names the exception type and its message; the lines above show the path through which the error was reached. The deepest entry inside the user's own code is usually where to start investigating."},
+  {term:"tuple", syn:["tupel","ordered pair"], def:"An ordered, immutable Python sequence, written with parentheses: <code>(1, 2, 3)</code>. Used for fixed-length records where the position of each element is meaningful — for instance, the <code>.shape</code> of a DataFrame is a tuple."},
+  {term:"validate", syn:["merge validate","validate=","kardinalitätsprüfung"], def:"A keyword argument to <code>pd.merge</code> that asserts the expected cardinality of the join (<code>'1:1'</code>, <code>'1:m'</code>, <code>'m:1'</code>, or <code>'m:m'</code>) and raises an exception if the assumption is violated. Recommended on any non-trivial merge as protection against silently inflated results."},
+  {term:"whitespace", syn:["leerzeichen","spaces","tabs","blank"], def:"Characters that appear blank: ordinary spaces, tabs, and line breaks. Often present at the start or end of strings from manual data entry; removed by <code>.str.strip()</code> before grouping or comparison."}
+];
+
+/* ============================================================
+   SYNONYMS — used by question→suggestion matching
+   ============================================================ */
+const SYNONYMS = {
+  "remove":["drop","delete","kill","eliminate","loeschen","löschen","entfernen","wegwerfen"],
+  "drop":["remove","delete","kill","loeschen","löschen","entfernen"],
+  "missing":["nan","null","na","fehlend","lücke","luecke","leer","empty"],
+  "row":["rows","zeile","zeilen","observation","record","case","fall"],
+  "column":["columns","col","cols","spalte","spalten","feature","variable"],
+  "average":["mean","durchschnitt","mittel","mittelwert"],
+  "mean":["average","durchschnitt","mittelwert"],
+  "group":["groupby","gruppe","gruppieren","per","by","aggregate","aggregation"],
+  "aggregate":["groupby","aggregation","summary","summarise","zusammenfassen"],
+  "merge":["join","verknuepfen","verknüpfen","verbinden","combine"],
+  "combine":["merge","join","verbinden","kombinieren","complement","ergaenzen","ergänzen"],
+  "concat":["concatenate","stack","stapeln","append","union"],
+  "array":["arrays","ndarray","numpy"],
+  "1d":["one-dimensional","one dimensional","eindimensional","vector"],
+  "2d":["two-dimensional","two dimensional","zweidimensional","matrix","table"],
+  "plot":["chart","graph","visualize","visualisieren","diagramm","abbildung"],
+  "bar":["bar chart","balken","balkendiagramm"],
+  "histogram":["hist","verteilung","distribution"],
+  "line":["trend","linie","liniendiagramm"],
+  "title":["titel","heading"],
+  "label":["beschriftung","axis label","achsenbeschriftung"],
+  "save":["export","write","schreiben","speichern"],
+  "load":["read","import","einlesen","laden"],
+  "filter":["subset","where","wo","auswaehlen","filtern"],
+  "sort":["order","sortieren","ranking"],
+  "rename":["umbenennen","relabel"],
+  "type":["dtype","datatype","datentyp","cast"],
+  "date":["datetime","datum","time"],
+  "duplicate":["duplicates","duplikat","doppelt","duplicated"],
+  "encoding":["kodierung","utf-8","latin-1","cp1252","zeichensatz"],
+  "compare":["comparison","vergleich","vergleichen"],
+  "count":["frequency","anzahl","haeufigkeit"],
+  "outlier":["ausreisser","extreme"],
+  "replace":["ersetzen","substitute","recode"],
+  "fill":["impute","auffuellen","fillna"]
+};
+
+function expand(token){
+  const t = token.toLowerCase();
+  const out = new Set([t]);
+  if (SYNONYMS[t]) SYNONYMS[t].forEach(s => out.add(s));
+  for (const [key, vals] of Object.entries(SYNONYMS)) {
+    if (vals.includes(t)) {
+      out.add(key);
+      vals.forEach(v => out.add(v));
+    }
+  }
+  return [...out];
+}
+
+function tokenize(s){
+  return s.toLowerCase()
+          .replace(/[^a-zA-Zäöüß0-9 _\-]/g," ")
+          .split(/\s+/)
+          .filter(t => t.length > 1 && !["the","a","an","i","my","to","do","how","with","of","in","on","for","is","are"].includes(t));
+}
+
+/* ============================================================
+   RENDER COMMAND CARDS
+   ============================================================ */
+function renderCmd(c){
+  const tokens = c.tokens.map(([code, expl]) => `
+    <div class="row"><code>${code}</code><div>${expl}</div></div>`).join("");
+  const required = c.requires.length ? `<li>${c.requires.join("</li><li>")}</li>` : "<li>none</li>";
+  const important = c.important.length ? `<li>${c.important.join("</li><li>")}</li>` : "<li>—</li>";
+  const avoid = c.avoid.length ? `<li>${c.avoid.join("</li><li>")}</li>` : "<li>—</li>";
+
+  return `
+    <details class="cmd" id="cmd-${c.id}">
+      <summary><code>${c.code}</code><span class="short">${c.short}</span></summary>
+      <div class="body">
+        <h4>What it does</h4>
+        <p class="what">${c.what}</p>
+        <h4>What the code means</h4>
+        <div class="tokens">${tokens}</div>
+        <h4>Conditions</h4>
+        <div class="cond">
+          <div class="req"><span class="label">Requires</span><ul style="margin:0;padding-left:18px;">${required}</ul></div>
+          <div class="imp"><span class="label">Important when</span><ul style="margin:0;padding-left:18px;">${important}</ul></div>
+          <div class="avoid"><span class="label">Avoid when</span><ul style="margin:0;padding-left:18px;">${avoid}</ul></div>
+        </div>
+        <h4>When to reach for this</h4>
+        <div class="reach">${c.reach}</div>
+        <h4>Example</h4>
+        ${c.example}
+      </div>
+    </details>`;
+}
+
+function renderAll(){
+  document.querySelectorAll(".commands").forEach(div => {
+    const stage = div.dataset.stage;
+    div.innerHTML = CORPUS.filter(c => c.stage === stage).map(renderCmd).join("");
+  });
+}
+
+/* Helper for safe regex from arbitrary strings */
+function escapeRegex(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+
+/* ============================================================
+   CONVERT STAGE SECTIONS INTO ACCORDION BARS
+   Each <section class="card"> becomes a <details class="stage-bar">
+   with summary = number + title + short description.
+   ============================================================ */
+function convertToAccordion(){
+  document.querySelectorAll("section.card").forEach(sec => {
+    const h2 = sec.querySelector("h2");
+    if (!h2) return;
+    const numSpan = h2.querySelector(".num");
+    const num = numSpan ? numSpan.textContent.trim() : "";
+    let title = h2.textContent.trim();
+    if (num) title = title.replace(new RegExp("^\\s*" + escapeRegex(num) + "\\s*"), "").trim();
+    let mainTitle = title, desc = "";
+    const dashIdx = title.indexOf("—");
+    if (dashIdx > -1) {
+      mainTitle = title.slice(0, dashIdx).trim();
+      desc = title.slice(dashIdx + 1).trim();
+      desc = desc.charAt(0).toUpperCase() + desc.slice(1);
+      if (desc && !/[.?!]$/.test(desc)) desc += ".";
+    }
+    let stepLabel;
+    if (num === "★") stepLabel = "Decisions";
+    else if (num === "▣") stepLabel = "Example";
+    else if (/^\d+$/.test(num)) stepLabel = "Step " + num;
+    else stepLabel = num || "—";
+
+    const details = document.createElement("details");
+    details.className = "stage-bar";
+    details.id = sec.id;
+    // Preserve the original section's class list useful classes
+    if (sec.classList.contains("example")) details.classList.add("example");
+
+    const summary = document.createElement("summary");
+    summary.innerHTML =
+      '<span class="bar-num">' + stepLabel + '</span>' +
+      '<span class="bar-title">' + mainTitle + '</span>' +
+      '<span class="bar-desc">' + desc + '</span>';
+
+    const body = document.createElement("div");
+    body.className = "bar-body";
+    Array.from(sec.childNodes).forEach(child => {
+      if (child !== h2) body.appendChild(child);
+    });
+    details.appendChild(summary);
+    details.appendChild(body);
+    sec.replaceWith(details);
+  });
+}
+
+renderAll();
+convertToAccordion();
+
+/* ============================================================
+   AUTO-LINK GLOSSARY TERMS
+   Walks all prose under .container and wraps glossary terms in
+   clickable spans. Code blocks, headings, buttons, and the
+   glossary drawer itself are skipped. Each term is linked only
+   once per scope (command card / decision box / intro / example)
+   to limit visual density.
+   ============================================================ */
+function autoLinkGlossary(root) {
+  if (!root) return;
+  const patterns = [];
+  GLOSSARY.forEach(e => {
+    patterns.push({pat: e.term, key: e.term});
+    e.syn.forEach(s => patterns.push({pat: s, key: e.term}));
+  });
+  patterns.sort((a,b) => b.pat.length - a.pat.length);
+
+  // Suppress generic short tokens that would match too liberally in prose.
+  const ignore = new Set(["df","col","cols","na","na ","null","type","case","row","list","set","key","col.","arr"]);
+  const filtered = patterns.filter(p => p.pat.length >= 4 && !ignore.has(p.pat.toLowerCase()));
+
+  const escaped = filtered.map(p => p.pat.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  const regex = new RegExp("\\b(" + escaped.join("|") + ")\\b", "gi");
+
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      if (!node.textContent || node.textContent.trim().length < 6) return NodeFilter.FILTER_REJECT;
+      let p = node.parentElement;
+      while (p && p !== root) {
+        const tag = p.tagName;
+        if (tag === "CODE" || tag === "PRE" || tag === "BUTTON" || tag === "INPUT" ||
+            tag === "SCRIPT" || tag === "STYLE" || tag === "SUMMARY" ||
+            tag === "H1" || tag === "H2" || tag === "H3" || tag === "H4") {
+          return NodeFilter.FILTER_REJECT;
+        }
+        if (p.classList && p.classList.contains("glossary-link")) return NodeFilter.FILTER_REJECT;
+        p = p.parentElement;
+      }
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+
+  const linkedByScope = new WeakMap();
+  const getScope = (n) => {
+    let s = n.parentElement;
+    while (s && s !== root) {
+      if (s.classList) {
+        if (s.classList.contains("cmd") || s.classList.contains("decision") ||
+            s.classList.contains("stage-bar") || s.classList.contains("hero") ||
+            s.classList.contains("intro") || s.classList.contains("example") ||
+            s.classList.contains("orient") || s.classList.contains("context") ||
+            s.classList.contains("card")) return s;
+      }
+      s = s.parentElement;
+    }
+    return root;
+  };
+
+  nodes.forEach(node => {
+    regex.lastIndex = 0;
+    const txt = node.textContent;
+    if (!regex.test(txt)) return;
+    regex.lastIndex = 0;
+
+    const scope = getScope(node);
+    if (!linkedByScope.has(scope)) linkedByScope.set(scope, new Set());
+    const seen = linkedByScope.get(scope);
+
+    const frag = document.createDocumentFragment();
+    let lastIdx = 0;
+    let m;
+    let replaced = false;
+    while ((m = regex.exec(txt)) !== null) {
+      const matched = m[0];
+      const tm = filtered.find(p => p.pat.toLowerCase() === matched.toLowerCase());
+      if (!tm) continue;
+      if (seen.has(tm.key)) continue;
+      seen.add(tm.key);
+      if (m.index > lastIdx) frag.appendChild(document.createTextNode(txt.slice(lastIdx, m.index)));
+      const span = document.createElement("span");
+      span.className = "glossary-link";
+      span.dataset.term = tm.key;
+      span.textContent = matched;
+      frag.appendChild(span);
+      lastIdx = m.index + matched.length;
+      replaced = true;
+    }
+    if (!replaced) return;
+    if (lastIdx < txt.length) frag.appendChild(document.createTextNode(txt.slice(lastIdx)));
+    node.parentNode.replaceChild(frag, node);
+  });
+}
+autoLinkGlossary(document.querySelector(".container"));
+
+/* ============================================================
+   ASK OVERLAY — open / close / keyboard / outside click
+   ============================================================ */
+const askFab     = document.getElementById("ask-fab");
+const askOverlay = document.getElementById("ask-overlay");
+const askClose   = document.getElementById("ask-close");
+
+function openAsk(){
+  if (!askOverlay) return;
+  askOverlay.classList.add("open");
+  setTimeout(() => { const q = document.getElementById("q"); if (q) q.focus(); }, 50);
+}
+function closeAsk(){
+  if (askOverlay) askOverlay.classList.remove("open");
+}
+
+if (askFab)   askFab.addEventListener("click", openAsk);
+if (askClose) askClose.addEventListener("click", closeAsk);
+if (askOverlay) {
+  askOverlay.addEventListener("click", e => {
+    if (e.target === askOverlay) closeAsk();
+  });
+}
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && askOverlay && askOverlay.classList.contains("open")) closeAsk();
+});
+
+/* ============================================================
+   BACK TO TOP
+   ============================================================ */
+const backTop = document.getElementById("back-top");
+if (backTop) {
+  backTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+  window.addEventListener("scroll", () => {
+    if (window.scrollY > 600) backTop.classList.add("visible");
+    else backTop.classList.remove("visible");
+  });
+}
+
+/* ============================================================
+   AUTO-OPEN STAGE BAR ON ANCHOR NAVIGATION (#s1, #example, …)
+   ============================================================ */
+function openByHash(){
+  const hash = window.location.hash.slice(1);
+  if (!hash) return;
+  const el = document.getElementById(hash);
+  if (el && el.tagName === "DETAILS") {
+    el.open = true;
+    setTimeout(() => el.scrollIntoView({behavior:"smooth", block:"start"}), 80);
+  }
+}
+window.addEventListener("hashchange", openByHash);
+openByHash();
+
+/* ============================================================
+   QUESTION → COMMAND SUGGESTION
+   ============================================================ */
+function score(cmd, queryTokens){
+  let s = 0;
+  const expanded = new Set();
+  queryTokens.forEach(t => expand(t).forEach(e => expanded.add(e)));
+
+  for (const t of expanded) {
+    if (cmd.tags && cmd.tags.includes(t)) s += 4;
+    if (cmd.id.toLowerCase().includes(t)) s += 2;
+    if (cmd.short.toLowerCase().includes(t)) s += 2;
+    if (cmd.what.toLowerCase().includes(t)) s += 1;
+    if (cmd.code.toLowerCase().includes(t)) s += 1;
+  }
+  return s;
+}
+
+function suggest(query){
+  const out = document.getElementById("suggestions");
+  if (!query.trim()) { out.innerHTML = ""; return; }
+  const qt = tokenize(query);
+  const ranked = CORPUS
+    .map(c => ({...c, _s: score(c, qt)}))
+    .filter(c => c._s > 0)
+    .sort((a,b) => b._s - a._s)
+    .slice(0, 6);
+
+  const closeBtnHtml = `<button class="sg-close" aria-label="Hide suggestions">× hide</button>`;
+  const clearAll = () => {
+    out.innerHTML = "";
+    document.getElementById("q").value = "";
+  };
+
+  if (!ranked.length) {
+    out.innerHTML = `<div class="sg-header"><span>No matches</span>${closeBtnHtml}</div>
+                     <div class="empty">No matching commands found. Try keywords such as <em>missing, group, merge, plot, sort, count</em>.</div>`;
+    out.querySelector(".sg-close").addEventListener("click", clearAll);
+    return;
+  }
+
+  const hitsHtml = ranked.map(c => `
+    <div class="hit" data-id="${c.id}">
+      <div><code>${c.code}</code></div>
+      <div class="why">${c.short} <em style="color:var(--grey-light);">— stage: ${c.stage}</em></div>
+    </div>`).join("");
+
+  out.innerHTML = `<div class="sg-header"><span>${ranked.length} suggestion${ranked.length===1?"":"s"}</span>${closeBtnHtml}</div>` + hitsHtml;
+  out.querySelector(".sg-close").addEventListener("click", clearAll);
+
+  out.querySelectorAll(".hit").forEach(h => {
+    h.addEventListener("click", () => {
+      const id = h.dataset.id;
+      const el = document.getElementById("cmd-" + id);
+      if (el) {
+        // Open the parent stage-bar so the command is reachable
+        let p = el.parentElement;
+        while (p && !p.classList.contains("stage-bar")) p = p.parentElement;
+        if (p) p.open = true;
+        el.open = true;
+        // Close the ask overlay
+        const ov = document.getElementById("ask-overlay");
+        if (ov) ov.classList.remove("open");
+        setTimeout(() => el.scrollIntoView({behavior:"smooth", block:"center"}), 220);
+      }
+    });
+  });
+}
+
+document.getElementById("ask").addEventListener("click", () => suggest(document.getElementById("q").value));
+document.getElementById("q").addEventListener("keydown", e => {
+  if (e.key === "Enter") suggest(e.target.value);
+  if (e.key === "Escape") {
+    document.getElementById("suggestions").innerHTML = "";
+    e.target.value = "";
+  }
+});
+document.getElementById("q").addEventListener("input", e => {
+  if (!e.target.value.trim()) document.getElementById("suggestions").innerHTML = "";
+});
+document.querySelectorAll(".question-bar .hint span").forEach(s => {
+  s.addEventListener("click", () => {
+    document.getElementById("q").value = s.dataset.q;
+    suggest(s.dataset.q);
+  });
+});
+
+/* ============================================================
+   GLOSSARY DRAWER
+   ============================================================ */
+const glossaryEl = document.getElementById("glossary");
+const scrim = document.getElementById("scrim");
+document.getElementById("open-glossary").addEventListener("click", openGlossary);
+document.getElementById("close-glossary").addEventListener("click", closeGlossary);
+scrim.addEventListener("click", closeGlossary);
+function openGlossary(){ glossaryEl.classList.add("open"); scrim.classList.add("open"); renderGlossary(""); }
+function closeGlossary(){ glossaryEl.classList.remove("open"); scrim.classList.remove("open"); }
+
+function glossaryMatch(entry, query){
+  if (!query) return true;
+  const q = query.toLowerCase();
+  const exp = new Set([q]);
+  expand(q).forEach(e => exp.add(e));
+  for (const t of exp) {
+    if (entry.term.toLowerCase().includes(t)) return true;
+    if (entry.def.toLowerCase().includes(t)) return true;
+    if (entry.syn.some(s => s.toLowerCase().includes(t))) return true;
+  }
+  return false;
+}
+
+function renderGlossary(q){
+  const results = document.getElementById("g-results");
+  const sorted = [...GLOSSARY].sort((a,b) => a.term.toLowerCase().localeCompare(b.term.toLowerCase()));
+  const hits = sorted.filter(e => glossaryMatch(e, q));
+  if (!hits.length) {
+    results.innerHTML = `<div class="empty">No entries match "${q}".</div>`;
+    return;
+  }
+  // If a specific term was clicked, surface that entry at the top.
+  if (q && hits.length > 1) {
+    const exact = hits.findIndex(e => e.term.toLowerCase() === q.toLowerCase());
+    if (exact > 0) { const [pulled] = hits.splice(exact, 1); hits.unshift(pulled); }
+  }
+  results.innerHTML = hits.map(e => `
+    <div class="entry">
+      <div class="term">${e.term}<span class="syn">${e.syn.join(" · ")}</span></div>
+      <div class="def">${e.def}</div>
+    </div>`).join("");
+}
+document.getElementById("g-search").addEventListener("input", e => renderGlossary(e.target.value));
+
+/* Click an inline glossary-link inside a command card → open drawer to that term */
+document.body.addEventListener("click", e => {
+  if (e.target.classList.contains("glossary-link")) {
+    const term = e.target.dataset.term;
+    openGlossary();
+    document.getElementById("g-search").value = term;
+    renderGlossary(term);
+  }
+});
+
+/* ============================================================
+   WORKED EXAMPLE — copy-to-clipboard
+   ============================================================ */
+const copyBtn = document.getElementById("copy-example");
+if (copyBtn) {
+  copyBtn.addEventListener("click", () => {
+    const code = document.getElementById("example-code").textContent;
+    if (!navigator.clipboard) {
+      // Fallback for older browsers
+      const ta = document.createElement("textarea");
+      ta.value = code;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); } catch (_) {}
+      document.body.removeChild(ta);
+    } else {
+      navigator.clipboard.writeText(code);
+    }
+    const original = copyBtn.textContent;
+    copyBtn.textContent = "Copied ✓";
+    copyBtn.classList.add("done");
+    setTimeout(() => {
+      copyBtn.textContent = original;
+      copyBtn.classList.remove("done");
+    }, 1800);
+  });
+}
+</script>
+</body>
+</html>
