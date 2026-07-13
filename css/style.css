@@ -48,17 +48,18 @@ body {
 header.top {
   background: var(--ink);
   color: #fff;
-  padding: 28px 40px 22px;
+  /* top padding clears the fixed Ask/Practice/Glossary buttons (top:14 + ~32px) */
+  padding: 56px 40px 16px;
 }
 header.top h1 {
   margin: 0 0 4px;
-  font-size: 26px;
+  font-size: 20px;
   letter-spacing: -0.01em;
   font-weight: 600;
 }
 header.top .sub {
   color: #BABABA;
-  font-size: 14px;
+  font-size: 13px;
 }
 header.top .meta {
   color: #888;
@@ -293,7 +294,7 @@ section.intro {
   padding: 24px 28px;
   margin: 24px 0;
 }
-section.intro h2 { margin: 0 0 8px; font-size: 20px; }
+section.intro h2 { margin: 0 0 8px; font-size: 17px; }
 section.intro p { margin: 10px 0; font-size: 14.5px; }
 
 /* ============== PIPELINE ============== */
@@ -334,7 +335,7 @@ section.card {
 }
 section.card h2 {
   margin: 0 0 6px;
-  font-size: 21px;
+  font-size: 18px;
   font-weight: 600;
   display: flex;
   align-items: baseline;
@@ -645,7 +646,7 @@ section.hero {
 }
 section.hero h2 {
   margin: 0 0 4px;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
@@ -1203,6 +1204,7 @@ details.stage-bar .bar-body {
 details.stage-bar .bar-body > h3:first-child { margin-top: 6px; }
 
 @media (max-width: 720px) {
+  header.top { padding-top: 96px; }
   .ask-fab { right: auto; left: 14px; top: 14px; }
   .task-fab { right: auto; left: 14px; top: 52px; }
   .floating-glossary-btn { top: 14px; right: 14px; }

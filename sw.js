@@ -10,7 +10,7 @@
  * browsers reinstall the cache.
  */
 
-const CACHE_VERSION = "pfr-v2.0.0";
+const CACHE_VERSION = "pfr-v2.0.1";
 
 const PRECACHE = [
   "./",
