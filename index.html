@@ -17,6 +17,9 @@
 <button class="ask-fab" id="ask-fab" aria-label="Ask a question">
   <span class="ask-icon">?</span> Ask
 </button>
+<button class="task-fab" id="task-fab" aria-label="Practice with a random task">
+  <span class="ask-icon">✎</span> Practice
+</button>
 <button class="floating-glossary-btn" id="open-glossary" aria-label="Open glossary">Glossary ▸</button>
 <button class="back-top" id="back-top" aria-label="Back to top">↑ Top</button>
 
@@ -38,6 +41,21 @@
       <span data-q="bar chart with title and labels">bar chart with labels</span>
     </div>
     <div id="suggestions"></div>
+  </div>
+</div>
+
+<div class="ask-overlay" id="task-overlay" aria-hidden="true">
+  <div class="ask-panel" role="dialog" aria-modal="true" aria-labelledby="task-title">
+    <button class="ask-close" id="task-close" aria-label="Close">×</button>
+    <h3 id="task-title">Practice</h3>
+    <p class="ask-sub">A random quiz or exercise drawn from the reference. Mastered cards appear less often.</p>
+    <div class="task-controls">
+      <label class="task-filter-label" for="task-stage-filter">Stage</label>
+      <select id="task-stage-filter" aria-label="Filter tasks by stage"></select>
+      <button id="task-next" type="button">New task ↻</button>
+      <button id="task-reset" type="button" class="task-reset">Reset progress</button>
+    </div>
+    <div id="task-body"></div>
   </div>
 </div>
 
@@ -251,8 +269,10 @@
   Python Foundations for Data Analytics · Dr. Jenny Delekta · V2.0 (c) 2026
 </footer>
 
+<script src="js/data.js"></script>
 <script src="js/search.js"></script>
 <script src="js/glossary.js"></script>
+<script src="js/tasks.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

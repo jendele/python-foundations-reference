@@ -1,1 +1,312 @@
-[]
+{
+  "datasets": {
+    "encounters": {
+      "label": "encounters — one row per hospital stay",
+      "setup": "import pandas as pd\n\ndf = pd.DataFrame({\n    \"ward\":      [\"ICU\", \"ICU\", \"Cardio\", \"Cardio\", \"Cardio\", \"Neuro\"],\n    \"age\":       [71, 64, None, 58, 81, 49],\n    \"los_days\":  [3, 9, 2, 5, 40, 4],\n    \"admit_date\": [\"2026-01-03\", \"2026-01-07\", \"2026-02-11\",\n                   \"2026-02-12\", \"2026-03-01\", \"2026-03-04\"],\n    \"diagnosis\": [\"sepsis\", \"Sepsis, severe\", \"angina\",\n                  \"MI\", \"sepsis\", \"stroke\"],\n})"
+    },
+    "revenue": {
+      "label": "revenue — quarterly revenue by region",
+      "setup": "import pandas as pd\n\ndf = pd.DataFrame({\n    \"region\":  [\"North\", \"North\", \"South\", \"South\", \"East\", \"East\"],\n    \"quarter\": [\"Q1\", \"Q2\", \"Q1\", \"Q2\", \"Q1\", \"Q2\"],\n    \"revenue\": [120, 145, 98, 110, 210, 175],\n})"
+    },
+    "wide_measures": {
+      "label": "wide_measures — one row per patient, measures in columns",
+      "setup": "import pandas as pd\n\ndf = pd.DataFrame({\n    \"patient\":   [\"p01\", \"p02\", \"p03\"],\n    \"systolic\":  [128, 141, 119],\n    \"diastolic\": [82, 90, 76],\n})"
+    }
+  },
+  "tasks": [
+    {
+      "id": "q-idxmax-vs-max",
+      "type": "concept",
+      "stage": "stats",
+      "question": "Which method returns the <em>label</em> of the maximum value in a Series?",
+      "options": [".max()", ".idxmax()", ".argmax()", ".loc[max]"],
+      "correct": 1,
+      "why": "max returns the value itself; idxmax returns the index label of that value; argmax returns the integer position.",
+      "related": ["max", "idxmax", "argmax"]
+    },
+    {
+      "id": "q-median-vs-mean",
+      "type": "concept",
+      "stage": "stats",
+      "question": "A length-of-stay column has a few very long outlier stays. Which statistic best describes a <em>typical</em> stay?",
+      "options": ["mean", "median", "sum", "std"],
+      "correct": 1,
+      "why": "The median is robust to outliers; the mean is pulled toward the long tail and overstates the typical stay.",
+      "related": ["median", "mean", "quantile"]
+    },
+    {
+      "id": "q-size-vs-count",
+      "type": "concept",
+      "stage": "aggregate",
+      "question": "Within a groupby, what is the difference between <code>size()</code> and <code>count()</code>?",
+      "options": [
+        "They are identical",
+        "size() includes NaN rows; count() excludes them",
+        "count() includes NaN rows; size() excludes them",
+        "size() works only on numeric columns"
+      ],
+      "correct": 1,
+      "why": "size() counts all rows in each group including missing values; count() counts only non-null values per column.",
+      "related": ["groupby_size", "groupby_count"]
+    },
+    {
+      "id": "q-loc-vs-iloc",
+      "type": "concept",
+      "stage": "select",
+      "question": "<code>df.iloc[0]</code> selects a row by what?",
+      "options": ["Its index label", "Its integer position", "Its first column value", "A boolean mask"],
+      "correct": 1,
+      "why": "iloc is positional (0 = first row regardless of the index); loc is label-based.",
+      "related": ["iloc", "loc"]
+    },
+    {
+      "id": "q-dropna-default",
+      "type": "concept",
+      "stage": "clean",
+      "question": "By default, <code>df.dropna()</code> removes a row if…",
+      "options": [
+        "all of its values are missing",
+        "any one of its values is missing",
+        "its index is missing",
+        "the first column is missing"
+      ],
+      "correct": 1,
+      "why": "The default is how='any' — a single NaN anywhere in the row drops it. Use how='all' or subset= to narrow this.",
+      "related": ["dropna", "isna_sum"]
+    },
+    {
+      "id": "q-merge-how",
+      "type": "concept",
+      "stage": "merge",
+      "question": "You want every row of the left table kept, with matching columns added from the right where a key exists. Which join?",
+      "options": ["inner", "left", "right", "outer"],
+      "correct": 1,
+      "why": "A left join keeps all left rows; unmatched right columns become NaN. inner would drop unmatched left rows.",
+      "related": ["merge", "combine_first"]
+    },
+    {
+      "id": "q-astype-str-num",
+      "type": "concept",
+      "stage": "clean",
+      "question": "A column of ages loaded as text contains the value \"unknown\". Which is the safest conversion?",
+      "options": [
+        "df['age'].astype(int)",
+        "pd.to_numeric(df['age'], errors='coerce')",
+        "df['age'].astype(float).astype(int)",
+        "int(df['age'])"
+      ],
+      "correct": 1,
+      "why": "astype(int) raises on \"unknown\"; to_numeric with errors='coerce' turns unconvertible values into NaN so the rest survives.",
+      "related": ["to_numeric", "astype"]
+    },
+    {
+      "id": "q-vectorise-where",
+      "type": "concept",
+      "stage": "transform",
+      "question": "To create a column that is \"high\" when value &gt; 100 else \"low\", the idiomatic tool is…",
+      "options": ["a for-loop", "np.where", "df.apply with a lambda", "df.iterrows()"],
+      "correct": 1,
+      "why": "np.where is a vectorised if-else over the whole column — far faster and clearer than row-wise loops.",
+      "related": ["np_where", "np_select", "new_col"]
+    },
+    {
+      "id": "q-value-counts-normalize",
+      "type": "concept",
+      "stage": "stats",
+      "question": "Which gives the <em>proportion</em> of each category rather than the raw count?",
+      "options": [
+        "df['x'].value_counts()",
+        "df['x'].value_counts(normalize=True)",
+        "df['x'].nunique()",
+        "df['x'].count()"
+      ],
+      "correct": 1,
+      "why": "normalize=True divides each count by the total, yielding proportions that sum to 1.",
+      "related": ["value_counts_normalize", "value_counts"]
+    },
+    {
+      "id": "q-to-period",
+      "type": "concept",
+      "stage": "datetime",
+      "question": "For a monthly grouping key that sorts correctly across years, prefer…",
+      "options": [
+        "dt.month",
+        "dt.strftime('%m')",
+        "dt.to_period('M')",
+        "dt.year"
+      ],
+      "correct": 2,
+      "why": "dt.month gives 1-12 with no year, so 2024-01 and 2025-01 collide; to_period('M') keeps year+month and sorts chronologically.",
+      "related": ["dt_to_period", "dt_month", "resample"]
+    },
+    {
+      "id": "c-median-per-group",
+      "type": "code",
+      "stage": "aggregate",
+      "dataset": "encounters",
+      "question": "Compute the median length of stay per ward as a Series.",
+      "hint": "Combine groupby with a column selection and median().",
+      "solution": "df.groupby(\"ward\")[\"los_days\"].median()",
+      "why": "Group-then-stat is the canonical split-apply-combine pattern; median is robust to outlier stays.",
+      "related": ["groupby_mean", "median"]
+    },
+    {
+      "id": "c-drop-missing-age",
+      "type": "code",
+      "stage": "clean",
+      "dataset": "encounters",
+      "question": "Keep only rows where the <code>age</code> column is not missing.",
+      "hint": "dropna takes a subset= argument.",
+      "solution": "df.dropna(subset=[\"age\"])",
+      "why": "subset restricts the missing-value test to one column instead of dropping a row for any NaN anywhere.",
+      "related": ["dropna", "isna_sum"]
+    },
+    {
+      "id": "c-filter-mask",
+      "type": "code",
+      "stage": "transform",
+      "dataset": "encounters",
+      "question": "Select all rows where <code>age</code> is at least 65.",
+      "hint": "Build a boolean mask and index with it.",
+      "solution": "df[df[\"age\"] >= 65]",
+      "why": "A boolean Series passed to df[...] keeps the rows where it is True — the standard filtering idiom.",
+      "related": ["filter_mask", "boolean_indexing", "query"]
+    },
+    {
+      "id": "c-top5-nlargest",
+      "type": "code",
+      "stage": "transform",
+      "dataset": "revenue",
+      "question": "Return the 3 rows with the highest <code>revenue</code>.",
+      "hint": "There is a dedicated method; no full sort needed.",
+      "solution": "df.nlargest(3, \"revenue\")",
+      "why": "nlargest is clearer and cheaper than sort_values(...).head(3) when you only need the top N.",
+      "related": ["nlargest", "sort_values"]
+    },
+    {
+      "id": "c-parse-dates",
+      "type": "code",
+      "stage": "datetime",
+      "dataset": "encounters",
+      "question": "Convert the text column <code>admit_date</code> into real datetimes, in place.",
+      "hint": "pd.to_datetime, assigned back to the column.",
+      "solution": "df[\"admit_date\"] = pd.to_datetime(df[\"admit_date\"])",
+      "why": "Dates arrive as strings; parsing to datetime64 unlocks the .dt accessor, sorting, and time arithmetic.",
+      "related": ["to_datetime", "dt_year"]
+    },
+    {
+      "id": "c-pivot-table",
+      "type": "code",
+      "stage": "aggregate",
+      "dataset": "revenue",
+      "question": "Build a table of mean <code>revenue</code> with <code>region</code> as rows and <code>quarter</code> as columns.",
+      "hint": "pivot_table with index, columns, values, aggfunc.",
+      "solution": "df.pivot_table(index=\"region\", columns=\"quarter\", values=\"revenue\", aggfunc=\"mean\")",
+      "why": "pivot_table produces a wide, display-ready summary and aggregates duplicates automatically.",
+      "related": ["pivot_table", "pivot"]
+    },
+    {
+      "id": "c-str-contains",
+      "type": "code",
+      "stage": "strings",
+      "dataset": "encounters",
+      "question": "Select rows where <code>diagnosis</code> contains the word \"sepsis\" (case-insensitive).",
+      "hint": "Use the .str accessor; pass case and na arguments.",
+      "solution": "df[df[\"diagnosis\"].str.contains(\"sepsis\", case=False, na=False)]",
+      "why": "na=False prevents NaN cells from raising when the mask indexes rows; case=False makes the match case-insensitive.",
+      "related": ["str_contains", "boolean_indexing"]
+    },
+    {
+      "id": "c-melt-long",
+      "type": "code",
+      "stage": "reshape",
+      "dataset": "wide_measures",
+      "question": "Reshape the wide table (id column <code>patient</code>) into long format.",
+      "hint": "melt with id_vars.",
+      "solution": "df.melt(id_vars=\"patient\")",
+      "why": "melt turns named measure columns into variable/value rows — the tidy layout grouping and plotting expect.",
+      "related": ["melt", "stack"]
+    },
+    {
+      "id": "c-rng-seed",
+      "type": "code",
+      "stage": "numpy",
+      "question": "Create a reproducible random generator seeded with 42.",
+      "hint": "The modern NumPy API is np.random.default_rng.",
+      "solution": "rng = np.random.default_rng(42)",
+      "why": "A seeded default_rng makes random results reproducible; the legacy np.random.seed global state is discouraged.",
+      "related": ["np_random_rng", "np_random_choice"]
+    },
+    {
+      "id": "r-transform-shape",
+      "type": "read",
+      "stage": "aggregate",
+      "dataset": "encounters",
+      "code": "df.groupby(\"ward\")[\"los_days\"].transform(\"mean\")",
+      "question": "What is the shape of the result?",
+      "options": [
+        "One row per ward (a small Series)",
+        "Same length as the original df (a Series of length n_rows)",
+        "A single scalar"
+      ],
+      "correct": 1,
+      "why": "transform broadcasts the per-group statistic back to every original row, so the result aligns 1:1 with df.",
+      "related": ["transform", "groupby_mean"]
+    },
+    {
+      "id": "r-chained-assign",
+      "type": "read",
+      "stage": "select",
+      "dataset": "encounters",
+      "code": "df[df[\"age\"] > 65][\"flag\"] = 1",
+      "question": "What happens?",
+      "options": [
+        "The flag column is set to 1 for those rows",
+        "A SettingWithCopyWarning; the assignment may not stick",
+        "A KeyError is raised",
+        "All rows get flag = 1"
+      ],
+      "correct": 1,
+      "why": "Chained indexing assigns into a temporary copy. Use df.loc[df['age'] > 65, 'flag'] = 1 instead.",
+      "related": ["copy_vs_view", "loc", "boolean_indexing"]
+    },
+    {
+      "id": "r-nan-equality",
+      "type": "read",
+      "stage": "clean",
+      "code": "import numpy as np\nnp.nan == np.nan",
+      "question": "What does this evaluate to?",
+      "options": ["True", "False", "NaN", "It raises an error"],
+      "correct": 1,
+      "why": "NaN is not equal to anything, including itself. Test for missingness with isna()/isnull(), never == np.nan.",
+      "related": ["isna_sum", "fillna"]
+    },
+    {
+      "id": "r-merge-key-dtype",
+      "type": "read",
+      "stage": "merge",
+      "code": "left[\"id\"]  # dtype int64\nright[\"id\"] # dtype object ('001','002')\nleft.merge(right, on=\"id\")",
+      "question": "What is the likely outcome?",
+      "options": [
+        "A correct join on id",
+        "Zero matched rows — keys differ by dtype",
+        "A TypeError is raised immediately",
+        "Pandas auto-casts and it just works"
+      ],
+      "correct": 1,
+      "why": "Integer 1 never equals string '001'. Align key dtypes before merging or the join silently produces no matches.",
+      "related": ["merge", "astype"]
+    },
+    {
+      "id": "r-int-float-nan",
+      "type": "read",
+      "stage": "clean",
+      "code": "s = pd.Series([1, 2, None])\ns.dtype",
+      "question": "What is the dtype of s?",
+      "options": ["int64", "float64", "object", "Int64"],
+      "correct": 1,
+      "why": "A classic int column with a missing value is upcast to float64, because NaN is a float. Use the nullable Int64 dtype to keep integers.",
+      "related": ["astype", "fillna", "isna_sum"]
+    }
+  ]
+}

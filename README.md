@@ -14,13 +14,15 @@ from `main` branch root.
 ```
 index.html          Layout skeleton (no embedded data)
 css/style.css        Styles
-js/app.js            Loads data/, renders cards/decisions/example, accordion + auto-link
+js/data.js           AUTO-GENERATED bundle of data/*.json (so file:// works)
+js/app.js            Reads js/data.js, renders cards/decisions/example, accordion + auto-link
 js/search.js         Question → suggested commands; the Ask overlay
 js/glossary.js       Glossary auto-linker + drawer
+js/tasks.js          The Practice button: random quizzes/exercises + progress
 data/corpus.json     All commands (the main content)
 data/glossary.json   Terms, synonyms, definitions
 data/synonyms.json   DE↔EN search synonyms for question matching
-data/tasks.json      Quiz / code / read-and-predict cards (empty for now)
+data/tasks.json      Quiz / code / read-and-predict cards (the Practice pool)
 data/decisions.json  The decision boxes
 data/example.json    The complete worked example
 docs/schema.md       Data schema reference
@@ -30,20 +32,28 @@ scripts/             One-shot extraction scripts used during the v6 refactor
 
 ## Running locally
 
-The page fetches its data from `data/*.json`, which browsers block over
-`file://`. Serve over HTTP:
+Just open `index.html` in a browser — double-clicking the file works. The
+data is inlined into `js/data.js`, so there is no `fetch()` and no server
+requirement. This is how the reference is distributed to students (USB,
+email attachment, GitHub Pages — all work the same).
 
-```
-python -m http.server
-```
-
-then open <http://localhost:8000/>.
+Serving over HTTP (`python -m http.server`) also works and is unchanged.
 
 ## Editing content
 
 All content lives in `data/`. Adding or changing a command means editing
 `data/corpus.json`; no code changes are needed. See [docs/schema.md](docs/schema.md)
 for the field semantics of every data file.
+
+**After editing any `data/*.json`, regenerate the inlined bundle:**
+
+```
+node scripts/build-data-bundle.mjs
+```
+
+This rewrites `js/data.js` from the JSON files. `js/data.js` is
+auto-generated — never edit it by hand. Commit it alongside the JSON
+change so the distributed file stays in sync.
 
 Before committing, every JSON file must parse:
 

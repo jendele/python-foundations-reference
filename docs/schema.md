@@ -47,12 +47,23 @@ reaches its key and that key's other values). Source order preserved.
 
 ## `tasks.json`
 
-Top-level array (currently empty — populated in a later session). Three card
-types, discriminated by `type`:
+Object with two keys: `datasets` and `tasks`. (A legacy bare array of
+tasks is still accepted by the loader for backward compatibility.)
+
+`datasets` — a map of reusable sample DataFrames a task can point to.
+Each value: `{ label (string, shown above the block), setup (string,
+pandas construction code shown as a copyable block) }`.
+
+`tasks` — the pool the Practice button draws from. Three card types,
+discriminated by `type`:
 
 - **`concept`** — single-correct multiple choice: `id, type, stage, question, options[], correct (index), why, related[]`
 - **`code`** — write a one-liner: `id, type, stage, question, hint, solution, why, related[]`
 - **`read`** — inspect code, predict result: `id, type, stage, code, question, options[], correct (index), why, related[]`
+
+Any task may add an optional `dataset` key — the name of an entry in
+`datasets`. When present, that DataFrame's `setup` code is rendered
+above the question with a Copy button so the exercise can be run.
 
 `related` is a list of corpus `id`s the task UI links to.
 

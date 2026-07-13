@@ -13,25 +13,21 @@
    example regions as well as the command cards.
    ============================================================ */
 (async function main() {
-  let corpus, glossary, synonyms, tasks, decisions, example;
-  try {
-    [corpus, glossary, synonyms, tasks, decisions, example] = await Promise.all([
-      fetch("data/corpus.json").then(r => r.json()),
-      fetch("data/glossary.json").then(r => r.json()),
-      fetch("data/synonyms.json").then(r => r.json()),
-      fetch("data/tasks.json").then(r => r.json()),
-      fetch("data/decisions.json").then(r => r.json()),
-      fetch("data/example.json").then(r => r.json())
-    ]);
-  } catch (err) {
-    // Most common cause: opening index.html via file:// (fetch blocked).
+  // Data is inlined into js/data.js (window.REFERENCE_DATA) so the page
+  // works when index.html is opened directly from disk — browsers block
+  // fetch() of local JSON over file://. Regenerate that bundle after
+  // editing any data/*.json:  node scripts/build-data-bundle.mjs
+  const D = window.REFERENCE_DATA;
+  if (!D) {
     document.querySelector(".container").insertAdjacentHTML("afterbegin",
       `<section class="card"><h2>Could not load data</h2>
-       <p>The data files failed to load (${err}). Serve the site over HTTP
-       — for example <code>python -m http.server</code> — rather than opening
-       <code>index.html</code> directly from disk.</p></section>`);
+       <p>The data bundle (<code>js/data.js</code>) did not load. Regenerate it
+       with <code>node scripts/build-data-bundle.mjs</code> and confirm
+       <code>index.html</code> includes <code>&lt;script src="js/data.js"&gt;</code>
+       before <code>js/app.js</code>.</p></section>`);
     return;
   }
+  const { corpus, glossary, synonyms, tasks, decisions, example } = D;
 
   /* ---- command cards ---- */
   function renderCmd(c) {
@@ -224,6 +220,7 @@
 
   Search.initSearch(corpus, synonyms);
   Glossary.initGlossary(glossary);
+  Tasks.initTasks(tasks, corpus);
   wireBackTop();
   wireHashNav();
   wireCopyButton();
